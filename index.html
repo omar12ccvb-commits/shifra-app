@@ -144,6 +144,16 @@
   .price-hero .amt{ font-family:var(--mono); font-size:34px; font-weight:600; }
   .price-hero .lbl{ font-size:12.5px; color:var(--text-faint); margin-top:4px; }
   .timeline{ position:relative; padding-inline-start:22px; }
+  .chat-box{ background:var(--bg-elev); border:1px solid var(--border); border-radius:var(--radius); padding:14px; margin-bottom:10px; }
+  .chat-messages{ max-height:320px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding-inline-end:4px; margin-bottom:12px; }
+  .chat-msg{ max-width:80%; padding:9px 13px; border-radius:14px; font-size:13.5px; line-height:1.5; }
+  .chat-msg.mine{ align-self:flex-end; background:var(--purple); color:#fff; border-end-end-radius:4px; }
+  .chat-msg.theirs{ align-self:flex-start; background:var(--bg-elev-2); border-end-start-radius:4px; }
+  .chat-msg .chat-meta{ font-size:10.5px; opacity:.75; margin-bottom:3px; font-weight:600; }
+  .chat-msg .chat-time{ font-size:10px; opacity:.6; margin-top:3px; text-align:end; font-family:var(--mono); direction:ltr; }
+  .chat-input-row{ display:flex; gap:8px; }
+  .chat-input-row textarea{ flex:1; min-height:42px; max-height:100px; }
+  .chat-input-row button{ flex-shrink:0; align-self:flex-end; }
   .timeline::before{ content:''; position:absolute; inset-inline-start:6px; top:4px; bottom:4px; width:1px; background:var(--border); }
   .timeline-item{ position:relative; padding-bottom:16px; font-size:13px; }
   .timeline-item::before{ content:''; position:absolute; inset-inline-start:-22px; top:3px; width:9px; height:9px; border-radius:50%; background:var(--purple); }
@@ -615,9 +625,9 @@ async function getCatalog(){
 }
 
 async function renderProjectDetail(el, id){
-  const [{project}, priceRes, paymentsRes, revisionsRes, earningsRes, catalog] = await Promise.all([
+  const [{project}, priceRes, paymentsRes, revisionsRes, earningsRes, catalog, messagesRes] = await Promise.all([
     api(`/projects/${id}`), api(`/projects/${id}/price-agreements`), api(`/projects/${id}/payments`),
-    api(`/projects/${id}/revisions`), api(`/projects/${id}/earnings`), getCatalog(),
+    api(`/projects/${id}/revisions`), api(`/projects/${id}/earnings`), getCatalog(), api(`/projects/${id}/messages`),
   ]);
   const role = state.user.role;
   const latestAgreement = priceRes.priceAgreements[0] || null; // ordered DESC by version
@@ -719,8 +729,56 @@ async function renderProjectDetail(el, id){
       <div class="card"><div class="price-hero"><div class="amt">${money(myEarning.amount_minor)} EGP</div></div></div>`);
   }
 
+  blocks.push(`<div class="section-title">المحادثة</div>
+    <div class="chat-box">
+      <div class="chat-messages" id="chat-messages">${renderChatMessages(messagesRes.messages)}</div>
+      <div class="chat-input-row">
+        <textarea id="chat-input" placeholder="اكتب رسالة..." rows="1"></textarea>
+        <button class="btn btn-primary btn-sm" id="chat-send-btn">إرسال</button>
+      </div>
+    </div>`);
+
   el.innerHTML = blocks.join('');
   wireProjectDetailActions(el, project, id);
+  wireChat(el, id);
+  scrollChatToBottom();
+}
+
+function renderChatMessages(messages){
+  if (!messages.length) return '<div class="empty-state" style="padding:20px"><div class="ic">💬</div>ابدأ المحادثة</div>';
+  return messages.map(m => {
+    const mine = m.sender_id === state.user.id;
+    return `<div class="chat-msg ${mine?'mine':'theirs'}">
+      ${!mine ? `<div class="chat-meta">${esc(m.sender_name)}</div>` : ''}
+      <div>${esc(m.body)}</div>
+      <div class="chat-time">${fmtDate(m.created_at)}</div>
+    </div>`;
+  }).join('');
+}
+function scrollChatToBottom(){
+  const box = document.getElementById('chat-messages');
+  if (box) box.scrollTop = box.scrollHeight;
+}
+function wireChat(el, id){
+  const sendBtn = document.getElementById('chat-send-btn');
+  const input = document.getElementById('chat-input');
+  const send = async () => {
+    const body = input.value.trim();
+    if (!body) return;
+    sendBtn.disabled = true;
+    try {
+      await api(`/projects/${id}/messages`, {method:'POST', body:{body}});
+      input.value = '';
+      const { messages } = await api(`/projects/${id}/messages`);
+      document.getElementById('chat-messages').innerHTML = renderChatMessages(messages);
+      scrollChatToBottom();
+    } catch(err){ toast(err.message, 'err'); }
+    finally { sendBtn.disabled = false; }
+  };
+  sendBtn.addEventListener('click', send);
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+  });
 }
 
 function wireProjectDetailActions(el, project, id){
