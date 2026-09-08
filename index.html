@@ -58,9 +58,13 @@
   .field input:focus, .field select:focus, .field textarea:focus{ border-color:var(--purple); }
   .field-row{ display:flex; gap:10px; }
   .field-row .field{ flex:1; }
-  .role-picker{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:16px; }
-  .role-opt{ background:var(--bg-elev-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px 6px; text-align:center; font-size:12px; font-weight:600; color:var(--text-dim); transition:all .15s; }
+  .role-picker{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:10px; }
+  .role-opt{ background:var(--bg-elev-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px 6px 12px; text-align:center; color:var(--text-dim); transition:all .15s; }
+  .role-opt .role-ic{ font-size:20px; margin-bottom:6px; }
+  .role-opt .role-name{ font-size:12.5px; font-weight:700; }
+  .role-opt .role-tag{ font-size:10px; margin-top:2px; opacity:.8; line-height:1.3; }
   .role-opt.active{ border-color:var(--purple); background:var(--purple-soft); color:#e4d9ff; }
+  .role-desc{ background:var(--bg-elev-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:11px 13px; font-size:12.5px; color:var(--text-dim); margin-bottom:16px; line-height:1.6; }
   .btn{ border:none; border-radius:var(--radius-sm); padding:13px 18px; font-size:14.5px; font-weight:600; transition:filter .15s, transform .1s; }
   .btn:active{ transform:scale(.98); }
   .btn-primary{ background:var(--purple); color:#fff; width:100%; }
@@ -195,10 +199,20 @@
 
     <form id="signup-form" style="display:none">
       <div class="role-picker">
-        <button type="button" class="role-opt active" data-role="CUSTOMER">عميل</button>
-        <button type="button" class="role-opt" data-role="MARKETER">مسوّق</button>
-        <button type="button" class="role-opt" data-role="EDITOR">محرر</button>
+        <button type="button" class="role-opt active" data-role="CUSTOMER">
+          <div class="role-ic">🎬</div><div class="role-name">عميل</div>
+          <div class="role-tag">اطلب مشروعك</div>
+        </button>
+        <button type="button" class="role-opt" data-role="MARKETER">
+          <div class="role-ic">🤝</div><div class="role-name">مسوّق</div>
+          <div class="role-tag">تواصل واكسب</div>
+        </button>
+        <button type="button" class="role-opt" data-role="EDITOR">
+          <div class="role-ic">🎞️</div><div class="role-name">محرر</div>
+          <div class="role-tag">نفّذ واربح</div>
+        </button>
       </div>
+      <div class="role-desc" id="role-desc"></div>
       <div class="field"><label>الاسم بالكامل</label><input type="text" id="su-name" required></div>
       <div class="field"><label>البريد الإلكتروني</label><input type="email" id="su-email" class="ltr"></div>
       <div class="field"><label>رقم الهاتف</label><input type="text" id="su-phone" class="ltr"></div>
@@ -313,6 +327,13 @@ document.getElementById('modal-overlay').addEventListener('click', (e)=>{ if(e.t
 
 /* ---------------- Auth: tabs + role picker ---------------- */
 let signupRole = 'CUSTOMER';
+const ROLE_DESCRIPTIONS = {
+  CUSTOMER: 'اطلب خدمة مونتاج، تابع حالة مشروعك أول بأول، وافق على السعر، وراجع الشغل قبل التسليم النهائي.',
+  MARKETER: 'اجلب عملاء (أو استلم عملاء من النظام)، اتفاوض على السعر، وتابع مشروعهم لحد التسليم. تاخد عمولة من كل مشروع.',
+  EDITOR: 'استلم مشاريع مُسندة ليك، نفّذها، ارفع المعاينة، وسلّم الشغل النهائي. تاخد نصيبك من كل مشروع بتخلّصه.',
+};
+function updateRoleDesc(){ document.getElementById('role-desc').textContent = ROLE_DESCRIPTIONS[signupRole]; }
+updateRoleDesc();
 document.getElementById('tab-login').addEventListener('click', ()=> switchAuthTab('login'));
 document.getElementById('tab-signup').addEventListener('click', ()=> switchAuthTab('signup'));
 function switchAuthTab(which){
@@ -326,6 +347,7 @@ document.querySelectorAll('.role-opt').forEach(btn => btn.addEventListener('clic
   document.querySelectorAll('.role-opt').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   signupRole = btn.dataset.role;
+  updateRoleDesc();
   document.getElementById('su-referral-field').style.display = signupRole === 'CUSTOMER' ? 'block' : 'none';
 }));
 
@@ -402,14 +424,36 @@ function doLogout(){
   document.getElementById('auth-screen').style.display = 'flex';
   document.getElementById('login-password').value = '';
 }
+function openChangePasswordModal(){
+  modal(`<h3>تغيير كلمة المرور</h3>
+    <div class="field"><label>كلمة المرور الحالية</label><input type="password" id="cp-current" class="ltr"></div>
+    <div class="field"><label>كلمة المرور الجديدة (8 أحرف على الأقل)</label><input type="password" id="cp-new" class="ltr"></div>
+    <div class="field"><label>تأكيد كلمة المرور الجديدة</label><input type="password" id="cp-confirm" class="ltr"></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
+      <button class="btn btn-primary" id="cp-submit">تغيير</button></div>`);
+  document.getElementById('cp-submit').addEventListener('click', async (e) => {
+    const current = document.getElementById('cp-current').value;
+    const next = document.getElementById('cp-new').value;
+    const confirm = document.getElementById('cp-confirm').value;
+    if (!current || !next) { toast('املا الخانتين', 'err'); return; }
+    if (next.length < 8) { toast('كلمة المرور الجديدة لازم 8 أحرف على الأقل', 'err'); return; }
+    if (next !== confirm) { toast('كلمة المرور الجديدة والتأكيد مش متطابقين', 'err'); return; }
+    e.target.disabled = true;
+    try {
+      await api('/auth/change-password', {method:'POST', body:{currentPassword: current, newPassword: next}});
+      closeModal(); toast('اتغيّرت كلمة المرور بنجاح', 'ok');
+    } catch(err){ toast(err.message, 'err'); e.target.disabled = false; }
+  });
+}
 document.getElementById('logout-btn-desktop').addEventListener('click', doLogout);
 document.getElementById('user-menu-btn').addEventListener('click', () => {
   modal(`<h3>${esc(state.user.fullName)}</h3>
     <div class="kv"><span class="k">الدور</span><span class="v">${esc(state.user.role)}</span></div>
     ${state.profile && state.profile.referral_code ? `<div class="kv"><span class="k">كود الدعوة</span><span class="v mono">${esc(state.profile.referral_code)}</span></div>` : ''}
-    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button>
+    <div class="modal-actions"><button class="btn btn-ghost" id="modal-change-pw">تغيير كلمة المرور</button>
       <button class="btn btn-danger" id="modal-logout">تسجيل الخروج</button></div>`);
   document.getElementById('modal-logout').addEventListener('click', doLogout);
+  document.getElementById('modal-change-pw').addEventListener('click', openChangePasswordModal);
 });
 
 /* ---------------- Role-adaptive nav + router ---------------- */
