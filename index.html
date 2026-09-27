@@ -2240,8 +2240,8 @@ function wireProjectDetailActions(el, project, id){
     if (!isLocal) {
       const loginBase = document.getElementById('login-apibase');
       const signupBase = document.getElementById('signup-apibase');
-      if (loginBase) loginBase.value = '/api';
-      if (signupBase) signupBase.value = '/api';
+      if (loginBase) loginBase.value = 'https://api-production-2964.up.railway.app/api';
+      if (signupBase) signupBase.value = 'https://api-production-2964.up.railway.app/api';
     }
 
     bootstrapSavedSession();
