@@ -1089,39 +1089,130 @@ async function goView(id){
 }
 const RENDERERS = {};
 
-/* ================= OWNER LOGIN ENTRY ================= */
+/* ================= OWNER COMMAND CENTER ================= */
+async function ownerSafe(path, fallback){ try{return await api(path);}catch(e){return fallback;} }
+function ownerRoleAr(role){ return ({OWNER:'مالك',ADMIN:'إدارة',MARKETER:'مسوّق',EDITOR:'مونتير',CUSTOMER:'عميل'}[role]||role); }
+function ownerTerminal(p){ return ['DELIVERED','ELIGIBLE_FOR_SETTLEMENT','CANCELLED','REJECTED','REFUNDED'].includes(p.status); }
+function ownerFinanceSnapshot(balances){
+  let revenue=0, expense=0;
+  (balances||[]).forEach(b=>{ const cr=Number(b.net_credit_minor||b.credit_minor||0); const dr=Number(b.net_debit_minor||b.debit_minor||0); if(b.type==='REVENUE') revenue+=cr; if(b.type==='EXPENSE') expense+=dr; });
+  return {revenue,expense,profit:revenue-expense};
+}
+
 RENDERERS['owner-home'] = async (el) => {
-  const [projectsRes, paymentsRes, payoutsRes, complaintsRes] = await Promise.all([
-    api('/projects'),
-    api('/payments'),
-    api('/payouts'),
-    api('/complaints'),
+  const [ar,pr,payr,por,cr,lr,aur,convr] = await Promise.all([
+    ownerSafe('/accounts',{accounts:[]}), ownerSafe('/projects',{projects:[]}), ownerSafe('/payments',{payments:[]}),
+    ownerSafe('/payouts',{payouts:[]}), ownerSafe('/complaints',{complaints:[]}), ownerSafe('/ledger/accounts/balances',{balances:[]}),
+    ownerSafe('/audit-logs',{auditLogs:[]}), ownerSafe('/conversations',{conversations:[]})
   ]);
-  const projects = projectsRes.projects || [];
-  const payments = paymentsRes.payments || [];
-  const payouts = payoutsRes.payouts || [];
-  const complaints = complaintsRes.complaints || [];
-  const activeProjects = projects.filter(p => !['DELIVERED','CANCELLED','REJECTED','REFUNDED','ELIGIBLE_FOR_SETTLEMENT'].includes(p.status)).length;
-  const pendingProofs = payments.filter(p => p.status === 'PROOF_SUBMITTED').length;
-  const readyPayouts = payouts.filter(p => ['READY','PENDING'].includes(p.status)).length;
-  const openComplaints = complaints.filter(c => c.status === 'OPEN').length;
-  el.innerHTML = `
-    <div class="card" style="margin-bottom:16px">
-      <div style="font-size:18px;font-weight:800;margin-bottom:6px">أهلًا ${esc(state.user.fullName)}</div>
-      <div style="color:var(--text-dim);font-size:13px">
-        تسجيل دخول المالك أصبح من نفس شاشة الدخول المستخدمة للعميل والمسوق والمحرر.
-      </div>
-      <div class="badge badge-purple" style="margin-top:12px">${esc(state.user.ownerKey || state.user.role)}</div>
-    </div>
-    <div class="grid" style="grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
-      <div class="card"><div class="kv"><span class="k">المشاريع النشطة</span><span class="v mono">${activeProjects}</span></div></div>
-      <div class="card"><div class="kv"><span class="k">إثباتات دفع تحتاج مراجعة</span><span class="v mono">${pendingProofs}</span></div></div>
-      <div class="card"><div class="kv"><span class="k">مستحقات جاهزة</span><span class="v mono">${readyPayouts}</span></div></div>
-      <div class="card"><div class="kv"><span class="k">شكاوى مفتوحة</span><span class="v mono">${openComplaints}</span></div></div>
-    </div>
-  `;
+  const accounts=ar.accounts||[], projects=pr.projects||[], payments=payr.payments||[], payouts=por.payouts||[], complaints=cr.complaints||[];
+  const activeProjects=projects.filter(p=>!ownerTerminal(p));
+  const employees=accounts.filter(a=>a.status==='ACTIVE'&&['MARKETER','EDITOR'].includes(a.role));
+  const openEmployees=employees.filter(a=>Number(a.active_sessions||0)>0);
+  const working=new Set(); activeProjects.forEach(p=>{if(p.marketer_name)working.add(p.marketer_name);if(p.editor_name)working.add(p.editor_name);});
+  const pending=payments.filter(p=>p.status==='PROOF_SUBMITTED').length;
+  const ready=payouts.filter(p=>['PENDING','READY','PROCESSING'].includes(p.status)).length;
+  const issues=complaints.filter(c=>['OPEN','IN_REVIEW'].includes(c.status)).length;
+  const overdue=activeProjects.filter(p=>p.deadline&&new Date(p.deadline)<new Date()).length;
+  const due48=activeProjects.filter(p=>p.deadline&&new Date(p.deadline)>=new Date()&&new Date(p.deadline)<=new Date(Date.now()+48*3600*1000)).length;
+  const fin=ownerFinanceSnapshot(lr.balances||[]);
+  const tools=[
+    ['💰','الأرباح والخسائر','الـLedger + صافي الربح','owner-finance'],
+    ['◉','الفريق والحضور','مسجل / فاتح / مش فاتح','owner-team'],
+    ['💬','رسائل لأي حساب','مراسلة مباشرة','owner-direct'],
+    ['☷','محادثات المشاريع','كل المحادثات التشغيلية','owner-project-chat'],
+    ['⚙','رادار الاختناقات','حالات المشاريع والتأخير','owner-ops'],
+    ['👥','مراقبة الحسابات','الحالة والجلسات والأرباح','owner-accounts'],
+    ['▤','مركز المدفوعات','إثباتات الدفع والمخاطر','owner-payments'],
+    ['⇄','مركز المستحقات','جاهز ومدفوع وفاشل','owner-payouts'],
+    ['▧','التتبع والتدقيق','مين عمل إيه وإمتى','owner-audit'],
+    ['★','الأداء الأسبوعي','التحدي والمؤشرات','owner-weekly']
+  ];
+  const statuses={}; activeProjects.forEach(p=>statuses[p.status]=(statuses[p.status]||0)+1);
+  const statusRows=Object.entries(statuses).sort((a,b)=>b[1]-a[1]).slice(0,6); const maxStatus=Math.max(1,...statusRows.map(x=>x[1]));
+  const recent=(aur.auditLogs||[]).slice(0,6);
+  el.innerHTML = ''+
+    '<div class="owner-kpi-grid">'+
+      '<div class="owner-kpi"><div class="k">صافي الربح</div><div class="v">'+money(fin.profit)+' EGP</div><div class="s">إيراد '+money(fin.revenue)+' · مصروف '+money(fin.expense)+'</div></div>'+
+      '<div class="owner-kpi"><div class="k">الفريق النشط</div><div class="v">'+employees.length+'</div><div class="s">'+openEmployees.length+' فاتحين · '+(employees.length-openEmployees.length)+' مش فاتحين</div></div>'+
+      '<div class="owner-kpi"><div class="k">مشاريع نشطة</div><div class="v">'+activeProjects.length+'</div><div class="s">'+overdue+' متأخر · '+due48+' خلال 48 ساعة</div></div>'+
+      '<div class="owner-kpi"><div class="k">محتاج تدخل</div><div class="v">'+(pending+ready+issues)+'</div><div class="s">دفع '+pending+' · صرف '+ready+' · شكاوى '+issues+'</div></div>'+
+    '</div>'+
+    '<div class="owner-section"><div class="owner-section-head"><div class="title">10 أدوات جديدة للمالك</div><span class="badge badge-purple">'+esc(state.user.ownerKey||'OWNER')+'</span></div>'+
+      '<div class="owner-tool-grid">'+tools.map(t=>'<button class="owner-tool" data-owner-view="'+t[3]+'"><div class="ic">'+t[0]+'</div><div class="tt">'+t[1]+'</div><div class="ss">'+t[2]+'</div></button>').join('')+'</div></div>'+
+    '<div class="owner-section owner-split">'+
+      '<div class="card"><div class="owner-section-head"><div class="title">توزيع المشاريع</div><button class="btn btn-ghost btn-sm" data-owner-view="owner-ops">التفاصيل</button></div>'+
+        (statusRows.length?statusRows.map(x=>'<div style="margin:10px 0"><div style="display:flex;justify-content:space-between;font-size:11px"><span>'+esc(x[0])+'</span><span class="mono">'+x[1]+'</span></div><div class="owner-bar"><i style="width:'+Math.round(x[1]/maxStatus*100)+'%"></i></div></div>').join(''):'<div class="empty-state" style="padding:24px">مفيش مشاريع نشطة.</div>')+
+      '</div>'+
+      '<div class="card"><div class="owner-section-head"><div class="title">آخر العمليات</div><button class="btn btn-ghost btn-sm" data-owner-view="owner-audit">كل السجل</button></div>'+
+        (recent.length?recent.map(a=>'<div style="padding:9px 0;border-bottom:1px solid rgba(255,255,255,.045)"><b style="font-size:11.5px">'+esc(a.action||'—')+'</b><div style="font-size:10.5px;color:#687488;margin-top:2px">'+esc(a.actor_role||'')+' · '+fmtDate(a.created_at)+'</div></div>').join(''):'<div class="empty-state" style="padding:24px">مفيش حركة لسه.</div>')+
+      '</div>'+
+    '</div>'+
+    '<div class="owner-section"><div class="owner-section-head"><div class="title">المحادثات النشطة</div><button class="btn btn-ghost btn-sm" data-owner-view="owner-project-chat">فتح المركز</button></div><div class="card">'+
+      ((convr.conversations||[]).slice(0,6).map(c=>'<div style="display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.045)"><div><b>'+esc(c.order_number)+'</b><div style="font-size:10.5px;color:#687488">'+esc(c.latest_sender_name||'')+' · '+esc(c.latest_message||'لا توجد رسالة')+'</div></div><span class="badge badge-gray">'+fmtDate(c.latest_message_at||c.updated_at)+'</span></div>').join('')||'<div class="empty-state" style="padding:25px">مفيش محادثات مشاريع.</div>')+
+    '</div></div>';
+  el.querySelectorAll('[data-owner-view]').forEach(b=>b.addEventListener('click',()=>goView(b.dataset.ownerView)));
 };
 
+RENDERERS['owner-finance'] = async (el) => {
+  const [br,er,por]=await Promise.all([api('/ledger/accounts/balances'),api('/ledger/entries'),api('/payouts')]);
+  const fin=ownerFinanceSnapshot(br.balances||[]);
+  el.innerHTML='<div class="owner-kpi-grid">'+
+    '<div class="owner-kpi"><div class="k">الإيرادات</div><div class="v">'+money(fin.revenue)+' EGP</div></div>'+
+    '<div class="owner-kpi"><div class="k">المصروفات</div><div class="v">'+money(fin.expense)+' EGP</div></div>'+
+    '<div class="owner-kpi"><div class="k">صافي الربح / الخسارة</div><div class="v">'+money(fin.profit)+' EGP</div></div>'+
+    '<div class="owner-kpi"><div class="k">إجمالي المستحقات</div><div class="v">'+money((por.payouts||[]).reduce((n,p)=>n+Number(p.total_amount_minor||0),0))+' EGP</div></div></div>'+
+    '<div class="card" style="margin-bottom:14px"><div class="owner-section-head"><div class="title">أرصدة الحسابات</div></div>'+((br.balances||[]).map(b=>'<div class="kv"><span class="k">'+esc(b.name||b.account_code||'—')+' · '+esc(b.type||'')+'</span><span class="v mono">'+money(b.type==='LIABILITY'||b.type==='REVENUE'?b.net_credit_minor:b.net_debit_minor)+' EGP</span></div>').join('')||'<div class="empty-state">مفيش أرصدة.</div>')+'</div>'+
+    '<div class="owner-section-head"><div class="title">آخر القيود المالية</div></div><div class="table-wrap"><table><thead><tr><th>الحساب</th><th>مدين</th><th>دائن</th><th>الوصف</th><th>الوقت</th></tr></thead><tbody>'+
+      ((er.entries||[]).slice(0,80).map(e=>'<tr><td>'+esc(e.account_code)+'</td><td class="mono">'+(Number(e.debit_minor)?money(e.debit_minor):'—')+'</td><td class="mono">'+(Number(e.credit_minor)?money(e.credit_minor):'—')+'</td><td>'+esc(e.description||e.reference_type||'—')+'</td><td class="mono">'+fmtDate(e.created_at)+'</td></tr>').join('')||'<tr><td colspan="5"><div class="empty-state">مفيش قيود.</div></td></tr>')+
+    '</tbody></table></div>';
+};
+
+RENDERERS['owner-team'] = async (el) => {
+  const [ar,pr]=await Promise.all([api('/accounts'),api('/projects')]); const accounts=ar.accounts||[], projects=pr.projects||[];
+  const employees=accounts.filter(a=>a.status==='ACTIVE'&&['MARKETER','EDITOR'].includes(a.role)); const open=employees.filter(a=>Number(a.active_sessions||0)>0); const notOpen=employees.length-open.length; const working=new Set();
+  projects.filter(p=>!ownerTerminal(p)).forEach(p=>{if(p.marketer_name)working.add(p.marketer_name);if(p.editor_name)working.add(p.editor_name);});
+  el.innerHTML='<div class="owner-kpi-grid"><div class="owner-kpi"><div class="k">موظفين نشطين</div><div class="v">'+employees.length+'</div></div><div class="owner-kpi"><div class="k">فاتحين الآن</div><div class="v">'+open.length+'</div></div><div class="owner-kpi"><div class="k">مش فاتحين</div><div class="v">'+notOpen+'</div></div><div class="owner-kpi"><div class="k">مشاركين في عمل نشط</div><div class="v">'+working.size+'</div></div></div>'+
+  '<div class="table-wrap"><table><thead><tr><th>الحساب</th><th>الدور</th><th>الحالة</th><th>جلسات</th><th>مشاريع</th><th>أرباح</th><th>الحضور</th></tr></thead><tbody>'+
+  accounts.map(a=>'<tr><td><b>'+esc(a.full_name)+'</b><div style="font-size:10px;color:#687488">'+esc(a.email||a.phone||'')+'</div></td><td>'+ownerRoleAr(a.role)+'</td><td>'+esc(a.status)+'</td><td class="mono">'+Number(a.active_sessions||0)+'</td><td class="mono">'+Number(a.related_projects||0)+'</td><td class="mono">'+money(a.total_earnings_minor||0)+' EGP</td><td>'+(Number(a.active_sessions||0)?'<span class="owner-online"></span>فاتح الآن':'<span class="owner-offline"></span>مش فاتح')+'</td></tr>').join('')+'</tbody></table></div>';
+};
+
+RENDERERS['owner-ops'] = async (el) => {
+  const [pr,pay,cr]=await Promise.all([api('/projects'),api('/payments'),api('/complaints')]); const projects=pr.projects||[], payments=pay.payments||[], complaints=cr.complaints||[];
+  const active=projects.filter(p=>!ownerTerminal(p)), overdue=active.filter(p=>p.deadline&&new Date(p.deadline)<new Date()), due48=active.filter(p=>p.deadline&&new Date(p.deadline)>=new Date()&&new Date(p.deadline)<=new Date(Date.now()+48*3600*1000)); const status={}; active.forEach(p=>status[p.status]=(status[p.status]||0)+1); const max=Math.max(1,...Object.values(status));
+  el.innerHTML='<div class="owner-kpi-grid"><div class="owner-kpi"><div class="k">مشاريع نشطة</div><div class="v">'+active.length+'</div></div><div class="owner-kpi"><div class="k">متأخرة</div><div class="v">'+overdue.length+'</div></div><div class="owner-kpi"><div class="k">خلال 48 ساعة</div><div class="v">'+due48.length+'</div></div><div class="owner-kpi"><div class="k">شكاوى مفتوحة</div><div class="v">'+complaints.filter(c=>['OPEN','IN_REVIEW'].includes(c.status)).length+'</div></div></div>'+
+  '<div class="owner-split"><div class="card"><div class="owner-section-head"><div class="title">الاختناقات حسب الحالة</div></div>'+Object.entries(status).sort((a,b)=>b[1]-a[1]).map(x=>'<div style="padding:8px 0"><div style="display:flex;justify-content:space-between;font-size:11px"><span>'+esc(x[0])+'</span><span>'+x[1]+'</span></div><div class="owner-bar"><i style="width:'+Math.round(x[1]/max*100)+'%"></i></div></div>').join('')+'</div>'+
+  '<div class="card"><div class="owner-section-head"><div class="title">رادار المخاطر</div></div><div style="display:grid;gap:8px"><div class="owner-pill">إثباتات دفع معلقة: '+payments.filter(p=>p.status==='PROOF_SUBMITTED').length+'</div><div class="owner-pill">دفع فاشل: '+payments.filter(p=>p.status==='FAILED').length+'</div><div class="owner-pill">شكاوى مفتوحة: '+complaints.filter(c=>c.status==='OPEN').length+'</div><div class="owner-pill">مشاريع متأخرة: '+overdue.length+'</div></div></div></div>';
+};
+
+RENDERERS['owner-accounts'] = async (el) => {
+  const {accounts=[]}=await api('/accounts'); const isOmar=state.user.ownerKey==='OMAR';
+  el.innerHTML='<div class="card" style="margin-bottom:12px"><input id="oa-search" placeholder="ابحث بالاسم أو البريد أو الهاتف..." style="width:100%"></div><div class="table-wrap"><table><thead><tr><th>الحساب</th><th>الدور</th><th>الحالة</th><th>جلسات</th><th>مشاريع</th><th>أرباح</th><th>إجراء</th></tr></thead><tbody id="oa-body"></tbody></table></div>';
+  const body=el.querySelector('#oa-body'); const render=()=>{const q=(el.querySelector('#oa-search').value||'').toLowerCase().trim(); const rows=accounts.filter(a=>!q||[a.full_name,a.email,a.phone].filter(Boolean).join(' ').toLowerCase().includes(q)); body.innerHTML=rows.map(a=>'<tr><td><b>'+esc(a.full_name)+'</b><div style="font-size:10px;color:#687488">'+esc(a.email||a.phone||'')+'</div></td><td>'+ownerRoleAr(a.role)+'</td><td>'+esc(a.status)+'</td><td>'+a.active_sessions+'</td><td>'+a.related_projects+'</td><td>'+money(a.total_earnings_minor||0)+' EGP</td><td>'+(a.role==='OWNER'||Number(a.id)===Number(state.user.id)?'<span class="badge badge-gray">محمي</span>':isOmar?'<button class="btn btn-sm '+(a.status==='SUSPENDED'?'btn-primary':'btn-danger')+'" data-acct="'+a.id+'" data-next="'+(a.status==='SUSPENDED'?'ACTIVE':'SUSPENDED')+'">'+(a.status==='SUSPENDED'?'تفعيل':'حظر')+'</button>':'<span class="badge badge-gray">عرض فقط</span>')+'</td></tr>').join('')||'<tr><td colspan="7"><div class="empty-state">مفيش حسابات مطابقة.</div></td></tr>';};
+  render(); el.querySelector('#oa-search').addEventListener('input',render); body.addEventListener('click',async e=>{const b=e.target.closest('[data-acct]');if(!b)return;b.disabled=true;try{await api('/accounts/'+b.dataset.acct+'/status',{method:'POST',body:{status:b.dataset.next}});toast('اتغيرت حالة الحساب','ok');const fresh=await api('/accounts');accounts.splice(0,accounts.length,...fresh.accounts);render();}catch(err){toast(err.message,'err');b.disabled=false;}});
+};
+
+RENDERERS['owner-payments'] = async (el) => {
+  const isYoussef=state.user.ownerKey==='YOUSSEF'; const {payments=[]}=await api('/payments?status=PROOF_SUBMITTED');
+  el.innerHTML='<div class="card" style="margin-bottom:12px"><b>إثباتات الدفع المعلقة</b><div style="font-size:11px;color:#687488;margin-top:4px">'+(isYoussef?'يوسف يقدر يؤكد أو يرفض.':'عمر يشوف ويدقق، والتأكيد التشغيلي من يوسف.')+'</div></div><div class="table-wrap"><table><thead><tr><th>المشروع</th><th>العميل</th><th>المبلغ</th><th>المرجع</th><th>الإجراء</th></tr></thead><tbody>'+
+  (payments.map(p=>'<tr><td>'+esc(p.order_number)+'</td><td>'+esc(p.customer_name)+'</td><td class="mono">'+money(p.expected_amount_minor)+' EGP</td><td class="mono">'+esc(p.latest_proof_reference||'—')+'</td><td>'+(isYoussef?'<button class="btn btn-sm btn-primary" data-pok="'+p.id+'">تأكيد</button> <button class="btn btn-sm btn-danger" data-pno="'+p.id+'">رفض</button>':'<span class="badge badge-gray">مراجعة فقط</span>')+'</td></tr>').join('')||'<tr><td colspan="5"><div class="empty-state">مفيش إثباتات معلقة.</div></td></tr>')+'</tbody></table></div>';
+  el.querySelectorAll('[data-pok]').forEach(b=>b.addEventListener('click',async()=>{b.disabled=true;try{await api('/payments/'+b.dataset.pok+'/verify',{method:'POST'});toast('تم تأكيد الدفع','ok');RENDERERS['owner-payments'](el);}catch(e){toast(e.message,'err');b.disabled=false;}}));
+  el.querySelectorAll('[data-pno]').forEach(b=>b.addEventListener('click',()=>{modal('<h3>سبب رفض الإثبات</h3><textarea id="owner-pay-reason" placeholder="اكتب السبب..."></textarea><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button><button class="btn btn-danger" id="owner-pay-reject">رفض</button></div>');document.getElementById('owner-pay-reject').addEventListener('click',async()=>{const reason=document.getElementById('owner-pay-reason').value.trim();if(!reason){toast('اكتب السبب','err');return;}try{await api('/payments/'+b.dataset.pno+'/reject',{method:'POST',body:{reason}});closeModal();toast('تم رفض الإثبات','ok');RENDERERS['owner-payments'](el);}catch(e){toast(e.message,'err');}});}));
+};
+
+RENDERERS['owner-payouts'] = async (el) => {
+  const {payouts=[]}=await api('/payouts'); const isYoussef=state.user.ownerKey==='YOUSSEF';
+  el.innerHTML='<div class="owner-kpi-grid"><div class="owner-kpi"><div class="k">جاهز / معلق</div><div class="v">'+payouts.filter(p=>['READY','PENDING','PROCESSING'].includes(p.status)).length+'</div></div><div class="owner-kpi"><div class="k">مدفوع</div><div class="v">'+payouts.filter(p=>p.status==='PAID').length+'</div></div><div class="owner-kpi"><div class="k">فاشل</div><div class="v">'+payouts.filter(p=>p.status==='FAILED').length+'</div></div><div class="owner-kpi"><div class="k">الإجمالي</div><div class="v">'+money(payouts.reduce((n,p)=>n+Number(p.total_amount_minor||0),0))+'</div></div></div>'+
+  '<div class="table-wrap"><table><thead><tr><th>المستفيد</th><th>النوع</th><th>المبلغ</th><th>الحالة</th><th>المرجع</th><th></th></tr></thead><tbody>'+payouts.map(p=>'<tr><td>#'+esc(p.recipient_user_id)+'</td><td>'+esc(p.recipient_type)+'</td><td class="mono">'+money(p.total_amount_minor)+' EGP</td><td>'+badge(p.status)+'</td><td>'+esc(p.reference||'—')+'</td><td>'+(isYoussef&&['PENDING','READY','PROCESSING'].includes(p.status)?'<button class="btn btn-sm btn-primary" data-pok2="'+p.id+'">تأكيد</button> <button class="btn btn-sm btn-danger" data-pno2="'+p.id+'">فشل</button>':'—')+'</td></tr>').join('')+'</tbody></table></div>';
+  el.querySelectorAll('[data-pok2]').forEach(b=>b.addEventListener('click',()=>{modal('<h3>تأكيد الصرف</h3><div class="field"><label>مرجع التحويل</label><input id="owner-payout-ref" class="ltr"></div><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" id="owner-payout-save">تأكيد</button></div>');document.getElementById('owner-payout-save').addEventListener('click',async()=>{try{await api('/payouts/'+b.dataset.pok2+'/confirm',{method:'POST',body:{reference:document.getElementById('owner-payout-ref').value.trim()}});closeModal();toast('تم تأكيد الصرف','ok');RENDERERS['owner-payouts'](el);}catch(e){toast(e.message,'err');}});}));
+  el.querySelectorAll('[data-pno2]').forEach(b=>b.addEventListener('click',async()=>{try{await api('/payouts/'+b.dataset.pno2+'/mark-failed',{method:'POST',body:{notes:'Marked from owner console'}});toast('اتسجل كفاشل','ok');RENDERERS['owner-payouts'](el);}catch(e){toast(e.message,'err');}}));
+};
+
+RENDERERS['owner-audit'] = async (el) => { const {auditLogs=[]}=await api('/audit-logs'); el.innerHTML='<div class="card" style="margin-bottom:12px"><b>سجل التدقيق</b><div style="font-size:11px;color:#687488;margin-top:4px">'+auditLogs.length+' حدث</div></div><div class="table-wrap"><table><thead><tr><th>العملية</th><th>الكيان</th><th>الفاعل</th><th>السبب</th><th>الوقت</th></tr></thead><tbody>'+auditLogs.map(a=>'<tr><td>'+esc(a.action)+'</td><td>'+esc(a.entity_type)+' #'+esc(a.entity_id)+'</td><td>'+esc(a.actor_role||'')+' #'+esc(a.actor_id||'')+'</td><td>'+esc(a.reason||'—')+'</td><td class="mono">'+fmtDate(a.created_at)+'</td></tr>').join('')+'</tbody></table></div>'; };
+
+RENDERERS['owner-weekly'] = async (el) => { const {challenge,leaderboard=[]}=await api('/weekly-challenges/current'); const labels={ACTIVE:'جارية',COMPLETED:'منتهية',CANCELLED:'ملغاة',DRAFT:'مسودة'}; el.innerHTML='<div class="card" style="margin-bottom:14px"><b style="font-size:17px">'+(challenge?esc(challenge.title):'مفيش تحدي أسبوعي حالي')+'</b><div style="font-size:11px;color:#687488;margin-top:4px">'+(challenge?esc(challenge.description||''):'')+'</div><div style="margin-top:10px">'+(challenge?'<span class="badge badge-purple">'+(labels[challenge.status]||challenge.status)+'</span>':'<span class="badge badge-gray">مفيش تحدي</span>')+'</div></div><div class="table-wrap"><table><thead><tr><th>الموظف</th><th>الدور</th><th>AI</th><th>النهائي</th><th>الإنتاجية</th><th>الجودة</th><th>الالتزام</th></tr></thead><tbody>'+leaderboard.map(x=>'<tr><td>'+esc(x.full_name)+'</td><td>'+ownerRoleAr(x.role)+'</td><td>'+Number(x.ai_score||0).toFixed(1)+'</td><td>'+Number(x.final_score||0).toFixed(1)+'</td><td>'+Number(x.productivity_score||0).toFixed(0)+'</td><td>'+Number(x.quality_score||0).toFixed(0)+'</td><td>'+Number(x.punctuality_score||0).toFixed(0)+'</td></tr>').join('')+'</tbody></table></div>'; };
+
+RENDERERS['owner-ops'] = RENDERERS['owner-ops'];
 /* ================= PROJECTS (shared list, role-adaptive) ================= */
 RENDERERS.projects = async (el) => {
   if (el.dataset.detail) return renderProjectDetail(el, el.dataset.detail);
