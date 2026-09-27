@@ -431,6 +431,300 @@ body::before{
   .card,.list-card,.btn,.nav-item,.role-opt,.auth-tab{transition-duration:.01ms!important}
 }
 </style>
+
+<style id="shifra-engineering-ui-v2">
+  :root{
+    --bg:#06070a;
+    --bg-elev:#0d1016;
+    --bg-elev-2:#11151d;
+    --border:rgba(255,255,255,.075);
+    --border-soft:rgba(255,255,255,.05);
+    --text:#f4f7fb;
+    --text-dim:#9ba6b6;
+    --text-faint:#657083;
+    --purple:#8b5cf6;
+    --purple-2:#6d4aff;
+    --cyan:#38bdf8;
+    --green:#34d399;
+    --red:#fb7185;
+    --amber:#fbbf24;
+    --blue:#60a5fa;
+    --radius:18px;
+    --radius-sm:12px;
+    --font:'IBM Plex Sans Arabic',sans-serif;
+  }
+
+  html,body{background:#06070a}
+  body{
+    position:relative;
+    background:
+      radial-gradient(800px 520px at 10% -10%,rgba(109,74,255,.18),transparent 60%),
+      radial-gradient(700px 500px at 100% 0%,rgba(56,189,248,.10),transparent 62%),
+      linear-gradient(180deg,#050609 0%,#080a0f 55%,#05070a 100%);
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:0; pointer-events:none; z-index:-1; opacity:.34;
+    background-image:
+      linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+    background-size:28px 28px;
+    mask-image:linear-gradient(to bottom,rgba(0,0,0,.85),transparent 92%);
+  }
+  body::after{
+    content:"";
+    position:fixed; inset:0; pointer-events:none; z-index:-1;
+    background:
+      linear-gradient(135deg,transparent 0 48%,rgba(255,255,255,.018) 49%,transparent 50%),
+      linear-gradient(315deg,transparent 0 48%,rgba(255,255,255,.015) 49%,transparent 50%);
+    background-size:220px 220px;
+    opacity:.18;
+  }
+
+  #auth-screen{
+    padding:22px;
+    min-height:100svh;
+  }
+  .auth-card{
+    width:min(100%,460px);
+    padding:30px;
+    border:1px solid rgba(255,255,255,.09);
+    border-radius:24px;
+    background:
+      linear-gradient(180deg,rgba(16,19,27,.92),rgba(8,10,14,.93));
+    box-shadow:
+      0 40px 100px -36px rgba(0,0,0,.95),
+      0 0 0 1px rgba(139,92,246,.035),
+      inset 0 1px 0 rgba(255,255,255,.04);
+    backdrop-filter:blur(24px);
+  }
+  .auth-card::before{
+    content:"";
+    position:absolute;
+    inset:1px;
+    border-radius:23px;
+    pointer-events:none;
+    background:
+      linear-gradient(135deg,rgba(139,92,246,.08),transparent 28%),
+      linear-gradient(315deg,rgba(56,189,248,.05),transparent 28%);
+  }
+  .brand{position:relative}
+  .brand-mark{
+    width:46px;height:46px;border-radius:14px;
+    background:
+      radial-gradient(circle at 30% 24%,rgba(255,255,255,.28),transparent 25%),
+      linear-gradient(145deg,#b39aff 0%,#7c5cff 42%,#4c1d95 100%);
+    box-shadow:
+      0 16px 34px -16px rgba(124,92,255,.9),
+      inset 0 1px 0 rgba(255,255,255,.18);
+  }
+  .brand-text{
+    font-size:22px;
+    letter-spacing:-.3px;
+    background:linear-gradient(100deg,#fff 0%,#ece8ff 46%,#c7ecff 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .brand-sub{
+    color:#768195;
+    letter-spacing:1.1px;
+    font-size:10.5px;
+  }
+
+  .auth-tabs{
+    padding:4px;
+    gap:4px;
+    border-radius:14px;
+    background:rgba(255,255,255,.03);
+    border:1px solid rgba(255,255,255,.07);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
+  }
+  .auth-tab{
+    padding:10px 12px;
+    border-radius:10px;
+    font-size:13px;
+  }
+  .auth-tab.active{
+    background:linear-gradient(135deg,#7c5cff,#6d4aff);
+    box-shadow:0 10px 26px -16px rgba(124,92,255,.95),inset 0 1px 0 rgba(255,255,255,.14);
+  }
+
+  .field{margin-bottom:16px}
+  .field label{
+    color:#8793a7;
+    font-size:12px;
+    font-weight:600;
+    margin-bottom:7px;
+  }
+  .field input,.field select,.field textarea{
+    min-height:46px;
+    border-radius:12px;
+    background:rgba(255,255,255,.028);
+    border:1px solid rgba(255,255,255,.08);
+    color:#eef2f7;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+  }
+  .field input::placeholder,.field textarea::placeholder{color:#5f6978}
+  .field input:hover,.field select:hover,.field textarea:hover{
+    border-color:rgba(139,92,246,.34);
+    background:rgba(255,255,255,.035);
+  }
+  .field input:focus,.field select:focus,.field textarea:focus{
+    border-color:rgba(139,92,246,.78);
+    box-shadow:
+      0 0 0 4px rgba(139,92,246,.10),
+      0 14px 28px -20px rgba(139,92,246,.75);
+  }
+
+  .role-picker{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:10px;
+  }
+  .role-opt{
+    min-height:72px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:14px;
+    background:rgba(255,255,255,.025);
+    border:1px solid rgba(255,255,255,.075);
+    color:#7e8a9c;
+  }
+  .role-opt:hover{
+    transform:translateY(-2px);
+    color:#cfd7e2;
+    border-color:rgba(139,92,246,.32);
+  }
+  .role-opt.active{
+    color:#f1edff;
+    border-color:rgba(151,131,255,.72);
+    background:
+      linear-gradient(145deg,rgba(139,92,246,.19),rgba(139,92,246,.065));
+    box-shadow:
+      0 14px 30px -22px rgba(139,92,246,1),
+      inset 0 1px 0 rgba(255,255,255,.06);
+  }
+
+  .btn{
+    min-height:46px;
+    border-radius:12px;
+    font-weight:700;
+  }
+  .btn-primary{
+    background:linear-gradient(135deg,#7c5cff 0%,#6d4aff 52%,#5b35da 100%);
+    box-shadow:
+      0 18px 32px -24px rgba(124,92,255,1),
+      inset 0 1px 0 rgba(255,255,255,.14);
+  }
+  .btn-primary:hover{
+    filter:brightness(1.08);
+    box-shadow:
+      0 22px 36px -24px rgba(124,92,255,1),
+      0 0 0 1px rgba(255,255,255,.04);
+  }
+  .btn-ghost{
+    background:rgba(255,255,255,.025);
+    border:1px solid rgba(255,255,255,.075);
+    color:#9aa6b7;
+  }
+  .btn-ghost:hover{
+    background:rgba(255,255,255,.05);
+    border-color:rgba(255,255,255,.12);
+    color:#eef2f7;
+  }
+
+  .adv summary{
+    color:#667286;
+    transition:color .18s ease;
+  }
+  .adv summary:hover{color:#a9b4c4}
+
+  #app-shell{background:transparent}
+  .sidebar{
+    background:
+      linear-gradient(180deg,rgba(6,8,12,.90),rgba(7,9,13,.78));
+    border-color:rgba(255,255,255,.06)!important;
+    box-shadow:20px 0 60px -52px rgba(0,0,0,1);
+  }
+  .main{position:relative}
+  .topbar,.app-topbar{
+    border-color:rgba(255,255,255,.055);
+    background:rgba(7,9,13,.32);
+    backdrop-filter:blur(18px);
+  }
+  .page-title{
+    font-size:24px;
+    letter-spacing:-.35px;
+  }
+  .page-sub{color:#697587}
+  .content{max-width:1100px}
+  .card,.list-card{
+    background:
+      linear-gradient(180deg,rgba(17,20,27,.88),rgba(11,13,18,.83));
+    border:1px solid rgba(255,255,255,.065);
+    border-radius:16px;
+    box-shadow:
+      0 20px 44px -34px rgba(0,0,0,.98),
+      inset 0 1px 0 rgba(255,255,255,.025);
+  }
+  .card:hover,.list-card:hover{
+    transform:translateY(-2px);
+    border-color:rgba(139,92,246,.22);
+    box-shadow:
+      0 24px 54px -34px rgba(0,0,0,.98),
+      0 0 0 1px rgba(139,92,246,.035);
+  }
+  .bottom-nav{
+    background:rgba(6,8,12,.86)!important;
+    backdrop-filter:blur(18px);
+    border-color:rgba(255,255,255,.06)!important;
+  }
+  .nav-item{border-radius:11px}
+  .nav-item.active{
+    background:
+      linear-gradient(135deg,rgba(139,92,246,.15),rgba(139,92,246,.055));
+    color:#eee9ff;
+    box-shadow:inset 0 0 0 1px rgba(160,143,255,.08);
+  }
+  .user-menu-btn{
+    background:rgba(255,255,255,.028);
+    border:1px solid rgba(255,255,255,.08);
+  }
+  .section-title{
+    color:#aab4c3;
+    font-size:12px;
+    letter-spacing:.9px;
+    text-transform:uppercase;
+  }
+  .kv{border-color:rgba(255,255,255,.05)}
+  .kv .k{color:#738095}
+  .kv .v{color:#eef2f7}
+
+  .modal-overlay{
+    background:rgba(1,2,5,.72)!important;
+    backdrop-filter:blur(12px)!important;
+  }
+  .modal{
+    border-radius:18px;
+    background:linear-gradient(180deg,#171b24,#0d1118)!important;
+    border-color:rgba(255,255,255,.08);
+    box-shadow:0 35px 90px -28px rgba(0,0,0,.98);
+  }
+  .toast{
+    background:rgba(20,24,31,.94)!important;
+    border-color:rgba(255,255,255,.08);
+    backdrop-filter:blur(16px);
+  }
+
+  @media (max-width:600px){
+    .auth-card{padding:22px 18px;border-radius:20px}
+    .brand{margin-bottom:22px}
+    .brand-mark{width:42px;height:42px;border-radius:13px}
+    .role-picker{gap:8px}
+    .role-opt{min-height:66px;font-size:11px}
+    .content{padding-inline:14px}
+    .page-title{font-size:21px}
+  }
+</style>
 </head>
 <body>
 
