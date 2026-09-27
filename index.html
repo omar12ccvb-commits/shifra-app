@@ -645,8 +645,12 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
 async function loadMeAndEnter(){
   const me = await api('/auth/me');
   state.user = me.user;
+  // OWNER/ADMIN use this exact same login form too. The backend already authenticates them,
+  // so do not bounce them back to a separate login screen.
   if (state.user.role === 'OWNER' || state.user.role === 'ADMIN') {
-    throw new Error('حساب الإدارة له لوحة تحكم منفصلة. سجّل دخول بحساب عميل أو مسوّق أو محرر.');
+    state.profile = null;
+    enterApp();
+    return;
   }
   // fetch the role-specific profile (gives us referral_code / earnings context up front)
   if (state.user.role === 'MARKETER') state.profile = (await api('/marketers/me')).marketer;
@@ -677,6 +681,8 @@ const NAV_BY_ROLE = {
   MARKETER: [ {id:'opportunities', label:'الفرص', icon:'◆'}, {id:'customers', label:'عملائي', icon:'☺'},
               {id:'projects', label:'مشاريعي', icon:'▦'}, {id:'earnings', label:'أرباحي', icon:'%'} ],
   EDITOR:   [ {id:'projects', label:'مهامي', icon:'▦'}, {id:'earnings', label:'أرباحي', icon:'%'} ],
+  OWNER:    [ {id:'owner-home', label:'لوحة المالك', icon:'◆'} ],
+  ADMIN:    [ {id:'owner-home', label:'لوحة الإدارة', icon:'◆'} ],
 };
 const VIEW_META = {
   opportunities:{title:'فرص جديدة', sub:'عملاء محتاجين مسوّق'},
@@ -685,6 +691,7 @@ const VIEW_META = {
              MARKETER:{title:'مشاريعي', sub:'المشاريع اللي بتتابعها'},
              EDITOR:{title:'مهامي', sub:'الشغل المُسند ليك'} },
   earnings:{title:'أرباحي', sub:'المستحق والمدفوع'},
+  'owner-home':{title:'لوحة المالك', sub:'تم الدخول من نفس شاشة الحسابات الأخرى'},
 };
 function enterApp(){
   document.getElementById('auth-screen').style.display = 'none';
@@ -755,6 +762,39 @@ async function goView(id){
   refreshBellBadge();
 }
 const RENDERERS = {};
+
+/* ================= OWNER LOGIN ENTRY ================= */
+RENDERERS['owner-home'] = async (el) => {
+  const [projectsRes, paymentsRes, payoutsRes, complaintsRes] = await Promise.all([
+    api('/projects'),
+    api('/payments'),
+    api('/payouts'),
+    api('/complaints'),
+  ]);
+  const projects = projectsRes.projects || [];
+  const payments = paymentsRes.payments || [];
+  const payouts = payoutsRes.payouts || [];
+  const complaints = complaintsRes.complaints || [];
+  const activeProjects = projects.filter(p => !['DELIVERED','CANCELLED','REJECTED','REFUNDED','ELIGIBLE_FOR_SETTLEMENT'].includes(p.status)).length;
+  const pendingProofs = payments.filter(p => p.status === 'PROOF_SUBMITTED').length;
+  const readyPayouts = payouts.filter(p => ['READY','PENDING'].includes(p.status)).length;
+  const openComplaints = complaints.filter(c => c.status === 'OPEN').length;
+  el.innerHTML = `
+    <div class="card" style="margin-bottom:16px">
+      <div style="font-size:18px;font-weight:800;margin-bottom:6px">أهلًا ${esc(state.user.fullName)}</div>
+      <div style="color:var(--text-dim);font-size:13px">
+        تسجيل دخول المالك أصبح من نفس شاشة الدخول المستخدمة للعميل والمسوق والمحرر.
+      </div>
+      <div class="badge badge-purple" style="margin-top:12px">${esc(state.user.ownerKey || state.user.role)}</div>
+    </div>
+    <div class="grid" style="grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+      <div class="card"><div class="kv"><span class="k">المشاريع النشطة</span><span class="v mono">${activeProjects}</span></div></div>
+      <div class="card"><div class="kv"><span class="k">إثباتات دفع تحتاج مراجعة</span><span class="v mono">${pendingProofs}</span></div></div>
+      <div class="card"><div class="kv"><span class="k">مستحقات جاهزة</span><span class="v mono">${readyPayouts}</span></div></div>
+      <div class="card"><div class="kv"><span class="k">شكاوى مفتوحة</span><span class="v mono">${openComplaints}</span></div></div>
+    </div>
+  `;
+};
 
 /* ================= PROJECTS (shared list, role-adaptive) ================= */
 RENDERERS.projects = async (el) => {
