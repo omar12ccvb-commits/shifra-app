@@ -2259,29 +2259,62 @@ function wireProjectDetailActions(el, project, id){
 
 <script id="shifra-preview-mode">
 (() => {
-  // Temporary UI preview mode: bypass authentication and use local mock responses.
-  // Remove this block later to restore the real login flow.
-  const demoUser = {
-    id: 0,
-    role: 'CUSTOMER',
-    fullName: 'عمر — وضع المعاينة',
-    email: 'preview@shifra.local',
-    phone: ''
+  // Preview mode: no registration/login. Choose a persona and enter directly.
+  const PERSONAS = {
+    editor: {
+      role: 'EDITOR',
+      fullName: 'مونتير — وضع المعاينة',
+      label: 'مونتير',
+      icon: '🎬',
+      sub: 'شوف واجهة المونتير والمهام'
+    },
+    marketer: {
+      role: 'MARKETER',
+      fullName: 'مسوق — وضع المعاينة',
+      label: 'مسوق',
+      icon: '📈',
+      sub: 'شوف واجهة المسوق والفرص'
+    },
+    youssef: {
+      role: 'OWNER_PREVIEW',
+      fullName: 'يوسف — وضع المعاينة',
+      label: 'يوسف',
+      icon: '👤',
+      sub: 'دخول معاينة باسم يوسف'
+    },
+    omar: {
+      role: 'OWNER_PREVIEW',
+      fullName: 'عمر — وضع المعاينة',
+      label: 'عمر',
+      icon: '👑',
+      sub: 'دخول معاينة باسم عمر'
+    },
+    customer: {
+      role: 'CUSTOMER',
+      fullName: 'العميل — وضع المعاينة',
+      label: 'العميل',
+      icon: '🛍️',
+      sub: 'شوف تجربة العميل'
+    }
   };
+
+  // Owner-preview identities use the customer shell for now so the internal
+  // product can be explored without a real account.
+  NAV_BY_ROLE.OWNER_PREVIEW = NAV_BY_ROLE.CUSTOMER;
 
   const arrayKeys = new Set([
     'projects','conversations','notifications','ratings','messages','leads',
     'opportunities','customers','earnings','payments','revisions','complaints',
-    'items','results','data'
+    'items','results','data','users','accounts','payouts','transactions'
   ]);
+
+  let activePersona = null;
 
   api = async function previewApi(path, opts = {}) {
     const method = (opts.method || 'GET').toUpperCase();
-
     if (method !== 'GET') {
       return { ok: true, success: true, message: 'تمت المحاكاة — وضع المعاينة' };
     }
-
     if (path.includes('/notifications')) return { notifications: [] };
     if (path.includes('/projects')) return { projects: [] };
     if (path.includes('/conversations')) return { conversations: [] };
@@ -2291,43 +2324,109 @@ function wireProjectDetailActions(el, project, id){
 
     return new Proxy({}, {
       get(_target, prop) {
-        if (prop === 'user') return demoUser;
-        if (prop === 'customer') return {
+        if (prop === 'user') return activePersona ? {
           id: 0,
-          full_name: demoUser.fullName,
-          email: demoUser.email,
-          phone: 'وضع المعاينة',
-          status: 'ACTIVE'
-        };
-        if (prop === 'marketer' || prop === 'editor' || prop === 'profile') return {};
+          role: activePersona.role,
+          fullName: activePersona.fullName,
+          email: 'preview@shifra.local',
+          phone: ''
+        } : null;
+        if (prop === 'customer') return { id:0, full_name:activePersona?.fullName || '', email:'preview@shifra.local', phone:'وضع المعاينة', status:'ACTIVE' };
+        if (prop === 'marketer') return { id:0, full_name:activePersona?.fullName || '', level:'PREVIEW', status:'ACTIVE' };
+        if (prop === 'editor') return { id:0, full_name:activePersona?.fullName || '', level:'PREVIEW', status:'ACTIVE' };
+        if (prop === 'profile') return {};
         if (arrayKeys.has(String(prop))) return [];
-        return null;
+        return 0;
       }
     });
   };
 
-  state.token = 'preview-mode';
-  state.user = demoUser;
-  state.profile = {
-    id: 0,
-    full_name: demoUser.fullName,
-    email: demoUser.email,
-    phone: 'وضع المعاينة'
-  };
-  state.apiBase = '/api';
+  function boot(personaKey) {
+    activePersona = PERSONAS[personaKey];
+    state.token = 'preview-mode';
+    state.user = {
+      id: 0,
+      role: activePersona.role,
+      fullName: activePersona.fullName,
+      email: 'preview@shifra.local',
+      phone: ''
+    };
+    state.profile = {
+      id: 0,
+      full_name: activePersona.fullName,
+      email: 'preview@shifra.local',
+      phone: 'وضع المعاينة'
+    };
+    state.apiBase = '/api';
+
+    const chooser = document.getElementById('shifra-preview-chooser');
+    if (chooser) chooser.remove();
+    const auth = document.getElementById('auth-screen');
+    if (auth) auth.style.display = 'none';
+    const shell = document.getElementById('app-shell');
+    if (shell) shell.classList.add('active');
+
+    const old = document.getElementById('shifra-preview-banner');
+    if (old) old.remove();
+    const banner = document.createElement('div');
+    banner.id = 'shifra-preview-banner';
+    banner.textContent = 'وضع المعاينة — بدون تسجيل';
+    banner.style.cssText = 'position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(139,92,246,.95);color:#fff;padding:7px 14px;border-radius:999px;font:600 12px/1.2 var(--font);box-shadow:0 8px 24px rgba(0,0,0,.35);backdrop-filter:blur(8px);';
+    document.body.appendChild(banner);
+
+    enterApp();
+  }
 
   const auth = document.getElementById('auth-screen');
   if (auth) auth.style.display = 'none';
 
-  const shell = document.getElementById('app-shell');
-  if (shell) shell.classList.add('active');
+  const chooser = document.createElement('div');
+  chooser.id = 'shifra-preview-chooser';
+  chooser.innerHTML = `
+    <div class="shifra-preview-card">
+      <div class="shifra-preview-brand">
+        <div class="brand-mark">ش</div>
+        <div>
+          <div class="brand-text">شفرة</div>
+          <div class="brand-sub">PREVIEW MODE</div>
+        </div>
+      </div>
+      <h1>اختار هتدخل كمين؟</h1>
+      <p class="shifra-preview-sub">مفيش تسجيل أو كلمة مرور. اختار الشخصية وادخل التطبيق مباشرة.</p>
+      <div class="shifra-preview-grid">
+        ${Object.entries(PERSONAS).map(([key,p]) => `
+          <button class="shifra-persona" data-preview-persona="${key}">
+            <span class="shifra-persona-icon">${p.icon}</span>
+            <span class="shifra-persona-name">${p.label}</span>
+            <span class="shifra-persona-sub">${p.sub}</span>
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  document.body.appendChild(chooser);
 
-  const banner = document.createElement('div');
-  banner.textContent = 'وضع المعاينة — التسجيل متوقف مؤقتًا';
-  banner.style.cssText = 'position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(139,92,246,.95);color:#fff;padding:7px 14px;border-radius:999px;font:600 12px/1.2 var(--font);box-shadow:0 8px 24px rgba(0,0,0,.35);backdrop-filter:blur(8px);';
-  document.body.appendChild(banner);
+  const style = document.createElement('style');
+  style.textContent = `
+    #shifra-preview-chooser{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse 700px 500px at 50% -10%,rgba(139,92,246,.18),transparent 65%);}
+    .shifra-preview-card{width:100%;max-width:560px;background:rgba(19,19,24,.88);border:1px solid var(--border);border-radius:22px;padding:28px;box-shadow:0 30px 90px -35px rgba(0,0,0,.95);backdrop-filter:blur(14px);}
+    .shifra-preview-brand{display:flex;align-items:center;gap:10px;margin-bottom:24px;}
+    .shifra-preview-brand .brand{margin-bottom:0;}
+    #shifra-preview-chooser h1{font-size:24px;margin-bottom:6px;}
+    .shifra-preview-sub{color:var(--text-dim);font-size:13px;margin-bottom:20px;}
+    .shifra-preview-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+    .shifra-persona{border:1px solid var(--border);background:var(--bg-elev);color:var(--text);border-radius:16px;padding:17px 14px;text-align:right;display:flex;flex-direction:column;gap:5px;transition:.18s;min-height:112px;}
+    .shifra-persona:hover{transform:translateY(-2px);border-color:rgba(155,124,255,.55);background:var(--bg-elev-2);box-shadow:0 14px 34px -24px rgba(139,92,246,.7);}
+    .shifra-persona-icon{font-size:25px;}
+    .shifra-persona-name{font-weight:700;font-size:15px;}
+    .shifra-persona-sub{font-size:11.5px;color:var(--text-faint);}
+    @media(max-width:520px){.shifra-preview-grid{grid-template-columns:1fr}.shifra-preview-card{padding:22px}.shifra-persona{min-height:96px}}
+  `;
+  document.head.appendChild(style);
 
-  enterApp();
+  chooser.querySelectorAll('[data-preview-persona]').forEach(btn => {
+    btn.addEventListener('click', () => boot(btn.dataset.previewPersona));
+  });
 })();
 </script>
 
