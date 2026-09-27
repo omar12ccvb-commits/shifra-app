@@ -550,8 +550,10 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   try {
     const identifier = document.getElementById('login-identifier').value.trim();
     const password = document.getElementById('login-password').value;
-    const { token } = await api('/auth/login', {method:'POST', body:{identifier, password}});
-    state.token = token;
+    const result = await api('/auth/login', {method:'POST', body:{identifier, password}});
+    if(!result.token || !result.user) throw new Error('السيرفر لم يُرجع بيانات جلسة صحيحة');
+    state.token = result.token;
+    state.user = result.user;
     await loadMeAndEnter();
   } catch(err){ authError(err.message); }
   finally { btn.disabled = false; btn.textContent = orig; }
@@ -575,8 +577,10 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
       const ref = document.getElementById('su-referral').value.trim();
       if (ref) body.referralCode = ref;
     }
-    const { token } = await api('/auth/signup', {method:'POST', body});
-    state.token = token;
+    const result = await api('/auth/signup', {method:'POST', body});
+    if(!result.token || !result.user) throw new Error('السيرفر لم يُرجع بيانات جلسة صحيحة');
+    state.token = result.token;
+    state.user = result.user;
     await loadMeAndEnter();
     toast('أهلًا بيك في شفرة', 'ok');
   } catch(err){ authError(err.message); }
@@ -584,8 +588,10 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
 });
 
 async function loadMeAndEnter(){
-  const me = await api('/auth/me');
-  state.user = me.user;
+  if (!state.user) {
+    const me = await api('/auth/me');
+    state.user = me.user;
+  }
   if (state.user.role === 'OWNER' || state.user.role === 'ADMIN') {
     throw new Error('حساب الإدارة له لوحة تحكم منفصلة. استخدم رابط لوحة المالك.');
   }
