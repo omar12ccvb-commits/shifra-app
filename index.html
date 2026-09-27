@@ -1249,6 +1249,18 @@ async function renderProjectDetail(el, id){
     <div class="kv"><span class="k">الديدلاين</span><span class="v mono">${project.deadline ? fmtDay(project.deadline) : '—'}</span></div>
     ${project.notes ? `<div class="kv"><span class="k">ملاحظات</span><span class="v">${esc(project.notes)}</span></div>` : ''}
   </div>`);
+  if (role === 'CUSTOMER' || role === 'MARKETER' || role === 'EDITOR') {
+    const waButtons = [];
+    if (project.marketer_phone) waButtons.push('<button class="btn btn-ghost btn-sm" id="wa-marketer-project">WhatsApp المسوّق</button>');
+    if (project.editor_phone) waButtons.push('<button class="btn btn-ghost btn-sm" id="wa-editor-project">WhatsApp الممنتج</button>');
+    if (role !== 'CUSTOMER' && project.customer_name) {
+      const customerPhone = project.customer_phone || '';
+      if (customerPhone) waButtons.push('<button class="btn btn-ghost btn-sm" id="wa-customer-project">WhatsApp العميل</button>');
+    }
+    if (waButtons.length) {
+      blocks.push('<div class="card" style="margin-bottom:14px"><div style="font-weight:700;margin-bottom:8px">التواصل والملفات</div><div style="font-size:12px;color:var(--text-faint);margin-bottom:9px">استخدم WhatsApp لإرسال الصور والفيديوهات والملفات. SHIFRA لا يخزن الوسائط هنا في هذه المرحلة.</div><div class="btn-row">'+waButtons.join('')+'</div></div>');
+    }
+  }
 
   /* ---- Price ---- */
   blocks.push(`<div class="section-title">السعر</div>`);
@@ -1513,6 +1525,10 @@ function wireProjectDetailActions(el, project, id){
     try { await api(`/projects/${id}/revisions/${btn.dataset.resolveRevision}/resolve`, {method:'POST'}); toast('اتحل التعديل','ok'); refresh(); }
     catch(err){ toast(err.message,'err'); btn.disabled = false; }
   }));
+  document.getElementById('wa-marketer-project')?.addEventListener('click',()=>openWhatsApp(project.marketer_phone,'مرحباً '+project.marketer_name+'، عندي تفاصيل وملفات للمشروع '+project.order_number+'. هبعتها لك هنا على WhatsApp.'));
+  document.getElementById('wa-editor-project')?.addEventListener('click',()=>openWhatsApp(project.editor_phone,'مرحباً '+project.editor_name+'، ده بخصوص المشروع '+project.order_number+'. هبعت لك الصور والفيديوهات والملاحظات هنا على WhatsApp.'));
+  document.getElementById('wa-customer-project')?.addEventListener('click',()=>openWhatsApp(project.customer_phone,'مرحباً '+project.customer_name+'، بخصوص المشروع '+project.order_number+'. هبعت لك آخر التحديثات هنا على WhatsApp.'));
+
 
   el.querySelectorAll('[data-rate-role]').forEach(btn => btn.addEventListener('click', () => {
     const targetRole = btn.dataset.rateRole;
