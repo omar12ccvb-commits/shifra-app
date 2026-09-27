@@ -304,6 +304,18 @@ const money = (minor) => (Number(minor)/100).toLocaleString('en-US',{minimumFrac
 const fmtDate = (d) => d ? new Date(d).toLocaleString('ar-EG',{dateStyle:'medium', timeStyle:'short'}) : '—';
 const fmtDay = (d) => d ? new Date(d).toLocaleDateString('ar-EG',{dateStyle:'medium'}) : '—';
 function esc(s){ const d=document.createElement('div'); d.textContent=(s===null||s===undefined)?'':s; return d.innerHTML; }
+function whatsappUrl(phone,text=''){
+  if(!phone) return null;
+  const raw=String(phone).replace(/[^\d+]/g,'');
+  let n=raw;
+  if(n.startsWith('+')) n=n.slice(1); else if(n.startsWith('00')) n=n.slice(2); else if(n.startsWith('0')) n='20'+n.slice(1);
+  return 'https://wa.me/'+n+(text?'?text='+encodeURIComponent(text):'');
+}
+function openWhatsApp(phone,text=''){
+  const url=whatsappUrl(phone,text);
+  if(!url){ toast('رقم WhatsApp غير متوفر في الحساب','err'); return false; }
+  window.open(url,'_blank','noopener'); return true;
+}
 const STATUS_BADGE = {
   NEW:'gray', CLIENT_ASSIGNED:'gray', DETAILS_COLLECTED:'gray', PRICE_NEGOTIATION:'amber',
   PRICE_ACCEPTED:'blue', PRICE_LOCKED:'blue', PAYMENT_PENDING:'amber', PAYMENT_CONFIRMED:'blue',
@@ -467,6 +479,7 @@ const NAV_BY_ROLE = {
   ],
   MARKETER: [
     {id:'marketerHome', label:'الرئيسية', icon:'⌂'},
+    {id:'matchEditors', label:'طلبات العميل / الممنتجين', icon:'🎬'},
     {id:'opportunities', label:'الفرص', icon:'◆'},
     {id:'customers', label:'عملائي', icon:'☺'},
     {id:'projects', label:'مشاريعي', icon:'▦'},
@@ -476,6 +489,7 @@ const NAV_BY_ROLE = {
   ],
   EDITOR: [
     {id:'projects', label:'مهامي', icon:'▦'},
+    {id:'editorProfile', label:'خبرتي وتخصصي', icon:'🧩'},
     {id:'conversations', label:'محادثات', icon:'💬'},
     {id:'ratings', label:'تقييماتي', icon:'★'},
     {id:'earnings', label:'أرباحي', icon:'%'}
@@ -484,6 +498,8 @@ const NAV_BY_ROLE = {
 const VIEW_META = {
   home:{title:'الرئيسية', sub:'لوحة العميل ومتابعة كل طلباتك'},
   marketerHome:{title:'الرئيسية', sub:'مركز تشغيل المسوّق ومتابعة العملاء والمشاريع والأرباح'},
+  matchEditors:{title:'طلبات العميل / الممنتجين', sub:'اكتب احتياجات العميل وسيقترح لك النظام الممنتجين الأنسب ثم تواصل معهم عبر WhatsApp'},
+  editorProfile:{title:'خبرتي وتخصصي', sub:'حدد كل أنواع المونتاج والمحتوى والبرامج التي تتقنها حتى يتم ترشيحك للطلبات المناسبة'},
   profile:{title:'حسابي', sub:'بياناتك وأمان حسابك'},
   opportunities:{title:'فرص جديدة', sub:'عملاء محتاجين مسوّق'},
   customers:{title:'عملائي', sub:'العملاء اللي بتتابعهم'},
@@ -655,6 +671,11 @@ RENDERERS.home = async (el) => {
       ${quickAction('projects','مشاريعي','▦')}
       ${quickAction('conversations','المحادثات','💬')}
       ${quickAction('profile','حسابي وأمان الحساب','👤')}
+      <button class="card" id="home-marketer-wa" style="border:none;text-align:start;cursor:pointer">
+        <div style="font-size:22px;margin-bottom:7px">🟢</div>
+        <div style="font-weight:700">إرسال الطلبات على WhatsApp</div>
+        <div style="font-size:11px;color:var(--text-faint);margin-top:3px">ابعت الصور والفيديوهات للمسوّق مباشرة</div>
+      </button>
       <button class="card" id="home-bell-action" style="border:none;text-align:start;cursor:pointer">
         <div style="font-size:22px;margin-bottom:7px">🔔</div>
         <div style="font-weight:700">الإشعارات</div>
@@ -669,6 +690,10 @@ RENDERERS.home = async (el) => {
   });
   document.getElementById('home-latest-conversation')?.addEventListener('click', () => goView('conversations'));
   document.querySelectorAll('[data-home-view]').forEach(btn => btn.addEventListener('click', () => goView(btn.dataset.homeView)));
+  document.getElementById('home-marketer-wa')?.addEventListener('click', () => {
+    if(!state.profile?.marketer_phone){toast('المسوّق غير مضاف له رقم WhatsApp بعد','err');return;}
+    openWhatsApp(state.profile.marketer_phone,'مرحباً '+(state.profile.marketer_name||'')+'، عندي طلب مونتاج جديد. هبعتلك كل الصور والفيديوهات والتفاصيل هنا على WhatsApp.');
+  });
   document.getElementById('home-bell-action')?.addEventListener('click', () => document.getElementById('bell-btn').click());
 };
 
@@ -939,6 +964,70 @@ RENDERERS.marketerHome = async function(el){
   });});
 };
 
+/* ================= EDITOR PROFILE ================= */
+RENDERERS.editorProfile = async function(el){
+  if(state.user.role!=='EDITOR'){el.innerHTML='<div class="empty-state">الصفحة متاحة للمحرر.</div>';return;}
+  const [{editor},{serviceTypes,contentTypes,editingLevels}]=await Promise.all([api('/editors/me'),api('/services/catalog')]);
+  const ex=editor.expertise||{};
+  const csv=function(a){return Array.isArray(a)?a.join(', '):'';};
+  const checkGroup=function(title,items,selected,name){
+    return '<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:10px">'+title+'</div><div class="grid grid-2">'+items.map(function(x){var checked=selected.includes(x.code)?'checked':'';return '<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" name="'+name+'" value="'+esc(x.code)+'" '+checked+'><span>'+esc(x.name_ar||x.name_en||x.code)+'</span></label>';}).join('')+'</div></div>';
+  };
+  el.innerHTML='<div class="card" style="margin-bottom:14px"><div class="kv"><span class="k">الاسم</span><span class="v">'+esc(editor.full_name||state.user.fullName)+'</span></div><div class="kv"><span class="k">WhatsApp</span><span class="v mono">'+esc(editor.phone||'—')+'</span></div></div>'
+    +'<div class="field"><label>التخصص الرئيسي</label><input id="ed-specialty" value="'+esc(editor.specialty||'')+'" placeholder="مثال: مونتاج إعلانات عقارية"></div>'
+    +'<div class="field"><label>نبذة وخبرة</label><textarea id="ed-bio" rows="3" placeholder="اكتب خبرتك بالتفصيل...">'+esc(editor.bio||'')+'</textarea></div>'
+    +'<div class="field"><label>التوافر</label><select id="ed-availability"><option value="AVAILABLE">متاح</option><option value="BUSY">مشغول جزئياً</option><option value="PAUSED">متوقف مؤقتاً</option></select></div>'
+    +'<div class="field"><label>أقصى عدد مشاريع نشطة</label><input id="ed-max" type="number" min="1" max="50" value="'+Number(editor.max_active_projects||3)+'"></div>'
+    +checkGroup('أنواع الخدمات التي تتقنها',serviceTypes,ex.services||[],'ed-service')
+    +checkGroup('أنواع المحتوى التي تتقنها',contentTypes,ex.contentTypes||[],'ed-content')
+    +checkGroup('مستويات المونتاج',editingLevels,ex.editingLevels||[],'ed-level')
+    +'<div class="field"><label>الأساليب / Styles</label><input id="ed-styles" value="'+esc(csv(ex.styles))+'" placeholder="Cinematic, UGC, Reels"></div>'
+    +'<div class="field"><label>البرامج / Software</label><input id="ed-software" value="'+esc(csv(ex.software))+'" placeholder="Premiere, After Effects, CapCut"></div>'
+    +'<div class="field"><label>التخصصات / Niches</label><input id="ed-specialties" value="'+esc(csv(ex.specialties))+'" placeholder="عقارات, طبي, مطاعم"></div>'
+    +'<div class="field"><label>كلمات إضافية للمطابقة</label><input id="ed-keywords" value="'+esc(csv(ex.keywords))+'" placeholder="motion graphics, subtitles, color grading"></div>'
+    +'<div class="btn-row"><button class="btn btn-primary" id="ed-save">حفظ الخبرة</button><button class="btn btn-ghost" id="ed-wa-preview">معاينة WhatsApp</button></div>';
+  document.getElementById('ed-availability').value=editor.availability_status||'AVAILABLE';
+  function checked(name){return Array.from(el.querySelectorAll('input[name="'+name+'"]:checked')).map(function(x){return x.value;});}
+  document.getElementById('ed-save').addEventListener('click',async function(e){
+    e.target.disabled=true;
+    const body={specialty:document.getElementById('ed-specialty').value.trim(),bio:document.getElementById('ed-bio').value.trim(),availabilityStatus:document.getElementById('ed-availability').value,maxActiveProjects:Number(document.getElementById('ed-max').value||3),expertise:{services:checked('ed-service'),contentTypes:checked('ed-content'),editingLevels:checked('ed-level'),styles:document.getElementById('ed-styles').value.split(',').map(x=>x.trim()).filter(Boolean),software:document.getElementById('ed-software').value.split(',').map(x=>x.trim()).filter(Boolean),specialties:document.getElementById('ed-specialties').value.split(',').map(x=>x.trim()).filter(Boolean),keywords:document.getElementById('ed-keywords').value.split(',').map(x=>x.trim()).filter(Boolean)}};
+    try{const r=await api('/editors/me',{method:'PATCH',body});state.profile=r.editor;toast('تم حفظ خبرتك وتخصصك','ok');}catch(err){toast(err.message,'err');}finally{e.target.disabled=false;}
+  });
+  document.getElementById('ed-wa-preview').addEventListener('click',function(){openWhatsApp(editor.phone,'مرحباً، أنا المحرر '+(editor.full_name||state.user.fullName)+' في SHIFRA.');});
+};
+
+/* ================= CUSTOMER REQUEST -> EDITOR MATCHING ================= */
+RENDERERS.matchEditors = async function(el){
+  if(state.user.role!=='MARKETER'){el.innerHTML='<div class="empty-state">الصفحة متاحة للمسوّق.</div>';return;}
+  const [{customers},{serviceTypes,contentTypes,editingLevels}]=await Promise.all([api('/customers'),api('/services/catalog')]);
+  let rows=[{id:1}];
+  function rowHtml(row,idx){
+    return '<div class="card mk-request-row" data-row="'+row.id+'" style="margin-bottom:12px"><div class="list-card-top"><b>طلب '+(idx+1)+'</b><button type="button" class="btn btn-ghost btn-sm" data-remove-row="'+row.id+'">حذف</button></div>'
+      +'<div class="field"><label>وصف الطلب</label><input data-f="title" placeholder="مثال: 3 ريلز عقارات"></div>'
+      +'<div class="grid grid-3"><div class="field"><label>الخدمة</label><select data-f="service">'+serviceTypes.map(function(x){return '<option value="'+esc(x.code)+'">'+esc(x.name_ar||x.name_en)+'</option>';}).join('')+'</select></div>'
+      +'<div class="field"><label>نوع المحتوى</label><select data-f="content">'+contentTypes.map(function(x){return '<option value="'+esc(x.code)+'">'+esc(x.name_ar||x.name_en)+'</option>';}).join('')+'</select></div>'
+      +'<div class="field"><label>مستوى المونتاج</label><select data-f="level">'+editingLevels.map(function(x){return '<option value="'+esc(x.code)+'">'+esc(x.name_ar||x.name_en)+'</option>';}).join('')+'</select></div></div>'
+      +'<div class="field"><label>كل التفاصيل التي قالها العميل</label><textarea data-f="requirements" rows="3" placeholder="المدة، الأسلوب، النصوص، المؤثرات، اللقطات المطلوبة، وأي ملاحظات..."></textarea></div>'
+      +'</div>';
+  }
+  el.innerHTML='<div class="card" style="margin-bottom:14px"><div class="field"><label>العميل</label><select id="match-customer">'+customers.map(function(c){return '<option value="'+esc(c.id)+'">'+esc(c.full_name)+(c.phone?' · '+esc(c.phone):'')+'</option>';}).join('')+'</select></div><div class="btn-row"><button class="btn btn-primary btn-sm" id="add-request-row">+ أضف طلب آخر</button><button class="btn btn-ghost btn-sm" id="run-matching">اعثر على الممنتجين المناسبين</button><button class="btn btn-ghost btn-sm" id="wa-customer">فتح WhatsApp مع العميل</button></div></div>'
+    +'<div id="request-rows">'+rowHtml(rows[0],0)+'</div><div id="match-results"></div>';
+  document.getElementById('add-request-row').addEventListener('click',function(){rows.push({id:Date.now()});document.getElementById('request-rows').insertAdjacentHTML('beforeend',rowHtml(rows[rows.length-1],rows.length-1));bindRemove();});
+  function bindRemove(){el.querySelectorAll('[data-remove-row]').forEach(function(b){b.onclick=function(){const id=String(b.dataset.removeRow);rows=rows.filter(function(x){return String(x.id)!==id;});b.closest('.mk-request-row')?.remove();};});}
+  bindRemove();
+  document.getElementById('wa-customer').addEventListener('click',function(){const customer=customers.find(function(x){return String(x.id)===String(document.getElementById('match-customer').value);});if(customer)openWhatsApp(customer.phone,'مرحباً '+customer.full_name+'، ابعتلي كل صور وفيديوهات ومتطلبات المونتاج على WhatsApp.');});
+  document.getElementById('run-matching').addEventListener('click',async function(e){
+    const reqs=Array.from(el.querySelectorAll('.mk-request-row')).map(function(card,i){return {id:String(i+1),title:card.querySelector('[data-f="title"]').value.trim()||('طلب '+(i+1)),serviceTypeCode:card.querySelector('[data-f="service"]').value,contentTypeCode:card.querySelector('[data-f="content"]').value,editingLevelCode:card.querySelector('[data-f="level"]').value,requirements:card.querySelector('[data-f="requirements"]').value.trim()};});
+    e.target.disabled=true; e.target.textContent='جاري المطابقة...';
+    try{const data=await api('/editor-matches',{method:'POST',body:{requests:reqs}});
+      const html=data.results.map(function(result){return '<div class="card" style="margin-bottom:14px"><div class="section-title" style="margin-top:0">'+esc(result.request.title)+'</div>'+
+        (result.recommendations.length?result.recommendations.map(function(ed){return '<div class="card" style="margin-bottom:8px;border:1px solid var(--border)"><div class="list-card-top"><b>'+esc(ed.name)+'</b><span class="badge badge-purple">'+ed.score+'/100</span></div><div class="list-card-meta">'+(ed.specialty?esc(ed.specialty)+' · ':'')+esc(ed.availabilityStatus)+' · حمل '+ed.activeProjects+'/'+ed.maxActiveProjects+'</div><div style="font-size:12px;color:var(--text-dim);margin-top:6px">'+esc(ed.reasons.join(' · '))+'</div><div class="btn-row" style="margin-top:8px"><button class="btn btn-primary btn-sm" data-match-wa="'+esc(ed.phone||'')+'" data-match-name="'+esc(ed.name)+'" data-match-title="'+esc(result.request.title)+'">WhatsApp</button><button class="btn btn-ghost btn-sm" disabled>التعيين يتم بعد إنشاء المشروع</button></div></div>';}).join(''):'<div class="empty-state">مفيش ممنتج مناسب ببيانات كافية. اطلب من الممنتجين إكمال صفحة خبرتهم.</div>')+'</div>';}).join('');
+      document.getElementById('match-results').innerHTML=html;
+      el.querySelectorAll('[data-match-wa]').forEach(function(b){b.onclick=function(){openWhatsApp(b.dataset.matchWa,'مرحباً '+b.dataset.matchName+'، عندنا '+b.dataset.matchTitle+' من SHIFRA. هبعتلك كل التفاصيل والملفات على WhatsApp.');};});
+    }catch(err){toast(err.message,'err');}finally{e.target.disabled=false;e.target.textContent='اعثر على الممنتجين المناسبين';}
+  });
+};
+
 /* ================= OPPORTUNITIES (marketer) ================= */
 RENDERERS.opportunities = async (el) => {
   const { opportunities } = await api('/opportunities');
@@ -1087,7 +1176,11 @@ RENDERERS.customers = async (el) => {
       <div class="list-card-top"><span style="font-weight:600">${esc(c.full_name)}</span>
         <span class="badge badge-gray">${c.acquisition_source === 'EXTERNAL' ? 'خارجي' : 'داخلي'}</span></div>
       <div class="list-card-meta">${c.email ? esc(c.email) : esc(c.phone || '')}</div>
+      <div class="btn-row" style="margin-top:8px">
+        ${c.phone ? `<button class="btn btn-ghost btn-sm" data-wa-customer="${esc(c.phone)}" data-wa-name="${esc(c.full_name)}">WhatsApp العميل</button>` : '<span class="field-hint">لا يوجد رقم WhatsApp</span>'}
+      </div>
     </div>`).join('');
+  el.querySelectorAll('[data-wa-customer]').forEach(b=>b.addEventListener('click',()=>openWhatsApp(b.dataset.waCustomer,'مرحباً '+b.dataset.waName+'، ابعتلي كل تفاصيل الشغل على WhatsApp.')));
 };
 
 /* ================= EARNINGS (marketer / editor) ================= */
