@@ -459,8 +459,10 @@ document.getElementById('user-menu-btn').addEventListener('click', () => {
 /* ---------------- Role-adaptive nav + router ---------------- */
 const NAV_BY_ROLE = {
   CUSTOMER: [
+    {id:'home', label:'الرئيسية', icon:'⌂'},
     {id:'projects', label:'مشاريعي', icon:'▦'},
-    {id:'conversations', label:'محادثات', icon:'💬'}
+    {id:'conversations', label:'محادثات', icon:'💬'},
+    {id:'profile', label:'حسابي', icon:'👤'}
   ],
   MARKETER: [
     {id:'opportunities', label:'الفرص', icon:'◆'},
@@ -476,6 +478,8 @@ const NAV_BY_ROLE = {
   ],
 };
 const VIEW_META = {
+  home:{title:'الرئيسية', sub:'لوحة العميل ومتابعة كل طلباتك'},
+  profile:{title:'حسابي', sub:'بياناتك وأمان حسابك'},
   opportunities:{title:'فرص جديدة', sub:'عملاء محتاجين مسوّق'},
   customers:{title:'عملائي', sub:'العملاء اللي بتتابعهم'},
   conversations:{title:'المحادثات', sub:'تواصل مباشر مع العميل والمسوّق والمحرر'},
@@ -554,29 +558,212 @@ async function goView(id){
 }
 const RENDERERS = {};
 
+
+/* ================= CUSTOMER HOME / DASHBOARD ================= */
+RENDERERS.home = async (el) => {
+  if (state.user.role !== 'CUSTOMER') {
+    el.innerHTML = '<div class="empty-state">هذه الصفحة متاحة للعميل فقط.</div>';
+    return;
+  }
+
+  const [{projects}, {conversations}, {notifications}] = await Promise.all([
+    api('/projects'),
+    api('/conversations'),
+    api('/notifications'),
+  ]);
+
+  const active = projects.filter(p => !['DELIVERED','CANCELLED','REJECTED','REFUNDED'].includes(p.status));
+  const pendingPayment = projects.filter(p => ['PRICE_LOCKED','PAYMENT_PENDING'].includes(p.status));
+  const waitingApproval = projects.filter(p => ['PREVIEW_READY'].includes(p.status));
+  const delivered = projects.filter(p => p.status === 'DELIVERED');
+  const unread = notifications.filter(n => !n.is_read).length;
+
+  const nextDeadline = active
+    .filter(p => p.deadline)
+    .sort((a,b) => new Date(a.deadline) - new Date(b.deadline))[0];
+
+  const latest = projects[0];
+  const latestConversation = conversations[0];
+
+  const quickAction = (view,label,icon) => \`
+    <button class="card" data-home-view="\${view}" style="border:none;text-align:start;cursor:pointer">
+      <div style="font-size:22px;margin-bottom:7px">\${icon}</div>
+      <div style="font-weight:700">\${label}</div>
+    </button>\`;
+
+  el.innerHTML = \`
+    <div class="grid grid-2" style="margin-bottom:14px">
+      <div class="card">
+        <div style="font-size:12px;color:var(--text-faint)">كل الطلبات</div>
+        <div style="font-size:30px;font-weight:700;font-family:var(--mono);margin-top:5px">\${projects.length}</div>
+      </div>
+      <div class="card">
+        <div style="font-size:12px;color:var(--text-faint)">طلبات نشطة</div>
+        <div style="font-size:30px;font-weight:700;font-family:var(--mono);margin-top:5px">\${active.length}</div>
+      </div>
+      <div class="card">
+        <div style="font-size:12px;color:var(--text-faint)">بانتظار الدفع</div>
+        <div style="font-size:30px;font-weight:700;font-family:var(--mono);margin-top:5px;color:\${pendingPayment.length?'var(--amber)':'var(--green)'}">\${pendingPayment.length}</div>
+      </div>
+      <div class="card">
+        <div style="font-size:12px;color:var(--text-faint)">بانتظار اعتمادك</div>
+        <div style="font-size:30px;font-weight:700;font-family:var(--mono);margin-top:5px;color:\${waitingApproval.length?'var(--purple)':'var(--green)'}">\${waitingApproval.length}</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:14px">
+      <div style="font-weight:700;margin-bottom:8px">مركز المتابعة</div>
+      <div class="kv"><span class="k">تم التسليم</span><span class="v">\${delivered.length}</span></div>
+      <div class="kv"><span class="k">إشعارات غير مقروءة</span><span class="v">\${unread}</span></div>
+      <div class="kv"><span class="k">محادثات نشطة</span><span class="v">\${conversations.length}</span></div>
+      <div class="kv"><span class="k">أقرب موعد تسليم</span><span class="v mono">\${nextDeadline ? fmtDay(nextDeadline.deadline) : 'مفيش موعد محدد'}</span></div>
+    </div>
+
+    <div class="section-title">آخر طلب</div>
+    \${latest ? \`
+      <button class="card list-card" id="home-latest-project" style="text-align:start">
+        <div class="list-card-top">
+          <span class="list-card-title">\${esc(latest.order_number)}</span>
+          \${badge(latest.status)}
+        </div>
+        <div class="list-card-meta">
+          <span>الكمية: \${esc(latest.quantity)}</span>
+          <span>\${latest.deadline ? 'الديدلاين: '+fmtDay(latest.deadline) : 'من غير موعد تسليم'}</span>
+        </div>
+      </button>
+    \` : '<div class="empty-state" style="padding:30px"><div class="ic">▦</div>لسه مفيش طلبات</div>'}
+
+    <div class="section-title">آخر محادثة</div>
+    \${latestConversation ? \`
+      <button class="card list-card" id="home-latest-conversation" style="text-align:start">
+        <div style="font-weight:700">\${esc(latestConversation.order_number)}</div>
+        <div class="list-card-meta" style="margin-top:5px">
+          \${latestConversation.latest_message ? esc(latestConversation.latest_sender_name || 'رسالة')+': '+esc(latestConversation.latest_message) : 'ابدأ المحادثة مع فريقك'}
+        </div>
+      </button>
+    \` : '<div class="empty-state" style="padding:30px"><div class="ic">💬</div>مفيش محادثات لسه</div>'}
+
+    <div class="section-title">وصول سريع</div>
+    <div class="grid grid-2">
+      \${quickAction('projects','مشاريعي','▦')}
+      \${quickAction('conversations','المحادثات','💬')}
+      \${quickAction('profile','حسابي وأمان الحساب','👤')}
+      <button class="card" id="home-bell-action" style="border:none;text-align:start;cursor:pointer">
+        <div style="font-size:22px;margin-bottom:7px">🔔</div>
+        <div style="font-weight:700">الإشعارات</div>
+        <div style="font-size:11px;color:var(--text-faint);margin-top:3px">\${unread} غير مقروء</div>
+      </button>
+    </div>
+  \`;
+
+  document.getElementById('home-latest-project')?.addEventListener('click', () => {
+    document.getElementById('content').dataset.detail = latest.id;
+    goView('projects');
+  });
+  document.getElementById('home-latest-conversation')?.addEventListener('click', () => goView('conversations'));
+  document.querySelectorAll('[data-home-view]').forEach(btn => btn.addEventListener('click', () => goView(btn.dataset.homeView)));
+  document.getElementById('home-bell-action')?.addEventListener('click', () => document.getElementById('bell-btn').click());
+};
+
+/* ================= CUSTOMER PROFILE ================= */
+RENDERERS.profile = async (el) => {
+  if (state.user.role !== 'CUSTOMER') {
+    el.innerHTML = '<div class="empty-state">هذه الصفحة متاحة للعميل فقط.</div>';
+    return;
+  }
+  const customer = state.profile || {};
+  el.innerHTML = \`
+    <div class="card" style="margin-bottom:14px">
+      <div style="font-size:12px;color:var(--text-faint)">الاسم</div>
+      <div style="font-size:20px;font-weight:700;margin-top:4px">\${esc(customer.full_name || state.user.fullName)}</div>
+      <div class="kv"><span class="k">البريد</span><span class="v mono">\${esc(customer.email || state.user.email || '—')}</span></div>
+      <div class="kv"><span class="k">الهاتف</span><span class="v mono">\${esc(customer.phone || state.user.phone || '—')}</span></div>
+      <div class="kv"><span class="k">نوع الحساب</span><span class="v">عميل</span></div>
+      <div class="kv"><span class="k">تاريخ الانضمام</span><span class="v mono">\${customer.created_at ? fmtDate(customer.created_at) : '—'}</span></div>
+    </div>
+
+    <div class="card" style="margin-bottom:14px">
+      <div style="font-weight:700;margin-bottom:8px">الأمان</div>
+      <div style="font-size:12.5px;color:var(--text-dim);margin-bottom:12px">تقدر تغيّر كلمة المرور من غير ما تخرج من حسابك.</div>
+      <button class="btn btn-primary btn-block" id="profile-change-pw">تغيير كلمة المرور</button>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:700;margin-bottom:8px">التحكم بالحساب</div>
+      <button class="btn btn-ghost btn-block" id="profile-logout">تسجيل الخروج</button>
+    </div>
+  \`;
+
+  document.getElementById('profile-change-pw').addEventListener('click', openChangePasswordModal);
+  document.getElementById('profile-logout').addEventListener('click', doLogout);
+};
+
 /* ================= PROJECTS (shared list, role-adaptive) ================= */
 RENDERERS.projects = async (el) => {
   if (el.dataset.detail) return renderProjectDetail(el, el.dataset.detail);
   const { projects } = await api('/projects');
 
   const headerAction = state.user.role === 'MARKETER'
-    ? `<button class="btn btn-primary btn-sm" id="new-project-btn" style="margin-bottom:14px">+ مشروع جديد</button>` : '';
+    ? \`<button class="btn btn-primary btn-sm" id="new-project-btn" style="margin-bottom:14px">+ مشروع جديد</button>\` : '';
 
-  if (!projects.length) {
-    el.innerHTML = headerAction + `<div class="empty-state"><div class="ic">▦</div>مفيش مشاريع لسه</div>`;
+  const isCustomer = state.user.role === 'CUSTOMER';
+  const statuses = ['PRICE_NEGOTIATION','PRICE_ACCEPTED','PRICE_LOCKED','PAYMENT_PENDING','PAYMENT_CONFIRMED','EDITOR_ASSIGNED','IN_PRODUCTION','PREVIEW_READY','REVISION_REQUESTED','FINAL_APPROVED','READY_FOR_DELIVERY','DELIVERED'];
+  const search = el.dataset.search || '';
+  const filter = el.dataset.status || '';
+
+  const filtered = projects.filter(p => {
+    const matchesSearch = !search || (p.order_number || '').toLowerCase().includes(search.toLowerCase());
+    const matchesStatus = !filter || p.status === filter;
+    return matchesSearch && matchesStatus;
+  });
+
+  if (isCustomer) {
+    el.innerHTML = \`
+      <div class="field" style="margin-bottom:10px">
+        <label>بحث برقم الطلب</label>
+        <input id="customer-project-search" class="ltr" placeholder="SH-0001" value="\${esc(search)}">
+      </div>
+      <div class="field" style="margin-bottom:14px">
+        <label>تصفية حسب الحالة</label>
+        <select id="customer-project-filter">
+          <option value="">كل الطلبات</option>
+          \${statuses.map(s => \`<option value="\${s}">\${s}</option>\`).join('')}
+        </select>
+      </div>
+      <div style="font-size:12px;color:var(--text-faint);margin-bottom:10px">
+        \${filtered.length} من \${projects.length} طلب
+      </div>
+    \`;
   } else {
-    el.innerHTML = headerAction + projects.map(p => `
-      <button class="card list-card clickable" data-id="${p.id}">
-        <div class="list-card-top"><span class="list-card-title">${esc(p.order_number)}</span>${badge(p.status)}</div>
-        <div class="list-card-meta">
-          <span>الكمية: ${esc(p.quantity)}</span>
-          ${p.deadline ? `<span>الديدلاين: ${fmtDay(p.deadline)}</span>` : ''}
-        </div>
-      </button>`).join('');
-    el.querySelectorAll('[data-id]').forEach(card => card.addEventListener('click', () => {
-      el.dataset.detail = card.dataset.id; RENDERERS.projects(el);
-    }));
+    el.innerHTML = '';
   }
+
+  if (!filtered.length) {
+    el.innerHTML += headerAction + \`<div class="empty-state"><div class="ic">▦</div>\${projects.length ? 'مفيش طلبات مطابقة' : 'مفيش مشاريع لسه'}</div>\`;
+  } else {
+    el.innerHTML += headerAction + filtered.map(p => \`
+      <button class="card list-card clickable" data-id="\${p.id}">
+        <div class="list-card-top"><span class="list-card-title">\${esc(p.order_number)}</span>\${badge(p.status)}</div>
+        <div class="list-card-meta">
+          <span>الكمية: \${esc(p.quantity)}</span>
+          \${p.deadline ? \`<span>الديدلاين: \${fmtDay(p.deadline)}</span>\` : ''}
+          <span>آخر تحديث: \${fmtDate(p.updated_at)}</span>
+        </div>
+      </button>\`).join('');
+  }
+
+  el.querySelectorAll('[data-id]').forEach(card => card.addEventListener('click', () => {
+    el.dataset.detail = card.dataset.id; RENDERERS.projects(el);
+  }));
+
+  if (isCustomer) {
+    const searchInput = document.getElementById('customer-project-search');
+    const filterInput = document.getElementById('customer-project-filter');
+    filterInput.value = filter;
+    searchInput.addEventListener('input', () => { el.dataset.search = searchInput.value.trim(); RENDERERS.projects(el); });
+    filterInput.addEventListener('change', () => { el.dataset.status = filterInput.value; RENDERERS.projects(el); });
+  }
+
   const newBtn = document.getElementById('new-project-btn');
   if (newBtn) newBtn.addEventListener('click', () => openCreateProjectFlow(el));
 };
