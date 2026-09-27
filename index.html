@@ -367,27 +367,27 @@
     <h1>اختار هتدخل كمين؟</h1>
     <p>من غير تسجيل أو إيميل أو كلمة مرور — اختار الشخصية وادخل مباشرة.</p>
     <div class="preview-choice-grid">
-      <button type="button" class="preview-choice" data-preview="editor">
+      <button type="button" class="preview-choice" onclick="window.__shifraPreview('editor')">
         <span class="preview-icon">🎬</span>
         <strong>مونتير</strong>
         <small>واجهة المونتير والمهام</small>
       </button>
-      <button type="button" class="preview-choice" data-preview="marketer">
+      <button type="button" class="preview-choice" onclick="window.__shifraPreview('marketer')">
         <span class="preview-icon">📈</span>
         <strong>مسوق</strong>
         <small>واجهة المسوق والفرص</small>
       </button>
-      <button type="button" class="preview-choice" data-preview="youssef">
+      <button type="button" class="preview-choice" onclick="window.__shifraPreview('youssef')">
         <span class="preview-icon">👤</span>
         <strong>يوسف</strong>
         <small>وضع معاينة باسم يوسف</small>
       </button>
-      <button type="button" class="preview-choice" data-preview="omar">
+      <button type="button" class="preview-choice" onclick="window.__shifraPreview('omar')">
         <span class="preview-icon">👑</span>
         <strong>عمر</strong>
         <small>وضع معاينة باسم عمر</small>
       </button>
-      <button type="button" class="preview-choice preview-choice-wide" data-preview="customer">
+      <button type="button" class="preview-choice preview-choice-wide" onclick="window.__shifraPreview('customer')">
         <span class="preview-icon">🛍️</span>
         <strong>العميل</strong>
         <small>تجربة العميل كاملة</small>
@@ -2337,9 +2337,7 @@ function wireProjectDetailActions(el, project, id){
     }
   }
 
-  document.querySelectorAll('[data-preview]').forEach(btn=>{
-    btn.addEventListener('click',()=>enterPreview(btn.dataset.preview));
-  });
+  window.__shifraPreview = enterPreview;
 })();
 </script>\n</body>
 </html>
