@@ -2256,5 +2256,80 @@ function wireProjectDetailActions(el, project, id){
   }
 })();
 </script>
+
+<script id="shifra-preview-mode">
+(() => {
+  // Temporary UI preview mode: bypass authentication and use local mock responses.
+  // Remove this block later to restore the real login flow.
+  const demoUser = {
+    id: 0,
+    role: 'CUSTOMER',
+    fullName: 'عمر — وضع المعاينة',
+    email: 'preview@shifra.local',
+    phone: ''
+  };
+
+  const arrayKeys = new Set([
+    'projects','conversations','notifications','ratings','messages','leads',
+    'opportunities','customers','earnings','payments','revisions','complaints',
+    'items','results','data'
+  ]);
+
+  api = async function previewApi(path, opts = {}) {
+    const method = (opts.method || 'GET').toUpperCase();
+
+    if (method !== 'GET') {
+      return { ok: true, success: true, message: 'تمت المحاكاة — وضع المعاينة' };
+    }
+
+    if (path.includes('/notifications')) return { notifications: [] };
+    if (path.includes('/projects')) return { projects: [] };
+    if (path.includes('/conversations')) return { conversations: [] };
+    if (path.includes('/ratings')) return { ratings: [] };
+    if (path.includes('/complaints')) return { complaints: [] };
+    if (path.includes('/payments')) return { payments: [] };
+
+    return new Proxy({}, {
+      get(_target, prop) {
+        if (prop === 'user') return demoUser;
+        if (prop === 'customer') return {
+          id: 0,
+          full_name: demoUser.fullName,
+          email: demoUser.email,
+          phone: 'وضع المعاينة',
+          status: 'ACTIVE'
+        };
+        if (prop === 'marketer' || prop === 'editor' || prop === 'profile') return {};
+        if (arrayKeys.has(String(prop))) return [];
+        return null;
+      }
+    });
+  };
+
+  state.token = 'preview-mode';
+  state.user = demoUser;
+  state.profile = {
+    id: 0,
+    full_name: demoUser.fullName,
+    email: demoUser.email,
+    phone: 'وضع المعاينة'
+  };
+  state.apiBase = '/api';
+
+  const auth = document.getElementById('auth-screen');
+  if (auth) auth.style.display = 'none';
+
+  const shell = document.getElementById('app-shell');
+  if (shell) shell.classList.add('active');
+
+  const banner = document.createElement('div');
+  banner.textContent = 'وضع المعاينة — التسجيل متوقف مؤقتًا';
+  banner.style.cssText = 'position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(139,92,246,.95);color:#fff;padding:7px 14px;border-radius:999px;font:600 12px/1.2 var(--font);box-shadow:0 8px 24px rgba(0,0,0,.35);backdrop-filter:blur(8px);';
+  document.body.appendChild(banner);
+
+  enterApp();
+})();
+</script>
+
 </body>
 </html>
