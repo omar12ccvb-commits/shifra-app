@@ -336,64 +336,54 @@
     *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important}
   }
 </style>
-<style id="shifra-preview-choice-style">
-  #auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
-  .preview-choice-card{width:100%;max-width:560px;background:rgba(19,19,24,.92);border:1px solid var(--border);border-radius:22px;padding:28px;box-shadow:0 30px 90px -35px rgba(0,0,0,.95);backdrop-filter:blur(14px);}
-  .preview-choice-brand{display:flex;align-items:center;gap:10px;margin-bottom:22px;}
-  .preview-choice-brand .brand-text{font-size:21px;}
-  .preview-choice-card h1{font-size:24px;margin-bottom:6px;}
-  .preview-choice-card>p{font-size:13px;color:var(--text-dim);margin-bottom:20px;}
-  .preview-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
-  .preview-choice{border:1px solid var(--border);background:var(--bg-elev);color:var(--text);border-radius:16px;padding:16px 14px;text-align:right;display:flex;flex-direction:column;gap:5px;min-height:108px;transition:transform .18s,border-color .18s,background .18s;cursor:pointer;}
-  .preview-choice:hover{transform:translateY(-2px);border-color:rgba(155,124,255,.55);background:var(--bg-elev-2);}
-  .preview-icon{font-size:25px;line-height:1;}
-  .preview-choice strong{font-size:15px;}
-  .preview-choice small{font-size:11.5px;color:var(--text-faint);}
-  .preview-choice-wide{grid-column:1/-1;}
-  .preview-choice-note{margin-top:16px;text-align:center;font-size:11px;color:var(--text-faint);}
-  @media(max-width:520px){.preview-choice-grid{grid-template-columns:1fr}.preview-choice-wide{grid-column:auto}.preview-choice-card{padding:22px}.preview-choice{min-height:92px}}
-</style>\n</head>
+</head>
 <body>
 
 <div id="auth-screen">
-  <div class="preview-choice-card">
-    <div class="preview-choice-brand">
-      <div class="brand-mark">ش</div>
-      <div>
-        <div class="brand-text">شفرة</div>
-        <div class="brand-sub">PREVIEW MODE</div>
+  <div class="auth-card">
+    <div class="brand"><div class="brand-mark">ش</div><div><div class="brand-text">شفرة</div><div class="brand-sub" style="text-align:start">شفرة</div></div></div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login">دخول</button>
+      <button class="auth-tab" id="tab-signup">حساب جديد</button>
+    </div>
+    <div class="auth-error" id="auth-error"></div>
+
+    <form id="login-form">
+      <div class="field"><label>البريد أو الهاتف</label><input type="text" id="login-identifier" class="ltr" required></div>
+      <div class="field"><label>كلمة المرور</label><input type="password" id="login-password" class="ltr" required></div>
+      <details class="adv"><summary>إعدادات متقدمة</summary>
+        <div class="field" style="margin-top:10px"><label>عنوان السيرفر</label><input type="text" id="login-apibase" class="ltr" value="http://localhost:4000/api"></div>
+      </details>
+      <button type="submit" class="btn btn-primary" id="login-submit">دخول</button>
+    </form>
+
+    <form id="signup-form" style="display:none">
+      <div class="role-picker">
+        <button type="button" class="role-opt active" data-role="CUSTOMER">
+          <div class="role-ic">🎬</div><div class="role-name">عميل</div>
+          <div class="role-tag">اطلب مشروعك</div>
+        </button>
+        <button type="button" class="role-opt" data-role="MARKETER">
+          <div class="role-ic">🤝</div><div class="role-name">مسوّق</div>
+          <div class="role-tag">تواصل واكسب</div>
+        </button>
+        <button type="button" class="role-opt" data-role="EDITOR">
+          <div class="role-ic">🎞️</div><div class="role-name">محرر</div>
+          <div class="role-tag">نفّذ واربح</div>
+        </button>
       </div>
-    </div>
-    <h1>اختار هتدخل كمين؟</h1>
-    <p>من غير تسجيل أو إيميل أو كلمة مرور — اختار الشخصية وادخل مباشرة.</p>
-    <div class="preview-choice-grid">
-      <button type="button" class="preview-choice" onclick="window.__shifraPreview('editor')">
-        <span class="preview-icon">🎬</span>
-        <strong>مونتير</strong>
-        <small>واجهة المونتير والمهام</small>
-      </button>
-      <button type="button" class="preview-choice" onclick="window.__shifraPreview('marketer')">
-        <span class="preview-icon">📈</span>
-        <strong>مسوق</strong>
-        <small>واجهة المسوق والفرص</small>
-      </button>
-      <button type="button" class="preview-choice" onclick="window.__shifraPreview('youssef')">
-        <span class="preview-icon">👤</span>
-        <strong>يوسف</strong>
-        <small>وضع معاينة باسم يوسف</small>
-      </button>
-      <button type="button" class="preview-choice" onclick="window.__shifraPreview('omar')">
-        <span class="preview-icon">👑</span>
-        <strong>عمر</strong>
-        <small>وضع معاينة باسم عمر</small>
-      </button>
-      <button type="button" class="preview-choice preview-choice-wide" onclick="window.__shifraPreview('customer')">
-        <span class="preview-icon">🛍️</span>
-        <strong>العميل</strong>
-        <small>تجربة العميل كاملة</small>
-      </button>
-    </div>
-    <div class="preview-choice-note">التسجيل الحقيقي متوقف مؤقتًا للمعاينة.</div>
+      <div class="role-desc" id="role-desc"></div>
+      <div class="field"><label>الاسم بالكامل</label><input type="text" id="su-name" required></div>
+      <div class="field"><label>البريد الإلكتروني</label><input type="email" id="su-email" class="ltr"></div>
+      <div class="field"><label>رقم الهاتف</label><input type="text" id="su-phone" class="ltr"></div>
+      <div class="field"><label>كلمة المرور (8 أحرف على الأقل)</label><input type="password" id="su-password" class="ltr" required></div>
+      <div class="field" id="su-referral-field"><label>كود الدعوة (اختياري)</label><input type="text" id="su-referral" class="ltr"></div>
+      <details class="adv"><summary>إعدادات متقدمة</summary>
+        <div class="field" style="margin-top:10px"><label>عنوان السيرفر</label><input type="text" id="signup-apibase" class="ltr" value="http://localhost:4000/api"></div>
+      </details>
+      <button type="submit" class="btn btn-primary" id="signup-submit">إنشاء الحساب</button>
+    </form>
+    <div class="auth-note">شفرة — Creative Services Management</div>
   </div>
 </div>
 
@@ -437,7 +427,7 @@
    shipping three separate apps with duplicated plumbing.
    Session token lives in memory only (not localStorage).
    ============================================================ */
-const state = { token:null, user:null, profile:null, apiBase:'/api', view:null };
+const state = { token:null, user:null, profile:null, apiBase:'http://localhost:4000/api', view:null };
 
 // Smart default: if this page itself isn't running on localhost (i.e. it's
 // deployed behind the real domain), assume the API lives at /api on that same
@@ -446,7 +436,7 @@ const state = { token:null, user:null, profile:null, apiBase:'/api', view:null }
 // plain editable field, never hidden or hardcoded away from the user.
 (function setSmartApiDefault(){
   const isLocal = ['localhost','127.0.0.1'].includes(location.hostname) || location.protocol === 'file:';
-  const guess = isLocal ? 'http://localhost:4000/api' : '/api';
+  const guess = isLocal ? 'http://localhost:4000/api' : 'https://api-production-2964.up.railway.app/api';
   state.apiBase = guess;
   document.getElementById('login-apibase').value = guess;
   document.getElementById('signup-apibase').value = guess;
@@ -460,20 +450,14 @@ function toast(msg, kind){
   setTimeout(()=> el.remove(), 4200);
 }
 async function api(path, opts={}){
-  const method = opts.method || 'GET';
-  const headers = Object.assign(
-    {'Content-Type':'application/json','Cache-Control':'no-cache','Pragma':'no-cache'},
-    state.token ? {Authorization:'Bearer '+state.token} : {}
-  );
   const res = await fetch(state.apiBase + path, {
-    method,
-    headers,
-    cache:'no-store',
+    method: opts.method || 'GET',
+    headers: Object.assign({'Content-Type':'application/json'}, state.token ? {Authorization:'Bearer '+state.token} : {}),
     body: opts.body ? JSON.stringify(opts.body) : undefined,
-  }).catch(()=>{ throw new Error('تعذر الوصول للسيرفر — '+state.apiBase); });
+  }).catch(()=>{ throw new Error('تعذر الوصول للسيرفر — ' + state.apiBase); });
   let json = {};
   try { json = await res.json(); } catch(e) {}
-  if(!res.ok){ if(res.status===401 && state.token) doLogout(); throw new Error((json.error && json.error.message) || ('HTTP '+res.status)); }
+  if(!res.ok){ if(res.status===401) doLogout(); throw new Error((json.error && json.error.message) || ('HTTP '+res.status)); }
   return json;
 }
 const money = (minor) => (Number(minor)/100).toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2});
@@ -560,14 +544,8 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   try {
     const identifier = document.getElementById('login-identifier').value.trim();
     const password = document.getElementById('login-password').value;
-    const result = await api('/auth/login', {method:'POST', body:{identifier, password}});
-    if(!result.token || !result.user) throw new Error('السيرفر لم يُرجع بيانات جلسة صحيحة');
-    state.token = result.token;
-    state.user = result.user;
-    try {
-      sessionStorage.setItem('shifra_auth_token_v2', result.token);
-      sessionStorage.setItem('shifra_auth_user_v2', JSON.stringify(result.user));
-    } catch (_) {}
+    const { token } = await api('/auth/login', {method:'POST', body:{identifier, password}});
+    state.token = token;
     await loadMeAndEnter();
   } catch(err){ authError(err.message); }
   finally { btn.disabled = false; btn.textContent = orig; }
@@ -591,49 +569,28 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
       const ref = document.getElementById('su-referral').value.trim();
       if (ref) body.referralCode = ref;
     }
-    const result = await api('/auth/signup', {method:'POST', body});
-    if(!result.token || !result.user) throw new Error('السيرفر لم يُرجع بيانات جلسة صحيحة');
-    state.token = result.token;
-    state.user = result.user;
-    try {
-      sessionStorage.setItem('shifra_auth_token_v2', result.token);
-      sessionStorage.setItem('shifra_auth_user_v2', JSON.stringify(result.user));
-    } catch (_) {}
-    await loadMeAndEnter(result.customer || result.marketer || result.editor || null);
+    const { token } = await api('/auth/signup', {method:'POST', body});
+    state.token = token;
+    await loadMeAndEnter();
     toast('أهلًا بيك في شفرة', 'ok');
   } catch(err){ authError(err.message); }
   finally { btn.disabled = false; btn.textContent = orig; }
 });
 
-async function loadMeAndEnter(profileOverride = null){
-  if (!state.user) {
-    const me = await api('/auth/me');
-    state.user = me.user;
-  }
+async function loadMeAndEnter(){
+  const me = await api('/auth/me');
+  state.user = me.user;
   if (state.user.role === 'OWNER' || state.user.role === 'ADMIN') {
-    throw new Error('حساب الإدارة له لوحة تحكم منفصلة. استخدم رابط لوحة المالك.');
+    throw new Error('حساب الإدارة له لوحة تحكم منفصلة. سجّل دخول بحساب عميل أو مسوّق أو محرر.');
   }
-  state.profile = profileOverride || null;
-  if (!state.profile) {
-    try {
-      if (state.user.role === 'MARKETER') state.profile = (await api('/marketers/me')).marketer;
-      else if (state.user.role === 'EDITOR') state.profile = (await api('/editors/me')).editor;
-      else if (state.user.role === 'CUSTOMER') state.profile = (await api('/customers/me')).customer;
-    } catch (profileErr) {
-      console.warn('Role profile could not be loaded yet:', profileErr);
-    }
-  }
+  // fetch the role-specific profile (gives us referral_code / earnings context up front)
+  if (state.user.role === 'MARKETER') state.profile = (await api('/marketers/me')).marketer;
+  else if (state.user.role === 'EDITOR') state.profile = (await api('/editors/me')).editor;
+  else if (state.user.role === 'CUSTOMER') state.profile = (await api('/customers/me')).customer;
   enterApp();
 }
 
 function doLogout(){
-  try{
-    sessionStorage.removeItem('shifra_auth_token_v2');
-    sessionStorage.removeItem('shifra_auth_user_v2');
-    sessionStorage.removeItem('shifra_auth_token_v3');
-    sessionStorage.removeItem('shifra_auth_user_v3');
-    sessionStorage.removeItem('shifra_auth_form');
-  }catch(_){ }
   state.token = null; state.user = null; state.profile = null;
   document.getElementById('app-shell').classList.remove('active');
   document.getElementById('auth-screen').style.display = 'flex';
@@ -1428,18 +1385,16 @@ async function getCatalog(){
 
 async function renderProjectDetail(el, id){
   const role = state.user.role;
-  const [{project}, priceRes, paymentsRes, revisionsRes, earningsRes, catalog, messagesRes, ratingsRes, complaintsRes, videoPreviewRes] = await Promise.all([
+  const [{project}, priceRes, paymentsRes, revisionsRes, earningsRes, catalog, messagesRes, ratingsRes, complaintsRes] = await Promise.all([
     api(`/projects/${id}`), api(`/projects/${id}/price-agreements`), api(`/projects/${id}/payments`),
     api(`/projects/${id}/revisions`), api(`/projects/${id}/earnings`), getCatalog(), api(`/projects/${id}/messages`),
     role === 'CUSTOMER' ? api(`/projects/${id}/ratings`) : Promise.resolve({ratings:[]}),
     role === 'CUSTOMER' ? api('/complaints/me') : Promise.resolve({complaints:[]}),
-    api(`/projects/${id}/video-preview`),
   ]);
   const latestAgreement = priceRes.priceAgreements[0] || null; // ordered DESC by version
   const activePayment = paymentsRes.payments.find(p => ['PENDING','PROOF_SUBMITTED','PROOF_REJECTED'].includes(p.status));
   const openRevision = revisionsRes.revisions.find(r => r.status === 'OPEN');
   const myEarning = earningsRes.earnings[0] || null;
-  const videoPreview = videoPreviewRes.preview || null;
 
   const blocks = [];
   blocks.push(`<a class="backlink" href="#" id="back-to-list">‹ رجوع</a>`);
@@ -1468,98 +1423,6 @@ async function renderProjectDetail(el, id){
     if (waButtons.length) {
       blocks.push('<div class="card" style="margin-bottom:14px"><div style="font-weight:700;margin-bottom:8px">التواصل والملفات</div><div style="font-size:12px;color:var(--text-faint);margin-bottom:9px">استخدم WhatsApp لإرسال الصور والفيديوهات والملفات. شفرة لا يخزن الوسائط هنا في هذه المرحلة.</div><div class="btn-row">'+waButtons.join('')+'</div></div>');
     }
-  }
-
-  /* ---- WhatsApp-only media handoff / in-app text tracking ---- */
-  if (videoPreview) {
-    const statusLabel = {
-      EDITOR_SENT:'الممنتج أرسل النسخة المائية على WhatsApp',
-      MARKETER_RECEIVED:'المسوق استلم النسخة المائية على WhatsApp',
-      CUSTOMER_REVIEW:'العميل يشاهد النسخة على WhatsApp',
-      REVISION_REQUESTED:'العميل طلب تعديل',
-      PAYMENT_PENDING:'في انتظار تسعير/دفع التسليم النهائي',
-      PAYMENT_CONFIRMED:'الدفع النهائي اتأكد',
-      ORIGINAL_SENT:'الأصل اتبعت للمسوق على WhatsApp',
-      ORIGINAL_RECEIVED:'المسوق استلم الأصل على WhatsApp',
-      DELIVERED:'تم التسليم'
-    }[videoPreview.status] || videoPreview.status;
-    const paymentMinor = videoPreview.release_amount_minor;
-    const paymentStatus = videoPreview.release_payment_status;
-    blocks.push(
-      '<div class="section-title">تسليم الملفات — WhatsApp فقط</div>'+
-      '<div class="card" style="margin-bottom:12px;border-color:rgba(139,92,246,.28)">'+
-        '<div style="font-size:16px;font-weight:800">📱 لا يتم رفع صور أو فيديوهات أو تسجيلات داخل شفرة</div>'+
-        '<div style="margin-top:8px"><span class="badge badge-purple">'+esc(statusLabel)+'</span></div>'+
-        '<div style="font-size:12px;color:var(--text-faint);margin-top:9px">المعاينات والفيديو الأصلي وأي تسجيلات أو ملفات يتم إرسالها خارج التطبيق عبر WhatsApp. شفرة تحتفظ فقط بالحالة، الرسائل النصية، وبيانات المتابعة.</div>'+
-        (videoPreview.editor_note ? '<div style="margin-top:10px;font-size:12.5px;color:var(--text-dim)">ملاحظة الممنتج: '+esc(videoPreview.editor_note)+'</div>' : '')+
-        (videoPreview.marketer_handoff_summary ? '<div style="margin-top:10px;padding:10px;background:var(--bg-elev-2);border-radius:10px;font-size:12.5px"><b>ملخص المسوق:</b><br>'+esc(videoPreview.marketer_handoff_summary)+'</div>' : '')+
-        ((videoPreview.release_payment_status && paymentMinor) ? '<div style="margin-top:10px" class="kv"><span class="k">الدفع النهائي</span><span class="v mono">'+money(paymentMinor)+' '+esc(videoPreview.release_currency||'EGP')+' · '+esc(videoPreview.release_method||'—')+'</span></div>' : '')+
-        ((paymentStatus==='WAITING_PAYMENT' && role==='CUSTOMER') ? '<button class="btn btn-primary btn-sm" id="final-release-proof" style="margin-top:10px">أرسل رقم عملية الدفع</button>' : '')+
-      '</div>'
-    );
-  }
-
-  if (role==='EDITOR' && ['IN_PRODUCTION','PREVIEW_READY'].includes(project.status) && (!videoPreview || ['REVISION_REQUESTED'].includes(videoPreview.status))) {
-    blocks.push('<div class="card" style="margin-bottom:12px">'+
-      '<div style="font-weight:800;margin-bottom:6px">جهّز النسخة المائية</div>'+
-      '<div style="font-size:12px;color:var(--text-faint);margin-bottom:10px">الممنتج يعمل نسختين خارج شفرة: نسخة مائية للمراجعة ونسخة أصلية نظيفة. ابعت النسخة المائية للمسوق على WhatsApp ثم أكد هنا.</div>'+
-      (project.marketer_phone ? '<button class="btn btn-ghost btn-sm" id="wa-preview-marketer">WhatsApp المسوق</button>' : '<div style="font-size:12px;color:var(--text-faint)">لا يوجد رقم WhatsApp للمسوق.</div>')+
-      '<label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--text-dim);margin:10px 0"><input id="preview-watermark-confirm" type="checkbox" style="margin-top:3px"> أؤكد أني جهزت النسخة المائية وأرسلتها للمسوق على WhatsApp.</label>'+
-      '<div class="field"><label>ملاحظة للمسوق</label><textarea id="preview-editor-note" rows="3" placeholder="مثلاً: تم تنفيذ كل المطلوب والنسخة المائية جاهزة للمراجعة..."></textarea></div>'+
-      '<button class="btn btn-primary btn-block" id="send-video-preview">تأكيد إرسال النسخة المائية عبر WhatsApp</button>'+
-    '</div>');
-  }
-
-  if (role==='MARKETER' && videoPreview && videoPreview.status==='EDITOR_SENT') {
-    blocks.push('<div class="card" style="margin-bottom:12px">'+
-      '<div style="font-weight:800">نسخة المراجعة المائية وصلت على WhatsApp</div>'+
-      '<div style="font-size:12px;color:var(--text-faint);margin:6px 0 10px">بعد ما تستلمها على WhatsApp، ابعتها للعميل على WhatsApp ثم أكد الخطوة هنا.</div>'+
-      '<div class="btn-row"><button class="btn btn-primary" id="marketer-receive-preview">استلمت النسخة على WhatsApp</button>'+
-      (project.editor_phone ? '<button class="btn btn-ghost" id="wa-preview-editor">WhatsApp الممنتج</button>' : '')+
-      '</div></div>');
-  }
-
-  if (role==='MARKETER' && videoPreview && videoPreview.status==='MARKETER_RECEIVED') {
-    blocks.push('<div class="card" style="margin-bottom:12px">'+
-      '<div style="font-weight:800">إرسال النسخة المائية للعميل</div>'+
-      '<div style="font-size:12px;color:var(--text-faint);margin:6px 0 10px">ابعتها للعميل على WhatsApp. شفرة هتسجل فقط إن الإرسال حصل.</div>'+
-      (project.customer_phone ? '<button class="btn btn-ghost btn-sm" id="wa-preview-customer">WhatsApp العميل</button>' : '')+
-      '<button class="btn btn-primary btn-block" id="send-preview-to-customer" style="margin-top:9px">أكد أني أرسلتها للعميل على WhatsApp</button>'+
-    '</div>');
-  }
-
-  if (role==='CUSTOMER' && videoPreview && videoPreview.status==='CUSTOMER_REVIEW') {
-    blocks.push('<div class="card" style="margin-bottom:12px">'+
-      '<div style="font-weight:800">راجع الفيديو على WhatsApp</div>'+
-      '<div style="font-size:12px;color:var(--text-faint);margin:6px 0 10px">الفيديو نفسه موجود على WhatsApp، مش داخل شفرة. بعد ما تشوفه اضغط «تمام» أو اطلب تعديل كتابيًا.</div>'+
-      (project.marketer_phone ? '<button class="btn btn-ghost btn-sm" id="wa-review-marketer">WhatsApp المسوق</button>' : '')+
-      '<div class="btn-row" style="margin-top:9px"><button class="btn btn-primary" id="customer-preview-ok">تمام</button><button class="btn btn-ghost" id="customer-preview-revision">عايز تعديل</button></div>'+
-    '</div>');
-  }
-
-  if (role==='EDITOR' && videoPreview && videoPreview.status==='PAYMENT_CONFIRMED') {
-    blocks.push('<div class="card" style="margin-bottom:12px;border-color:rgba(52,211,153,.35)">'+
-      '<div style="font-weight:800">✅ الدفع النهائي اتأكد</div>'+
-      '<div style="font-size:12px;color:var(--text-faint);margin:6px 0 10px">ابعت الفيديو الأصلي للمسوق على WhatsApp، وبعدها أكد الاستلام هنا.</div>'+
-      '<button class="btn btn-primary btn-block" id="original-sent-btn">أرسلت الفيديو الأصلي للمسوق</button>'+
-      '</div>');
-  }
-
-  if (role==='MARKETER' && videoPreview && videoPreview.status==='ORIGINAL_SENT') {
-    blocks.push('<div class="card" style="margin-bottom:12px">'+
-      '<div style="font-weight:800">📦 الفيديو الأصلي اتبعت لك</div>'+
-      '<div style="font-size:12px;color:var(--text-faint);margin:6px 0 10px">استلمه من المونتير على WhatsApp ثم أكد الاستلام داخل التطبيق.</div>'+
-      '<button class="btn btn-primary btn-block" id="original-received-btn">استلمت الفيديو الأصلي</button>'+
-      '</div>');
-  }
-
-  if (role==='MARKETER' && videoPreview && videoPreview.status==='ORIGINAL_RECEIVED') {
-    blocks.push('<div class="card" style="margin-bottom:12px">'+
-      '<div style="font-weight:800">✅ الأصل عندك</div>'+
-      '<div style="font-size:12px;color:var(--text-faint);margin:6px 0 10px">ابعت الفيديو الأصلي للعميل عبر WhatsApp ثم اضغط الزر.</div>'+
-      (project.customer_phone ? '<button class="btn btn-ghost btn-sm" id="wa-original-customer">WhatsApp العميل</button>' : '')+
-      '<button class="btn btn-primary btn-block" id="deliver-original-btn" style="margin-top:9px">أرسلته للعميل</button>'+
-      '</div>');
   }
 
   /* ---- Price ---- */
@@ -1608,8 +1471,18 @@ async function renderProjectDetail(el, id){
   if (role === 'EDITOR' && project.status === 'EDITOR_ASSIGNED') {
     blocks.push(`<div class="section-title">الإنتاج</div><button class="btn btn-primary btn-block" id="start-prod-btn" style="margin-bottom:10px">بدء التنفيذ</button>`);
   }
+  if (role === 'EDITOR' && project.status === 'IN_PRODUCTION') {
+    blocks.push(`<div class="section-title">الإنتاج</div><button class="btn btn-primary btn-block" id="preview-ready-btn" style="margin-bottom:10px">المعاينة جاهزة</button>`);
+  }
   if (role === 'EDITOR' && project.status === 'READY_FOR_DELIVERY') {
     blocks.push(`<div class="section-title">التسليم</div><button class="btn btn-primary btn-block" id="deliver-btn" style="margin-bottom:10px">تسليم المشروع</button>`);
+  }
+  if (role === 'CUSTOMER' && project.status === 'PREVIEW_READY') {
+    blocks.push(`<div class="section-title">المعاينة</div>
+      <div class="btn-row" style="margin-bottom:10px">
+        <button class="btn btn-primary" id="final-approve-btn">اعتماد نهائي</button>
+        <button class="btn btn-ghost" id="request-revision-btn">اطلب تعديل</button>
+      </div>`);
   }
   if (role === 'EDITOR' && openRevision) {
     blocks.push(`<div class="section-title">تعديل مطلوب</div>
@@ -1752,101 +1625,6 @@ function wireProjectDetailActions(el, project, id){
     initPayBtn.disabled = true;
     try { await api(`/projects/${id}/payments`, {method:'POST'}); toast('اتبعت طلب الدفع للعميل','ok'); refresh(); }
     catch(err){ toast(err.message,'err'); initPayBtn.disabled = false; }
-  });
-
-  document.getElementById('wa-preview-marketer')?.addEventListener('click',()=>openWhatsApp(project.marketer_phone,'مرحباً '+project.marketer_name+'، دي النسخة المائية للمشروع '+project.order_number+' للمراجعة. النسخة الأصلية هتفضل مع الممنتج لحد تأكيد الدفع.'));
-  document.getElementById('wa-preview-customer')?.addEventListener('click',()=>openWhatsApp(project.customer_phone,'مرحباً '+project.customer_name+'، هبعت لك دلوقتي نسخة المراجعة المائية للمشروع '+project.order_number+' على WhatsApp.'));
-  document.getElementById('wa-review-marketer')?.addEventListener('click',()=>openWhatsApp(project.marketer_phone,'بخصوص مشروع '+project.order_number+'، شوفت النسخة المائية على WhatsApp.'));
-
-  const sendPreviewBtn=document.getElementById('send-video-preview');
-  if(sendPreviewBtn) sendPreviewBtn.addEventListener('click',async()=>{
-    const watermark=document.getElementById('preview-watermark-confirm')?.checked;
-    if(!watermark){toast('أكد إن النسخة المائية اتبعتت للمسوق على WhatsApp','err');return;}
-    sendPreviewBtn.disabled=true;
-    try{
-      await api(`/projects/${id}/video-preview`,{method:'POST',body:{
-        watermarkConfirmed:true,
-        whatsappSent:true,
-        editorNote:document.getElementById('preview-editor-note').value.trim()
-      }});
-      toast('اتسجل إن النسخة المائية اتبعتت على WhatsApp','ok');refresh();
-    }catch(err){toast(err.message,'err');sendPreviewBtn.disabled=false;}
-  });
-
-  const receivePreviewBtn=document.getElementById('marketer-receive-preview');
-  if(receivePreviewBtn) receivePreviewBtn.addEventListener('click',async()=>{
-    receivePreviewBtn.disabled=true;
-    try{await api(`/projects/${id}/video-preview/${videoPreview.id}/marketer-receive`,{method:'POST'});toast('اتسجل استلام المعاينة','ok');refresh();}
-    catch(err){toast(err.message,'err');receivePreviewBtn.disabled=false;}
-  });
-  document.getElementById('wa-preview-editor')?.addEventListener('click',()=>openWhatsApp(project.editor_phone,'مرحباً '+project.editor_name+'، بخصوص المعاينة للمشروع '+project.order_number));
-
-  const sendToCustomerBtn=document.getElementById('send-preview-to-customer');
-  if(sendToCustomerBtn) sendToCustomerBtn.addEventListener('click',()=>{
-    modal(`<h3>إرسال المعاينة للعميل</h3>
-      <div class="field"><label>ملخص كل طلبات العميل وما تم تنفيذه</label><textarea id="marketer-handoff-summary" rows="5" placeholder="اكتب بالتفصيل طلب العميل والنتيجة..."></textarea></div>
-      <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" id="confirm-preview-to-customer">إرسال</button></div>`);
-    document.getElementById('confirm-preview-to-customer').addEventListener('click',async()=>{
-      const summary=document.getElementById('marketer-handoff-summary').value.trim();
-      if(!summary){toast('اكتب ملخص طلب العميل والتنفيذ','err');return;}
-      try{await api(`/projects/${id}/video-preview/${videoPreview.id}/send-to-customer`,{method:'POST',body:{marketerSummary:summary}});closeModal();toast('اتبعتت للعميل','ok');refresh();}
-      catch(err){toast(err.message,'err');}
-    });
-  });
-
-  const approvePreviewBtn=document.getElementById('customer-preview-ok');
-  if(approvePreviewBtn) approvePreviewBtn.addEventListener('click',async()=>{
-    approvePreviewBtn.disabled=true;
-    try{await api(`/projects/${id}/video-preview/${videoPreview.id}/customer-approve`,{method:'POST'});toast('تمام — اتنقل ليوسف للتسعير والدفع','ok');refresh();}
-    catch(err){toast(err.message,'err');approvePreviewBtn.disabled=false;}
-  });
-
-  const revisionPreviewBtn=document.getElementById('customer-preview-revision');
-  if(revisionPreviewBtn) revisionPreviewBtn.addEventListener('click',()=>{
-    modal(`<h3>طلب تعديل</h3>
-      <div class="field"><label>إيه اللي محتاج يتعدل؟</label><textarea id="preview-revision-text" rows="4"></textarea></div>
-      <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" id="confirm-preview-revision">إرسال</button></div>`);
-    document.getElementById('confirm-preview-revision').addEventListener('click',async()=>{
-      const text=document.getElementById('preview-revision-text').value.trim();
-      if(!text){toast('اكتب التعديل المطلوب','err');return;}
-      try{await api(`/projects/${id}/video-preview/${videoPreview.id}/customer-revision`,{method:'POST',body:{requestText:text}});closeModal();toast('اتبعث طلب التعديل للمونتير','ok');refresh();}
-      catch(err){toast(err.message,'err');}
-    });
-  });
-
-  const finalReleaseProofBtn=document.getElementById('final-release-proof');
-  if(finalReleaseProofBtn) finalReleaseProofBtn.addEventListener('click',()=>{
-    modal(`<h3>إثبات الدفع النهائي</h3>
-      <div class="field"><label>رقم العملية / المرجع</label><input id="final-proof-ref" class="ltr"></div>
-      <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" id="send-final-proof">إرسال</button></div>`);
-    document.getElementById('send-final-proof').addEventListener('click',async()=>{
-      const ref=document.getElementById('final-proof-ref').value.trim();
-      if(!ref){toast('اكتب المرجع','err');return;}
-      try{await api(`/release-payments/${videoPreview.release_payment_id}/proof`,{method:'POST',body:{proofReference:ref}});closeModal();toast('إثبات الدفع النهائي اتبعت ليوسف','ok');refresh();}
-      catch(err){toast(err.message,'err');}
-    });
-  });
-
-  const originalSentBtn=document.getElementById('original-sent-btn');
-  if(originalSentBtn) originalSentBtn.addEventListener('click',async()=>{
-    originalSentBtn.disabled=true;
-    try{await api(`/projects/${id}/original-sent`,{method:'POST'});toast('اتسجل إن الأصل اتبعت للمسوق','ok');refresh();}
-    catch(err){toast(err.message,'err');originalSentBtn.disabled=false;}
-  });
-
-  const originalReceivedBtn=document.getElementById('original-received-btn');
-  if(originalReceivedBtn) originalReceivedBtn.addEventListener('click',async()=>{
-    originalReceivedBtn.disabled=true;
-    try{await api(`/projects/${id}/original-received`,{method:'POST'});toast('اتسجل استلام الأصل','ok');refresh();}
-    catch(err){toast(err.message,'err');originalReceivedBtn.disabled=false;}
-  });
-
-  document.getElementById('wa-original-customer')?.addEventListener('click',()=>openWhatsApp(project.customer_phone,'مرحباً '+project.customer_name+'، بخصوص المشروع '+project.order_number+'. هبعت لك الفيديو الأصلي هنا على WhatsApp.'));
-  const deliverOriginalBtn=document.getElementById('deliver-original-btn');
-  if(deliverOriginalBtn) deliverOriginalBtn.addEventListener('click',async()=>{
-    deliverOriginalBtn.disabled=true;
-    try{await api(`/projects/${id}/deliver-original-to-customer`,{method:'POST'});toast('تم تسجيل تسليم الفيديو الأصلي للعميل','ok');refresh();}
-    catch(err){toast(err.message,'err');deliverOriginalBtn.disabled=false;}
   });
 
   el.querySelectorAll('[data-upload-proof]').forEach(btn => btn.addEventListener('click', () => {
@@ -2012,332 +1790,5 @@ function wireProjectDetailActions(el, project, id){
   else install();
 })();
 </script>
-<script id="auth-rescue">
-(() => {
-  // Clean auth flow v3: one handler, one storage format, same-origin API in production.
-  const TOKEN_KEY = 'shifra_auth_token_v3';
-  const USER_KEY = 'shifra_auth_user_v3';
-  const OLD_KEYS = ['shifra_auth_token_v2', 'shifra_auth_user_v2', 'shifra_auth_form'];
-  const isLocal = ['localhost', '127.0.0.1'].includes(location.hostname) || location.protocol === 'file:';
-
-  function storageGet(key) {
-    try { return sessionStorage.getItem(key); } catch (_) { return null; }
-  }
-  function storageSet(key, value) {
-    try { sessionStorage.setItem(key, value); } catch (_) {}
-  }
-  function storageRemove(key) {
-    try { sessionStorage.removeItem(key); } catch (_) {}
-  }
-  function clearAuthStorage() {
-    storageRemove(TOKEN_KEY);
-    storageRemove(USER_KEY);
-    OLD_KEYS.forEach(storageRemove);
-  }
-
-  function resolveApiBase(form) {
-    if (!isLocal) return '/api';
-    const input = document.getElementById(form === 'signup' ? 'signup-apibase' : 'login-apibase');
-    return (input?.value || 'http://localhost:4000/api').trim().replace(/\/$/, '');
-  }
-
-  async function request(path, options = {}) {
-    const headers = {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-      'Cache-Control': 'no-store',
-      'Pragma': 'no-cache',
-      ...(options.token ? { Authorization: 'Bearer ' + options.token } : {})
-    };
-    const response = await fetch((options.base || '/api') + path, {
-      method: options.method || 'GET',
-      headers,
-      cache: 'no-store',
-      credentials: 'same-origin',
-      body: options.body === undefined ? undefined : JSON.stringify(options.body)
-    });
-
-    let data = {};
-    try { data = await response.json(); } catch (_) {}
-
-    if (!response.ok) {
-      const message = data?.error?.message || data?.message || ('HTTP ' + response.status);
-      const error = new Error(message);
-      error.status = response.status;
-      error.data = data;
-      throw error;
-    }
-    return data;
-  }
-
-  function setAuthMessage(message, kind = 'error') {
-    const el = document.getElementById('auth-error');
-    if (!el) return;
-    el.textContent = message || '';
-    el.style.display = message ? 'block' : 'none';
-    el.dataset.kind = kind;
-  }
-
-  function setBusy(form, busy) {
-    const btn = document.getElementById(form === 'signup' ? 'signup-submit' : 'login-submit');
-    if (!btn) return;
-    btn.disabled = busy;
-    btn.dataset.authBusy = busy ? '1' : '0';
-    btn.textContent = busy ? 'جارٍ التنفيذ...' : (form === 'signup' ? 'إنشاء الحساب' : 'دخول');
-  }
-
-  function persistSession(result) {
-    if (!result?.token || !result?.user?.id || !result?.user?.role) {
-      throw new Error('السيرفر لم يُرجع جلسة دخول مكتملة');
-    }
-    clearAuthStorage();
-    storageSet(TOKEN_KEY, result.token);
-    storageSet(USER_KEY, JSON.stringify(result.user));
-    state.token = result.token;
-    state.user = result.user;
-    state.profile = result.customer || result.marketer || result.editor || null;
-  }
-
-  function showAuthenticatedApp() {
-    if (!state.user) throw new Error('بيانات المستخدم غير موجودة');
-    if (state.user.role === 'OWNER' || state.user.role === 'ADMIN') {
-      throw new Error('حساب الإدارة يستخدم رابط لوحة المالك، وليس تطبيق العملاء والمسوقين والمونتيرين.');
-    }
-    document.getElementById('auth-screen').style.display = 'none';
-    document.getElementById('app-shell').classList.add('active');
-    enterApp();
-  }
-
-  async function refreshProfileInBackground() {
-    if (!state.token || !state.user) return;
-    try {
-      let result = null;
-      if (state.user.role === 'CUSTOMER') result = await request('/customers/me', {base: state.apiBase || '/api', token: state.token});
-      else if (state.user.role === 'MARKETER') result = await request('/marketers/me', {base: state.apiBase || '/api', token: state.token});
-      else if (state.user.role === 'EDITOR') result = await request('/editors/me', {base: state.apiBase || '/api', token: state.token});
-      if (result) {
-        state.profile = result.customer || result.marketer || result.editor || state.profile;
-      }
-    } catch (_) {
-      // Profile data is optional for entering the app. Never bounce a valid login back to the login screen.
-    }
-  }
-
-  async function handleSubmit(formName, event) {
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-
-    const form = document.getElementById(formName === 'signup' ? 'signup-form' : 'login-form');
-    if (!form || form.dataset.authBusy === '1') return;
-    form.dataset.authBusy = '1';
-    setAuthMessage('');
-    setBusy(formName, true);
-
-    try {
-      const base = resolveApiBase(formName);
-      state.apiBase = base;
-
-      let body;
-      if (formName === 'signup') {
-        const role = typeof signupRole === 'string' ? signupRole : 'CUSTOMER';
-        const fullName = document.getElementById('su-name')?.value.trim() || '';
-        const email = document.getElementById('su-email')?.value.trim() || '';
-        const phone = document.getElementById('su-phone')?.value.trim() || '';
-        const password = document.getElementById('su-password')?.value || '';
-        if (!fullName) throw new Error('اكتب الاسم بالكامل');
-        if (!email && !phone) throw new Error('اكتب البريد الإلكتروني أو رقم الهاتف');
-        if (password.length < 8) throw new Error('كلمة المرور لازم تكون 8 أحرف على الأقل');
-        body = { role, fullName, email: email || undefined, phone: phone || undefined, password };
-        if (role === 'CUSTOMER') {
-          const referralCode = document.getElementById('su-referral')?.value.trim() || '';
-          if (referralCode) body.referralCode = referralCode;
-        }
-      } else {
-        const identifier = document.getElementById('login-identifier')?.value.trim() || '';
-        const password = document.getElementById('login-password')?.value || '';
-        if (!identifier || !password) throw new Error('اكتب البريد/الهاتف وكلمة المرور');
-        body = { identifier, password };
-      }
-
-      const result = await request(formName === 'signup' ? '/auth/signup' : '/auth/login', {
-        base,
-        method: 'POST',
-        body
-      });
-
-      persistSession(result);
-
-      // Enter the actual app immediately. Profile loading is secondary and cannot kick
-      // the user back to the auth screen.
-      showAuthenticatedApp();
-      void refreshProfileInBackground();
-
-      toast(formName === 'signup' ? 'تم إنشاء الحساب ودخولك للتطبيق' : 'تم تسجيل الدخول', 'ok');
-    } catch (error) {
-      clearAuthStorage();
-      state.token = null;
-      state.user = null;
-      state.profile = null;
-      document.getElementById('app-shell').classList.remove('active');
-      document.getElementById('auth-screen').style.display = 'flex';
-      setAuthMessage(error?.message || 'حصل خطأ أثناء تسجيل الدخول');
-    } finally {
-      form.dataset.authBusy = '0';
-      setBusy(formName, false);
-    }
-  }
-
-  function bootstrapSavedSession() {
-    const token = storageGet(TOKEN_KEY);
-    const rawUser = storageGet(USER_KEY);
-    if (!token || !rawUser) return;
-
-    try {
-      const user = JSON.parse(rawUser);
-      if (!user?.id || !user?.role || user.role === 'OWNER' || user.role === 'ADMIN') {
-        clearAuthStorage();
-        return;
-      }
-
-      state.token = token;
-      state.user = user;
-      state.apiBase = isLocal ? (document.getElementById('login-apibase')?.value || 'http://localhost:4000/api') : '/api';
-
-      document.getElementById('auth-screen').style.display = 'none';
-      document.getElementById('app-shell').classList.add('active');
-      enterApp();
-
-      // Verify the saved token without blocking the UI. A failure clears the stale session.
-      request('/auth/me', {base: state.apiBase, token})
-        .then(result => {
-          if (result?.user) {
-            state.user = result.user;
-            storageSet(USER_KEY, JSON.stringify(result.user));
-            void refreshProfileInBackground();
-          }
-        })
-        .catch(error => {
-          if (error?.status === 401) {
-            clearAuthStorage();
-            state.token = null;
-            state.user = null;
-            state.profile = null;
-            document.getElementById('app-shell').classList.remove('active');
-            document.getElementById('auth-screen').style.display = 'flex';
-            setAuthMessage('انتهت جلسة الدخول. سجل دخولك مرة أخرى.');
-          }
-        });
-    } catch (_) {
-      clearAuthStorage();
-    }
-  }
-
-  function install() {
-    // Start clean: old v2 auth state was part of the previous broken flow.
-    OLD_KEYS.forEach(storageRemove);
-
-    const loginForm = document.getElementById('login-form');
-    const signupForm = document.getElementById('signup-form');
-
-    if (loginForm) {
-      loginForm.addEventListener('submit', event => { void handleSubmit('login', event); }, true);
-    }
-    if (signupForm) {
-      signupForm.addEventListener('submit', event => { void handleSubmit('signup', event); }, true);
-    }
-
-    if (!isLocal) {
-      const loginBase = document.getElementById('login-apibase');
-      const signupBase = document.getElementById('signup-apibase');
-      if (loginBase) loginBase.value = 'https://api-production-2964.up.railway.app/api';
-      if (signupBase) signupBase.value = 'https://api-production-2964.up.railway.app/api';
-    }
-
-    bootstrapSavedSession();
-  }
-
-  window.shifraAuthV3 = { clearAuthStorage, bootstrapSavedSession };
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', install, {once: true});
-  } else {
-    install();
-  }
-})();
-</script>
-
-
-
-<script id="shifra-preview-choice">
-(() => {
-  const personas = {
-    editor:   { role:'EDITOR',   fullName:'مونتير — وضع المعاينة' },
-    marketer: { role:'MARKETER', fullName:'مسوق — وضع المعاينة' },
-    youssef:  { role:'CUSTOMER', fullName:'يوسف — وضع المعاينة' },
-    omar:     { role:'CUSTOMER', fullName:'عمر — وضع المعاينة' },
-    customer: { role:'CUSTOMER', fullName:'العميل — وضع المعاينة' }
-  };
-
-  const arrayKeys = new Set([
-    'projects','conversations','notifications','ratings','messages','leads',
-    'opportunities','customers','earnings','payments','revisions','complaints',
-    'items','results','data'
-  ]);
-
-  async function previewApi(path, opts = {}) {
-    const method=(opts.method||'GET').toUpperCase();
-    if(method!=='GET') return {ok:true,success:true,message:'تمت المحاكاة — وضع المعاينة'};
-    if(path.includes('/notifications')) return {notifications:[]};
-    if(path.includes('/projects')) return {projects:[]};
-    if(path.includes('/conversations')) return {conversations:[]};
-    if(path.includes('/ratings')) return {ratings:[]};
-    if(path.includes('/complaints')) return {complaints:[]};
-    if(path.includes('/payments')) return {payments:[]};
-    return new Proxy({},{
-      get(_t,prop){
-        if(prop==='user') return state.user;
-        if(prop==='customer') return {id:0,full_name:state.user?.fullName||'',email:'preview@shifra.local',phone:'وضع المعاينة',status:'ACTIVE'};
-        if(prop==='marketer') return {id:0,full_name:state.user?.fullName||'',level:'PREVIEW',status:'ACTIVE'};
-        if(prop==='editor') return {id:0,full_name:state.user?.fullName||'',level:'PREVIEW',status:'ACTIVE'};
-        if(arrayKeys.has(String(prop))) return [];
-        return null;
-      }
-    });
-  }
-
-  function enterPreview(key){
-    const p=personas[key];
-    if(!p) return;
-
-    state.token='preview-mode';
-    state.user={id:0,role:p.role,fullName:p.fullName,email:'preview@shifra.local',phone:''};
-    state.profile={id:0,full_name:p.fullName,email:'preview@shifra.local',phone:'وضع المعاينة'};
-    state.apiBase='/api';
-
-    api=previewApi;
-
-    document.getElementById('auth-screen').style.display='none';
-    document.getElementById('app-shell').classList.add('active');
-
-    let banner=document.getElementById('preview-mode-banner');
-    if(!banner){
-      banner=document.createElement('div');
-      banner.id='preview-mode-banner';
-      banner.textContent='وضع المعاينة — بدون تسجيل';
-      banner.style.cssText='position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(139,92,246,.95);color:#fff;padding:7px 14px;border-radius:999px;font:600 12px/1.2 var(--font);box-shadow:0 8px 24px rgba(0,0,0,.35);';
-      document.body.appendChild(banner);
-    }
-
-    try { enterApp(); }
-    catch(err){
-      console.error('Preview enter error',err);
-      const content=document.getElementById('content');
-      if(content) content.innerHTML='<div class="empty-state">تم الدخول لوضع المعاينة، لكن الشاشة المختارة فيها خطأ برمجي.</div>';
-    }
-  }
-
-  window.__shifraPreview = enterPreview;
-})();
-</script>\n</body>
+</body>
 </html>
