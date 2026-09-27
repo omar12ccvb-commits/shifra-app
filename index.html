@@ -466,6 +466,7 @@ const NAV_BY_ROLE = {
     {id:'profile', label:'حسابي', icon:'👤'}
   ],
   MARKETER: [
+    {id:'marketerHome', label:'الرئيسية', icon:'⌂'},
     {id:'opportunities', label:'الفرص', icon:'◆'},
     {id:'customers', label:'عملائي', icon:'☺'},
     {id:'projects', label:'مشاريعي', icon:'▦'},
@@ -482,6 +483,7 @@ const NAV_BY_ROLE = {
 };
 const VIEW_META = {
   home:{title:'الرئيسية', sub:'لوحة العميل ومتابعة كل طلباتك'},
+  marketerHome:{title:'الرئيسية', sub:'مركز تشغيل المسوّق ومتابعة العملاء والمشاريع والأرباح'},
   profile:{title:'حسابي', sub:'بياناتك وأمان حسابك'},
   opportunities:{title:'فرص جديدة', sub:'عملاء محتاجين مسوّق'},
   customers:{title:'عملائي', sub:'العملاء اللي بتتابعهم'},
@@ -857,6 +859,85 @@ async function openCreateProjectFlow(listEl){
     } catch(err){ toast(err.message, 'err'); e.target.disabled = false; }
   });
 }
+
+/* ================= MARKETER HOME / OPERATIONS ================= */
+function marketerCsv(filename, rows){
+  if(!rows || !rows.length){ toast('مفيش بيانات للتصدير','err'); return; }
+  var keys=Object.keys(rows[0]);
+  var lines=[keys.join(','), ...rows.map(function(r){ return keys.map(function(k){ return '\"'+String(r[k] ?? '').replace(/\"/g,'\"\"')+'\"'; }).join(','); })];
+  var blob=new Blob(['\\uFEFF'+lines.join('\\n')],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob), a=document.createElement('a');
+  a.href=url; a.download=filename; a.click(); setTimeout(function(){URL.revokeObjectURL(url);},500);
+}
+function marketerOp(icon,title,value,action,sub){
+  return '<button class="card" data-mk-action="'+action+'" style="text-align:start;border:none;cursor:pointer;width:100%;min-height:108px">'+
+    '<div style="font-size:20px;margin-bottom:5px">'+icon+'</div>'+
+    '<div style="font-weight:700">'+esc(title)+'</div>'+
+    '<div style="font-size:22px;font-weight:700;font-family:var(--mono);margin-top:5px">'+esc(value)+'</div>'+
+    (sub ? '<div style="font-size:11px;color:var(--text-faint);margin-top:3px">'+esc(sub)+'</div>' : '')+</button>';
+}
+
+RENDERERS.marketerHome = async function(el){
+  var r=await Promise.all([api('/marketers/me'),api('/opportunities'),api('/customers'),api('/projects'),api('/conversations'),api('/me/earnings'),api('/ratings/me'),api('/notifications')]);
+  var marketer=r[0].marketer, opportunities=r[1].opportunities, customers=r[2].customers, projects=r[3].projects, conversations=r[4].conversations, earnings=r[5], rating=r[6], notifications=r[7].notifications;
+  var terminal=['DELIVERED','CANCELLED','REJECTED','REFUNDED'];
+  var active=projects.filter(function(p){return !terminal.includes(p.status);});
+  var overdue=active.filter(function(p){return p.deadline && new Date(p.deadline).getTime()<Date.now();});
+  var next48=active.filter(function(p){if(!p.deadline)return false;var t=new Date(p.deadline).getTime();return t>=Date.now()&&t<=Date.now()+48*3600*1000;});
+  var pricing=projects.filter(function(p){return ['DETAILS_COLLECTED','PRICE_NEGOTIATION','PRICE_ACCEPTED'].includes(p.status);});
+  var waitingPayment=projects.filter(function(p){return ['PRICE_LOCKED','PAYMENT_PENDING'].includes(p.status);});
+  var inProduction=projects.filter(function(p){return ['EDITOR_ASSIGNED','IN_PRODUCTION','PREVIEW_READY','REVISION_REQUESTED'].includes(p.status);});
+  var delivered=projects.filter(function(p){return p.status==='DELIVERED';});
+  var unread=notifications.filter(function(n){return !n.is_read;}).length;
+  var quietChats=conversations.filter(function(x){return !x.latest_message;}).length;
+  var clientsWithoutActiveProject=customers.filter(function(c){return !projects.some(function(p){return p.customer_id===c.id && !terminal.includes(p.status);});});
+  var html='';
+  html += '<div class="card" style="margin-bottom:14px"><div class="list-card-top"><div><div style="font-size:20px;font-weight:700">أهلاً '+esc(marketer.full_name||state.user.fullName)+' 👋</div><div style="font-size:12px;color:var(--text-faint);margin-top:4px">مركز تشغيل المسوّق</div></div><span class="badge badge-purple">MARKETER</span></div>';
+  html += '<div class="btn-row" style="margin-top:12px;flex-wrap:wrap"><button class="btn btn-primary btn-sm" id="mk-copy-referral">نسخ كود الدعوة</button><button class="btn btn-ghost btn-sm" id="mk-new-project">+ مشروع جديد</button><button class="btn btn-ghost btn-sm" id="mk-open-chat">فتح المحادثات</button><button class="btn btn-ghost btn-sm" id="mk-refresh">تحديث</button></div></div>';
+  html += '<div class="section-title">أهم المؤشرات</div><div class="grid grid-4">';
+  html += marketerOp('🎯','فرص متاحة',opportunities.length,'opportunities');
+  html += marketerOp('👥','عملائي',customers.length,'customers');
+  html += marketerOp('📦','مشاريع نشطة',active.length,'projects');
+  html += marketerOp('🚨','مشاريع متأخرة',overdue.length,'projects');
+  html += marketerOp('⏰','خلال 48 ساعة',next48.length,'projects');
+  html += marketerOp('💬','محادثات',conversations.length,'conversations');
+  html += marketerOp('🔔','غير مقروء',unread,'notifications');
+  html += marketerOp('📝','تحتاج تسعير',pricing.length,'projects');
+  html += marketerOp('💳','بانتظار الدفع',waitingPayment.length,'projects');
+  html += marketerOp('🎬','قيد التنفيذ',inProduction.length,'projects');
+  html += marketerOp('✅','تم التسليم',delivered.length,'projects');
+  html += marketerOp('⭐','متوسط التقييم',Number(rating.summary.average).toFixed(2),'ratings',rating.summary.count+' تقييم');
+  html += marketerOp('💰','إجمالي الأرباح',money(earnings.totalMinor)+' EGP','earnings');
+  html += marketerOp('💸','تم صرفه',money(earnings.paidMinor)+' EGP','earnings');
+  html += marketerOp('⏳','بانتظار الصرف',money(earnings.pendingMinor)+' EGP','earnings');
+  html += marketerOp('📭','محادثات بدون رسالة',quietChats,'conversations');
+  html += marketerOp('🧭','عملاء بلا مشروع نشط',clientsWithoutActiveProject.length,'followup');
+  html += '</div>';
+  html += '<div class="section-title">أدوات إضافية</div><div class="grid grid-3">';
+  html += marketerOp('📇','تصدير العملاء','CSV','export-customers');
+  html += marketerOp('🧾','تصدير الأرباح','CSV','export-earnings');
+  html += marketerOp('📅','متابعة المواعيد القريبة',next48.length,'projects');
+  html += marketerOp('🤝','الفرص الجديدة',opportunities.length,'opportunities');
+  html += marketerOp('📣','بدء متابعة العملاء','فتح قائمة العملاء','customers');
+  html += marketerOp('🔎','البحث في المشاريع','فتح المشاريع','projects');
+  html += '</div>';
+  html += '<div class="section-title">آخر المحادثات</div>';
+  if(conversations.length){ html += conversations.slice(0,5).map(function(x){ return '<button class="card list-card" data-mk-chat="'+x.id+'" style="text-align:start;margin-bottom:8px"><div class="list-card-top"><span class="list-card-title">'+esc(x.order_number)+'</span>'+badge(x.status)+'</div><div class="list-card-meta">العميل: '+esc(x.customer_name)+'</div><div style="margin-top:6px;font-size:12px;color:var(--text-dim)">'+(x.latest_message?esc(x.latest_message):'ابدأ المحادثة مع العميل')+'</div></button>'; }).join(''); }
+  else { html += '<div class="empty-state"><div class="ic">💬</div>مفيش محادثات لسه.</div>'; }
+  el.innerHTML=html;
+  document.getElementById('mk-copy-referral').addEventListener('click',async function(){try{await navigator.clipboard.writeText(marketer.referral_code||'');toast('اتنسخ كود الدعوة','ok');}catch(e){modal('<h3>كود الدعوة</h3><div class="mono" style="font-size:20px">'+esc(marketer.referral_code||'—')+'</div>');}});
+  document.getElementById('mk-new-project').addEventListener('click',function(){openCreateProjectFlow(el);});
+  document.getElementById('mk-open-chat').addEventListener('click',function(){goView('conversations');});
+  document.getElementById('mk-refresh').addEventListener('click',function(){RENDERERS.marketerHome(el);});
+  el.querySelectorAll('[data-mk-chat]').forEach(function(btn){btn.addEventListener('click',function(){goView('conversations');});});
+  el.querySelectorAll('[data-mk-action]').forEach(function(btn){btn.addEventListener('click',async function(){var a=btn.dataset.mkAction;
+    if(['opportunities','customers','projects','conversations','ratings','earnings'].includes(a)) return goView(a);
+    if(a==='notifications'){document.getElementById('bell-btn').click();return;}
+    if(a==='export-customers'){marketerCsv('shifra-my-customers.csv',customers);return;}
+    if(a==='export-earnings'){marketerCsv('shifra-my-earnings.csv',earnings.earnings);return;}
+    if(a==='followup'){modal('<h3>عملاء بلا مشروع نشط</h3>'+(clientsWithoutActiveProject.length?clientsWithoutActiveProject.map(function(x){return '<div class="kv"><span class="k">'+esc(x.full_name)+'</span><span class="v">'+esc(x.phone||x.email||'—')+'</span></div>';}).join(''):'<div class="empty-state">مفيش عملاء في القائمة.</div>'));return;}
+  });});
+};
 
 /* ================= OPPORTUNITIES (marketer) ================= */
 RENDERERS.opportunities = async (el) => {
