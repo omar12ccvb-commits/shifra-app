@@ -458,14 +458,27 @@ document.getElementById('user-menu-btn').addEventListener('click', () => {
 
 /* ---------------- Role-adaptive nav + router ---------------- */
 const NAV_BY_ROLE = {
-  CUSTOMER: [ {id:'projects', label:'مشاريعي', icon:'▦'} ],
-  MARKETER: [ {id:'opportunities', label:'الفرص', icon:'◆'}, {id:'customers', label:'عملائي', icon:'☺'},
-              {id:'projects', label:'مشاريعي', icon:'▦'}, {id:'earnings', label:'أرباحي', icon:'%'} ],
-  EDITOR:   [ {id:'projects', label:'مهامي', icon:'▦'}, {id:'earnings', label:'أرباحي', icon:'%'} ],
+  CUSTOMER: [
+    {id:'projects', label:'مشاريعي', icon:'▦'},
+    {id:'conversations', label:'محادثات', icon:'💬'}
+  ],
+  MARKETER: [
+    {id:'opportunities', label:'الفرص', icon:'◆'},
+    {id:'customers', label:'عملائي', icon:'☺'},
+    {id:'projects', label:'مشاريعي', icon:'▦'},
+    {id:'conversations', label:'محادثات', icon:'💬'},
+    {id:'earnings', label:'أرباحي', icon:'%'}
+  ],
+  EDITOR: [
+    {id:'projects', label:'مهامي', icon:'▦'},
+    {id:'conversations', label:'محادثات', icon:'💬'},
+    {id:'earnings', label:'أرباحي', icon:'%'}
+  ],
 };
 const VIEW_META = {
   opportunities:{title:'فرص جديدة', sub:'عملاء محتاجين مسوّق'},
   customers:{title:'عملائي', sub:'العملاء اللي بتتابعهم'},
+  conversations:{title:'المحادثات', sub:'تواصل مباشر مع العميل والمسوّق والمحرر'},
   projects:{ CUSTOMER:{title:'مشاريعي', sub:'كل طلباتك في مكان واحد'},
              MARKETER:{title:'مشاريعي', sub:'المشاريع اللي بتتابعها'},
              EDITOR:{title:'مهامي', sub:'الشغل المُسند ليك'} },
@@ -617,6 +630,128 @@ RENDERERS.opportunities = async (el) => {
     try { await api(`/opportunities/${btn.dataset.claim}/claim`, {method:'POST'}); toast('العميل بقى عندك دلوقتي','ok'); RENDERERS.opportunities(el); }
     catch(err){ toast(err.message,'err'); btn.disabled = false; btn.textContent = 'استلام العميل ده'; }
   }));
+};
+
+/* ================= CONVERSATIONS (all customer/marketer/editor roles) ================= */
+RENDERERS.conversations = async (el) => {
+  const { conversations } = await api('/conversations');
+
+  if (!conversations.length) {
+    el.innerHTML = `
+      <div class="empty-state">
+        <div class="ic">💬</div>
+        مفيش محادثات لسه.
+        <div style="margin-top:8px;font-size:12px">
+          أول ما يبقى عندك مشروع مرتبط بعميل، هتظهر المحادثة هنا.
+        </div>
+      </div>`;
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="section-title">محادثاتك</div>
+    ${conversations.map(c => `
+      <button class="card list-card" data-conversation="${c.id}" style="text-align:start;margin-bottom:10px">
+        <div class="list-card-top">
+          <span class="list-card-title">${esc(c.order_number)}</span>
+          ${badge(c.status)}
+        </div>
+        <div style="font-weight:600;margin-bottom:4px">
+          العميل: ${esc(c.customer_name)}
+        </div>
+        <div class="list-card-meta">
+          <span>المسوّق: ${esc(c.marketer_name || '—')}</span>
+          <span>المحرر: ${esc(c.editor_name || 'لسه ماتعيّنش')}</span>
+        </div>
+        <div style="margin-top:9px;color:var(--text-dim);font-size:12.5px">
+          ${c.latest_message ? `${esc(c.latest_sender_name || 'رسالة')}: ${esc(c.latest_message)}` : 'ابدأ المحادثة مع الفريق'}
+        </div>
+        <div style="margin-top:6px;color:var(--text-faint);font-size:11px">
+          ${c.latest_message_at ? fmtDate(c.latest_message_at) : 'مفيش رسائل لسه'}
+        </div>
+      </button>
+    `).join('')}
+    <div id="standalone-chat-panel"></div>
+  `;
+
+  el.querySelectorAll('[data-conversation]').forEach(btn => {
+    btn.addEventListener('click', () => renderConversationView(el, btn.dataset.conversation));
+  });
+};
+
+async function renderConversationView(host, projectId){
+  const panel = document.getElementById('standalone-chat-panel');
+  panel.innerHTML = '<div class="card"><span class="spinner"></span> جارِ تحميل المحادثة...</div>';
+
+  try {
+    const [{project}, {messages}] = await Promise.all([
+      api(`/projects/${projectId}`),
+      api(`/projects/${projectId}/messages`),
+    ]);
+
+    panel.innerHTML = `
+      <div class="section-title">محادثة ${esc(project.order_number)}</div>
+      <div class="chat-box">
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:12px">
+          <div>
+            <div style="font-weight:700;font-size:16px">${esc(project.customer_name)}</div>
+            <div style="font-size:12px;color:var(--text-faint)">
+              المسوّق: ${esc(project.marketer_name || '—')} ·
+              المحرر: ${esc(project.editor_name || 'لسه ماتعيّنش')}
+            </div>
+          </div>
+          ${badge(project.status)}
+        </div>
+
+        <div class="chat-messages" id="standalone-chat-messages">
+          ${renderChatMessages(messages)}
+        </div>
+
+        <div class="chat-input-row">
+          <textarea id="standalone-chat-input" placeholder="اكتب رسالتك..." rows="1"></textarea>
+          <button class="btn btn-primary btn-sm" id="standalone-chat-send">إرسال</button>
+        </div>
+      </div>
+    `;
+
+    const box = document.getElementById('standalone-chat-messages');
+    if (box) box.scrollTop = box.scrollHeight;
+
+    const send = async () => {
+      const input = document.getElementById('standalone-chat-input');
+      const button = document.getElementById('standalone-chat-send');
+      const body = input.value.trim();
+      if (!body) return;
+
+      button.disabled = true;
+      try {
+        await api(`/projects/${projectId}/messages`, {
+          method:'POST',
+          body:{body}
+        });
+        input.value = '';
+        const refreshed = await api(`/projects/${projectId}/messages`);
+        document.getElementById('standalone-chat-messages').innerHTML = renderChatMessages(refreshed.messages);
+        document.getElementById('standalone-chat-messages').scrollTop =
+          document.getElementById('standalone-chat-messages').scrollHeight;
+        toast('تم إرسال الرسالة','ok');
+      } catch(err) {
+        toast(err.message,'err');
+      } finally {
+        button.disabled = false;
+      }
+    };
+
+    document.getElementById('standalone-chat-send').addEventListener('click', send);
+    document.getElementById('standalone-chat-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        send();
+      }
+    });
+  } catch(err) {
+    panel.innerHTML = `<div class="empty-state"><div class="ic">⚠</div>${esc(err.message)}</div>`;
+  }
 };
 
 /* ================= CUSTOMERS (marketer) ================= */
