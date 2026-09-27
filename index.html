@@ -554,6 +554,10 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     if(!result.token || !result.user) throw new Error('السيرفر لم يُرجع بيانات جلسة صحيحة');
     state.token = result.token;
     state.user = result.user;
+    try {
+      sessionStorage.setItem('shifra_auth_token_v2', result.token);
+      sessionStorage.setItem('shifra_auth_user_v2', JSON.stringify(result.user));
+    } catch (_) {}
     await loadMeAndEnter();
   } catch(err){ authError(err.message); }
   finally { btn.disabled = false; btn.textContent = orig; }
@@ -581,13 +585,17 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
     if(!result.token || !result.user) throw new Error('السيرفر لم يُرجع بيانات جلسة صحيحة');
     state.token = result.token;
     state.user = result.user;
-    await loadMeAndEnter();
+    try {
+      sessionStorage.setItem('shifra_auth_token_v2', result.token);
+      sessionStorage.setItem('shifra_auth_user_v2', JSON.stringify(result.user));
+    } catch (_) {}
+    await loadMeAndEnter(result.customer || result.marketer || result.editor || null);
     toast('أهلًا بيك في شفرة', 'ok');
   } catch(err){ authError(err.message); }
   finally { btn.disabled = false; btn.textContent = orig; }
 });
 
-async function loadMeAndEnter(){
+async function loadMeAndEnter(profileOverride = null){
   if (!state.user) {
     const me = await api('/auth/me');
     state.user = me.user;
@@ -595,19 +603,25 @@ async function loadMeAndEnter(){
   if (state.user.role === 'OWNER' || state.user.role === 'ADMIN') {
     throw new Error('حساب الإدارة له لوحة تحكم منفصلة. استخدم رابط لوحة المالك.');
   }
-  state.profile = null;
-  try {
-    if (state.user.role === 'MARKETER') state.profile = (await api('/marketers/me')).marketer;
-    else if (state.user.role === 'EDITOR') state.profile = (await api('/editors/me')).editor;
-    else if (state.user.role === 'CUSTOMER') state.profile = (await api('/customers/me')).customer;
-  } catch (profileErr) {
-    console.warn('Role profile could not be loaded yet:', profileErr);
+  state.profile = profileOverride || null;
+  if (!state.profile) {
+    try {
+      if (state.user.role === 'MARKETER') state.profile = (await api('/marketers/me')).marketer;
+      else if (state.user.role === 'EDITOR') state.profile = (await api('/editors/me')).editor;
+      else if (state.user.role === 'CUSTOMER') state.profile = (await api('/customers/me')).customer;
+    } catch (profileErr) {
+      console.warn('Role profile could not be loaded yet:', profileErr);
+    }
   }
   enterApp();
 }
 
 function doLogout(){
-  try{ sessionStorage.removeItem('shifra_auth_token_v2'); sessionStorage.removeItem('shifra_auth_form'); }catch(_){}
+  try{
+    sessionStorage.removeItem('shifra_auth_token_v2');
+    sessionStorage.removeItem('shifra_auth_user_v2');
+    sessionStorage.removeItem('shifra_auth_form');
+  }catch(_){ }
   state.token = null; state.user = null; state.profile = null;
   document.getElementById('app-shell').classList.remove('active');
   document.getElementById('auth-screen').style.display = 'flex';
@@ -1989,6 +2003,7 @@ function wireProjectDetailActions(el, project, id){
 <script id="auth-rescue">
 (() => {
   const TOKEN_KEY = 'shifra_auth_token_v2';
+  const USER_KEY = 'shifra_auth_user_v2';
   const FIELDS = ['login-identifier','login-password','login-apibase','su-name','su-email','su-phone','su-password','su-referral','signup-apibase'];
   const save = () => {
     try {
@@ -2078,10 +2093,13 @@ function wireProjectDetailActions(el, project, id){
       if (!json.token) throw new Error('السيرفر سجّل الطلب لكن لم يُرجع جلسة دخول');
       state.apiBase = base;
       state.token = json.token;
+      state.user = json.user || null;
+      if (!state.user) throw new Error('السيرفر سجّل الطلب لكنه لم يُرجع بيانات المستخدم');
       sessionStorage.setItem(TOKEN_KEY, json.token);
+      sessionStorage.setItem(USER_KEY, JSON.stringify(state.user));
       clearSaved();
       if (typeof loadMeAndEnter === 'function') {
-        await loadMeAndEnter();
+        await loadMeAndEnter(signup ? (json.customer || json.marketer || json.editor || null) : null);
         if (!signup) toast('تم تسجيل الدخول', 'ok');
         else toast('تم إنشاء الحساب وتسجيل الدخول', 'ok');
       } else {
@@ -2096,16 +2114,27 @@ function wireProjectDetailActions(el, project, id){
   }, true);
 
   const token = (() => { try { return sessionStorage.getItem(TOKEN_KEY); } catch (_) { return null; } })();
+  const savedUser = (() => {
+    try {
+      const raw = sessionStorage.getItem(USER_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (_) { return null; }
+  })();
   if (token && typeof state !== 'undefined') {
     state.token = token;
+    if (savedUser && savedUser.id) state.user = savedUser;
     setTimeout(async () => {
       try {
         if (document.getElementById('auth-screen')?.style.display !== 'none' && typeof loadMeAndEnter === 'function') {
           await loadMeAndEnter();
         }
       } catch (err) {
-        try { sessionStorage.removeItem(TOKEN_KEY); } catch (_) {}
+        try {
+          sessionStorage.removeItem(TOKEN_KEY);
+          sessionStorage.removeItem(USER_KEY);
+        } catch (_) {}
         state.token = null;
+        state.user = null;
         const el = document.getElementById('auth-error');
         if (el) { el.textContent = err.message || 'انتهت الجلسة'; el.style.display = 'block'; }
       }
