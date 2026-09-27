@@ -352,7 +352,7 @@
       <div class="field"><label>البريد أو الهاتف</label><input type="text" id="login-identifier" class="ltr" required></div>
       <div class="field"><label>كلمة المرور</label><input type="password" id="login-password" class="ltr" required></div>
       <details class="adv"><summary>إعدادات متقدمة</summary>
-        <div class="field" style="margin-top:10px"><label>عنوان السيرفر</label><input type="text" id="login-apibase" class="ltr" value="http://localhost:4000/api"></div>
+        <div class="field" style="margin-top:10px"><label>عنوان السيرفر</label><input type="text" id="login-apibase" class="ltr" value="https://api-production-2964.up.railway.app/api"></div>
       </details>
       <button type="submit" class="btn btn-primary" id="login-submit">دخول</button>
     </form>
@@ -379,7 +379,7 @@
       <div class="field"><label>كلمة المرور (8 أحرف على الأقل)</label><input type="password" id="su-password" class="ltr" required></div>
       <div class="field" id="su-referral-field"><label>كود الدعوة (اختياري)</label><input type="text" id="su-referral" class="ltr"></div>
       <details class="adv"><summary>إعدادات متقدمة</summary>
-        <div class="field" style="margin-top:10px"><label>عنوان السيرفر</label><input type="text" id="signup-apibase" class="ltr" value="http://localhost:4000/api"></div>
+        <div class="field" style="margin-top:10px"><label>عنوان السيرفر</label><input type="text" id="signup-apibase" class="ltr" value="https://api-production-2964.up.railway.app/api"></div>
       </details>
       <button type="submit" class="btn btn-primary" id="signup-submit">إنشاء الحساب</button>
     </form>
@@ -1989,7 +1989,9 @@ function wireProjectDetailActions(el, project, id){
       const data = {};
       for (const id of FIELDS) {
         const el = document.getElementById(id);
-        if (el) data[id] = el.value;
+        if (el) data[id] = ((id === 'login-apibase' || id === 'signup-apibase') && !['localhost','127.0.0.1'].includes(location.hostname))
+          ? 'https://api-production-2964.up.railway.app/api'
+          : el.value;
       }
       sessionStorage.setItem('shifra_auth_form', JSON.stringify(data));
     } catch (_) {}
@@ -2001,7 +2003,12 @@ function wireProjectDetailActions(el, project, id){
       const data = JSON.parse(raw);
       for (const id of FIELDS) {
         const el = document.getElementById(id);
-        if (el && data[id] != null) el.value = data[id];
+        if (!el) continue;
+        if ((id === 'login-apibase' || id === 'signup-apibase') && !['localhost','127.0.0.1'].includes(location.hostname)) {
+          el.value = 'https://api-production-2964.up.railway.app/api';
+          continue;
+        }
+        if (data[id] != null) el.value = data[id];
       }
     } catch (_) {}
   };
