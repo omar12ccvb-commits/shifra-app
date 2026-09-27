@@ -463,7 +463,7 @@ async function api(path, opts={}){
   }).catch(()=>{ throw new Error('تعذر الوصول للسيرفر — '+state.apiBase); });
   let json = {};
   try { json = await res.json(); } catch(e) {}
-  if(!res.ok){ if(res.status===401) doLogout(); throw new Error((json.error && json.error.message) || ('HTTP '+res.status)); }
+  if(!res.ok){ if(res.status===401 && state.token) doLogout(); throw new Error((json.error && json.error.message) || ('HTTP '+res.status)); }
   return json;
 }
 const money = (minor) => (Number(minor)/100).toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2});
@@ -587,12 +587,16 @@ async function loadMeAndEnter(){
   const me = await api('/auth/me');
   state.user = me.user;
   if (state.user.role === 'OWNER' || state.user.role === 'ADMIN') {
-    throw new Error('حساب الإدارة له لوحة تحكم منفصلة. سجّل دخول بحساب عميل أو مسوّق أو محرر.');
+    throw new Error('حساب الإدارة له لوحة تحكم منفصلة. استخدم رابط لوحة المالك.');
   }
-  // fetch the role-specific profile (gives us referral_code / earnings context up front)
-  if (state.user.role === 'MARKETER') state.profile = (await api('/marketers/me')).marketer;
-  else if (state.user.role === 'EDITOR') state.profile = (await api('/editors/me')).editor;
-  else if (state.user.role === 'CUSTOMER') state.profile = (await api('/customers/me')).customer;
+  state.profile = null;
+  try {
+    if (state.user.role === 'MARKETER') state.profile = (await api('/marketers/me')).marketer;
+    else if (state.user.role === 'EDITOR') state.profile = (await api('/editors/me')).editor;
+    else if (state.user.role === 'CUSTOMER') state.profile = (await api('/customers/me')).customer;
+  } catch (profileErr) {
+    console.warn('Role profile could not be loaded yet:', profileErr);
+  }
   enterApp();
 }
 
