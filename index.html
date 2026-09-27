@@ -1213,6 +1213,49 @@ RENDERERS['owner-audit'] = async (el) => { const {auditLogs=[]}=await api('/audi
 RENDERERS['owner-weekly'] = async (el) => { const {challenge,leaderboard=[]}=await api('/weekly-challenges/current'); const labels={ACTIVE:'جارية',COMPLETED:'منتهية',CANCELLED:'ملغاة',DRAFT:'مسودة'}; el.innerHTML='<div class="card" style="margin-bottom:14px"><b style="font-size:17px">'+(challenge?esc(challenge.title):'مفيش تحدي أسبوعي حالي')+'</b><div style="font-size:11px;color:#687488;margin-top:4px">'+(challenge?esc(challenge.description||''):'')+'</div><div style="margin-top:10px">'+(challenge?'<span class="badge badge-purple">'+(labels[challenge.status]||challenge.status)+'</span>':'<span class="badge badge-gray">مفيش تحدي</span>')+'</div></div><div class="table-wrap"><table><thead><tr><th>الموظف</th><th>الدور</th><th>AI</th><th>النهائي</th><th>الإنتاجية</th><th>الجودة</th><th>الالتزام</th></tr></thead><tbody>'+leaderboard.map(x=>'<tr><td>'+esc(x.full_name)+'</td><td>'+ownerRoleAr(x.role)+'</td><td>'+Number(x.ai_score||0).toFixed(1)+'</td><td>'+Number(x.final_score||0).toFixed(1)+'</td><td>'+Number(x.productivity_score||0).toFixed(0)+'</td><td>'+Number(x.quality_score||0).toFixed(0)+'</td><td>'+Number(x.punctuality_score||0).toFixed(0)+'</td></tr>').join('')+'</tbody></table></div>'; };
 
 RENDERERS['owner-ops'] = RENDERERS['owner-ops'];
+/* ================= DIRECT MESSAGES ================= */
+function ownerDirectContactMarkup(c){
+  return '<button class="owner-contact" data-direct-user="'+c.id+'"><div style="display:flex;justify-content:space-between;gap:8px"><b>'+esc(c.full_name)+'</b>'+(c.unread_count?'<span class="badge badge-red">'+c.unread_count+'</span>':'')+'</div><div style="font-size:10.5px;color:#687488;margin-top:3px">'+ownerRoleAr(c.role)+' · '+esc(c.status)+(c.latest_message?' · '+esc(String(c.latest_message).slice(0,55)):'')+'</div></button>';
+}
+async function renderDirectChat(host,userId,button){
+  host.querySelectorAll('.owner-contact').forEach(b=>b.classList.remove('active')); if(button)button.classList.add('active');
+  const panel=host.querySelector('#direct-panel'); if(!panel)return; panel.innerHTML='<div class="empty-state">جارِ تحميل المحادثة...</div>';
+  try{
+    const r=await api('/direct-conversations/'+userId+'/messages'); const target=r.target; const messages=r.messages||[];
+    panel.innerHTML='<div class="owner-chat-head"><b>'+esc(target.full_name)+'</b><div style="font-size:10.5px;color:#687488;margin-top:2px">'+ownerRoleAr(target.role)+' · '+esc(target.email||target.phone||'')+'</div></div><div class="owner-chat-body" id="direct-body">'+(messages.map(m=>'<div class="owner-msg '+(Number(m.sender_id)===Number(state.user.id)?'mine':'theirs')+'"><div style="font-size:10px;color:#677387;margin-bottom:3px">'+esc(m.sender_name)+' · '+fmtDate(m.created_at)+'</div><div style="white-space:pre-wrap">'+esc(m.body)+'</div></div>').join('')||'<div class="empty-state" style="padding:25px">لسه مفيش رسائل.</div>')+'</div><form class="owner-chat-compose" id="direct-compose"><textarea id="direct-text" placeholder="اكتب رسالة..."></textarea><button class="btn btn-primary" type="submit">إرسال</button></form>';
+    const body=panel.querySelector('#direct-body'); body.scrollTop=body.scrollHeight;
+    panel.querySelector('#direct-compose').addEventListener('submit',async e=>{e.preventDefault();const input=panel.querySelector('#direct-text');const text=input.value.trim();if(!text)return;const send=e.target.querySelector('button');send.disabled=true;try{await api('/direct-conversations/'+userId+'/messages',{method:'POST',body:{body:text}});await renderDirectChat(host,userId,button);toast('اترسلت الرسالة','ok');}catch(err){toast(err.message,'err');send.disabled=false;}});
+  }catch(err){panel.innerHTML='<div class="empty-state">'+esc(err.message)+'</div>';}
+}
+RENDERERS['owner-direct'] = async (el) => {
+  const r=await api('/direct-conversations'); const conversations=r.conversations||[];
+  el.innerHTML='<div class="owner-chat-shell"><div class="owner-contact-list"><div style="padding:12px;border-bottom:1px solid rgba(255,255,255,.05)"><input id="direct-search" placeholder="ابحث عن أي حساب..." style="width:100%"></div><div id="direct-contacts">'+(conversations.map(ownerDirectContactMarkup).join('')||'<div class="empty-state" style="padding:30px">مفيش حسابات.</div>')+'</div></div><div class="owner-chat" id="direct-panel"><div class="empty-state" style="margin:auto">اختار أي حساب وابدأ الكلام.</div></div></div>';
+  const search=el.querySelector('#direct-search'); search.addEventListener('input',()=>{const q=search.value.toLowerCase().trim();el.querySelectorAll('.owner-contact').forEach(b=>b.style.display=b.textContent.toLowerCase().includes(q)?'block':'none');});
+  el.querySelectorAll('[data-direct-user]').forEach(b=>b.addEventListener('click',()=>renderDirectChat(el,b.dataset.directUser,b)));
+};
+
+RENDERERS['direct'] = async (el) => {
+  const r=await api('/direct-conversations'); const conversations=r.conversations||[];
+  el.innerHTML='<div class="card" style="margin-bottom:12px"><b>الرسائل المباشرة</b><div style="font-size:11px;color:#687488;margin-top:4px">المحادثة المباشرة متاحة بعد أن يفتحها المالك/الإدارة أو بعد وجود محادثة سابقة.</div></div><div class="owner-chat-shell"><div class="owner-contact-list">'+(conversations.map(ownerDirectContactMarkup).join('')||'<div class="empty-state" style="padding:30px">لسه مفيش محادثات.</div>')+'</div><div class="owner-chat" id="direct-panel"><div class="empty-state" style="margin:auto">اختار محادثة.</div></div></div>';
+  el.querySelectorAll('[data-direct-user]').forEach(b=>b.addEventListener('click',()=>renderDirectChat(el,b.dataset.directUser,b)));
+};
+
+/* ================= PROJECT CONVERSATIONS ================= */
+RENDERERS['owner-project-chat'] = async (el) => {
+  const r=await api('/conversations'); const conversations=r.conversations||[];
+  el.innerHTML='<div class="card" style="margin-bottom:12px"><b>كل محادثات المشاريع</b><div style="font-size:11px;color:#687488;margin-top:4px">'+conversations.length+' مشروع له محادثة/حركة ظاهرة للمالك.</div></div><div class="table-wrap"><table><thead><tr><th>المشروع</th><th>العميل</th><th>المسوّق</th><th>المحرر</th><th>آخر رسالة</th><th>الوقت</th></tr></thead><tbody>'+(conversations.map(c=>'<tr class="clickable" data-project-chat="'+c.id+'"><td class="mono">'+esc(c.order_number)+'</td><td>'+esc(c.customer_name||'—')+'</td><td>'+esc(c.marketer_name||'—')+'</td><td>'+esc(c.editor_name||'—')+'</td><td>'+esc(c.latest_message||'—')+'</td><td class="mono">'+fmtDate(c.latest_message_at||c.updated_at)+'</td></tr>').join('')||'<tr><td colspan="6"><div class="empty-state">مفيش محادثات مشاريع.</div></td></tr>')+'</tbody></table></div><div id="owner-project-panel" style="margin-top:12px"></div>';
+  el.querySelectorAll('[data-project-chat]').forEach(b=>b.addEventListener('click',()=>renderOwnerProjectConversation(el,b.dataset.projectChat)));
+};
+async function renderOwnerProjectConversation(host,id){
+  const panel=host.querySelector('#owner-project-panel'); panel.innerHTML='<div class="card">جارِ تحميل المحادثة...</div>';
+  try{
+    const [p,m]=await Promise.all([api('/projects/'+id),api('/projects/'+id+'/messages')]); const project=p.project; const messages=m.messages||[];
+    panel.innerHTML='<div class="card"><b>'+esc(project.order_number)+' · '+esc(project.customer_name||'')+'</b><div style="font-size:10.5px;color:#687488;margin:3px 0 10px">'+esc(project.marketer_name||'')+' · '+esc(project.editor_name||'لم يُعيّن')+'</div><div class="owner-chat-body" id="project-body" style="min-height:220px;max-height:430px">'+(messages.map(x=>'<div class="owner-msg '+(Number(x.sender_id)===Number(state.user.id)?'mine':'theirs')+'"><div style="font-size:10px;color:#677387">'+esc(x.sender_name)+' · '+fmtDate(x.created_at)+'</div><div style="margin-top:4px;white-space:pre-wrap">'+esc(x.body)+'</div></div>').join('')||'<div class="empty-state">لا توجد رسائل.</div>')+'</div><form class="owner-chat-compose" id="project-compose"><textarea id="project-text" placeholder="اكتب للعميل أو المسوق أو المحرر..."></textarea><button class="btn btn-primary" type="submit">إرسال</button></form></div>';
+    const body=panel.querySelector('#project-body'); body.scrollTop=body.scrollHeight;
+    panel.querySelector('#project-compose').addEventListener('submit',async e=>{e.preventDefault();const input=panel.querySelector('#project-text');const text=input.value.trim();if(!text)return;const send=e.target.querySelector('button');send.disabled=true;try{await api('/projects/'+id+'/messages',{method:'POST',body:{body:text}});await renderOwnerProjectConversation(host,id);toast('اترسلت الرسالة','ok');}catch(err){toast(err.message,'err');send.disabled=false;}});
+  }catch(err){panel.innerHTML='<div class="empty-state">'+esc(err.message)+'</div>';}
+};
+
 /* ================= PROJECTS (shared list, role-adaptive) ================= */
 RENDERERS.projects = async (el) => {
   if (el.dataset.detail) return renderProjectDetail(el, el.dataset.detail);
