@@ -620,6 +620,8 @@ function doLogout(){
   try{
     sessionStorage.removeItem('shifra_auth_token_v2');
     sessionStorage.removeItem('shifra_auth_user_v2');
+    sessionStorage.removeItem('shifra_auth_token_v3');
+    sessionStorage.removeItem('shifra_auth_user_v3');
     sessionStorage.removeItem('shifra_auth_form');
   }catch(_){ }
   state.token = null; state.user = null; state.profile = null;
@@ -2002,143 +2004,255 @@ function wireProjectDetailActions(el, project, id){
 </script>
 <script id="auth-rescue">
 (() => {
-  const TOKEN_KEY = 'shifra_auth_token_v2';
-  const USER_KEY = 'shifra_auth_user_v2';
-  const FIELDS = ['login-identifier','login-password','login-apibase','su-name','su-email','su-phone','su-password','su-referral','signup-apibase'];
-  const save = () => {
-    try {
-      const data = {};
-      for (const id of FIELDS) {
-        const el = document.getElementById(id);
-        if (el) data[id] = ((id === 'login-apibase' || id === 'signup-apibase') && !['localhost','127.0.0.1'].includes(location.hostname))
-          ? 'https://api-production-2964.up.railway.app/api'
-          : el.value;
-      }
-      sessionStorage.setItem('shifra_auth_form', JSON.stringify(data));
-    } catch (_) {}
-  };
-  const restore = () => {
-    try {
-      const raw = sessionStorage.getItem('shifra_auth_form');
-      if (!raw) return;
-      const data = JSON.parse(raw);
-      for (const id of FIELDS) {
-        const el = document.getElementById(id);
-        if (!el) continue;
-        if ((id === 'login-apibase' || id === 'signup-apibase') && !['localhost','127.0.0.1'].includes(location.hostname)) {
-          el.value = 'https://api-production-2964.up.railway.app/api';
-          continue;
-        }
-        if (data[id] != null) el.value = data[id];
-      }
-    } catch (_) {}
-  };
-  const clearSaved = () => {
-    try { sessionStorage.removeItem('shifra_auth_form'); } catch (_) {}
-  };
-  restore();
-  document.addEventListener('input', e => {
-    if (e.target && FIELDS.includes(e.target.id)) save();
-  }, true);
+  // Clean auth flow v3: one handler, one storage format, same-origin API in production.
+  const TOKEN_KEY = 'shifra_auth_token_v3';
+  const USER_KEY = 'shifra_auth_user_v3';
+  const OLD_KEYS = ['shifra_auth_token_v2', 'shifra_auth_user_v2', 'shifra_auth_form'];
+  const isLocal = ['localhost', '127.0.0.1'].includes(location.hostname) || location.protocol === 'file:';
 
-  document.addEventListener('submit', async e => {
-    const form = e.target;
-    if (!form || !['login-form','signup-form'].includes(form.id)) return;
-    e.preventDefault();
-    e.stopImmediatePropagation();
+  function storageGet(key) {
+    try { return sessionStorage.getItem(key); } catch (_) { return null; }
+  }
+  function storageSet(key, value) {
+    try { sessionStorage.setItem(key, value); } catch (_) {}
+  }
+  function storageRemove(key) {
+    try { sessionStorage.removeItem(key); } catch (_) {}
+  }
+  function clearAuthStorage() {
+    storageRemove(TOKEN_KEY);
+    storageRemove(USER_KEY);
+    OLD_KEYS.forEach(storageRemove);
+  }
 
-    const signup = form.id === 'signup-form';
-    const btn = document.getElementById(signup ? 'signup-submit' : 'login-submit');
-    const err = document.getElementById('auth-error');
-    const baseEl = document.getElementById(signup ? 'signup-apibase' : 'login-apibase');
-    const base = (baseEl?.value || state.apiBase || 'https://api-production-2964.up.railway.app/api').trim().replace(/\/$/,'');
-    state.apiBase = base;
-    if (err) err.style.display = 'none';
-    if (btn) { btn.disabled = true; btn.textContent = 'جارٍ التنفيذ...'; }
+  function resolveApiBase(form) {
+    if (!isLocal) return '/api';
+    const input = document.getElementById(form === 'signup' ? 'signup-apibase' : 'login-apibase');
+    return (input?.value || 'http://localhost:4000/api').trim().replace(/\/$/, '');
+  }
 
-    try {
-      let body;
-      if (signup) {
-        body = {
-          role: typeof signupRole === 'string' ? signupRole : 'CUSTOMER',
-          fullName: document.getElementById('su-name').value.trim(),
-          email: document.getElementById('su-email').value.trim() || undefined,
-          phone: document.getElementById('su-phone').value.trim() || undefined,
-          password: document.getElementById('su-password').value
-        };
-        if (body.role === 'CUSTOMER') {
-          const ref = document.getElementById('su-referral').value.trim();
-          if (ref) body.referralCode = ref;
-        }
-        if (!body.fullName) throw new Error('اكتب الاسم بالكامل');
-        if (!body.email && !body.phone) throw new Error('اكتب البريد الإلكتروني أو رقم الهاتف');
-        if (!body.password || body.password.length < 8) throw new Error('كلمة المرور لازم تكون 8 أحرف على الأقل');
-      } else {
-        body = {
-          identifier: document.getElementById('login-identifier').value.trim(),
-          password: document.getElementById('login-password').value
-        };
-        if (!body.identifier || !body.password) throw new Error('اكتب البريد/الهاتف وكلمة المرور');
-      }
+  async function request(path, options = {}) {
+    const headers = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store',
+      'Pragma': 'no-cache',
+      ...(options.token ? { Authorization: 'Bearer ' + options.token } : {})
+    };
+    const response = await fetch((options.base || '/api') + path, {
+      method: options.method || 'GET',
+      headers,
+      cache: 'no-store',
+      credentials: 'same-origin',
+      body: options.body === undefined ? undefined : JSON.stringify(options.body)
+    });
 
-      const response = await fetch(base + (signup ? '/auth/signup' : '/auth/login'), {
-        method:'POST',
-        headers:{'Content-Type':'application/json','Cache-Control':'no-cache','Pragma':'no-cache'},
-        cache:'no-store',
-        body:JSON.stringify(body)
-      });
-      let json = {};
-      try { json = await response.json(); } catch (_) {}
-      if (!response.ok) throw new Error(json?.error?.message || ('HTTP '+response.status));
-      if (!json.token) throw new Error('السيرفر سجّل الطلب لكن لم يُرجع جلسة دخول');
-      state.apiBase = base;
-      state.token = json.token;
-      state.user = json.user || null;
-      if (!state.user) throw new Error('السيرفر سجّل الطلب لكنه لم يُرجع بيانات المستخدم');
-      sessionStorage.setItem(TOKEN_KEY, json.token);
-      sessionStorage.setItem(USER_KEY, JSON.stringify(state.user));
-      clearSaved();
-      if (typeof loadMeAndEnter === 'function') {
-        await loadMeAndEnter(signup ? (json.customer || json.marketer || json.editor || null) : null);
-        if (!signup) toast('تم تسجيل الدخول', 'ok');
-        else toast('تم إنشاء الحساب وتسجيل الدخول', 'ok');
-      } else {
-        throw new Error('واجهة التطبيق لم تكتمل. حدّث الصفحة وحاول مرة أخرى.');
-      }
-    } catch (err2) {
-      if (err) { err.textContent = err2.message || 'حدث خطأ غير متوقع'; err.style.display = 'block'; }
-      save();
-    } finally {
-      if (btn) { btn.disabled = false; btn.textContent = signup ? 'إنشاء الحساب' : 'دخول'; }
+    let data = {};
+    try { data = await response.json(); } catch (_) {}
+
+    if (!response.ok) {
+      const message = data?.error?.message || data?.message || ('HTTP ' + response.status);
+      const error = new Error(message);
+      error.status = response.status;
+      error.data = data;
+      throw error;
     }
-  }, true);
+    return data;
+  }
 
-  const token = (() => { try { return sessionStorage.getItem(TOKEN_KEY); } catch (_) { return null; } })();
-  const savedUser = (() => {
+  function setAuthMessage(message, kind = 'error') {
+    const el = document.getElementById('auth-error');
+    if (!el) return;
+    el.textContent = message || '';
+    el.style.display = message ? 'block' : 'none';
+    el.dataset.kind = kind;
+  }
+
+  function setBusy(form, busy) {
+    const btn = document.getElementById(form === 'signup' ? 'signup-submit' : 'login-submit');
+    if (!btn) return;
+    btn.disabled = busy;
+    btn.dataset.authBusy = busy ? '1' : '0';
+    btn.textContent = busy ? 'جارٍ التنفيذ...' : (form === 'signup' ? 'إنشاء الحساب' : 'دخول');
+  }
+
+  function persistSession(result) {
+    if (!result?.token || !result?.user?.id || !result?.user?.role) {
+      throw new Error('السيرفر لم يُرجع جلسة دخول مكتملة');
+    }
+    clearAuthStorage();
+    storageSet(TOKEN_KEY, result.token);
+    storageSet(USER_KEY, JSON.stringify(result.user));
+    state.token = result.token;
+    state.user = result.user;
+    state.profile = result.customer || result.marketer || result.editor || null;
+  }
+
+  function showAuthenticatedApp() {
+    if (!state.user) throw new Error('بيانات المستخدم غير موجودة');
+    if (state.user.role === 'OWNER' || state.user.role === 'ADMIN') {
+      throw new Error('حساب الإدارة يستخدم رابط لوحة المالك، وليس تطبيق العملاء والمسوقين والمونتيرين.');
+    }
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('app-shell').classList.add('active');
+    enterApp();
+  }
+
+  async function refreshProfileInBackground() {
+    if (!state.token || !state.user) return;
     try {
-      const raw = sessionStorage.getItem(USER_KEY);
-      return raw ? JSON.parse(raw) : null;
-    } catch (_) { return null; }
-  })();
-  if (token && typeof state !== 'undefined') {
-    state.token = token;
-    if (savedUser && savedUser.id) state.user = savedUser;
-    setTimeout(async () => {
-      try {
-        if (document.getElementById('auth-screen')?.style.display !== 'none' && typeof loadMeAndEnter === 'function') {
-          await loadMeAndEnter();
-        }
-      } catch (err) {
-        try {
-          sessionStorage.removeItem(TOKEN_KEY);
-          sessionStorage.removeItem(USER_KEY);
-        } catch (_) {}
-        state.token = null;
-        state.user = null;
-        const el = document.getElementById('auth-error');
-        if (el) { el.textContent = err.message || 'انتهت الجلسة'; el.style.display = 'block'; }
+      let result = null;
+      if (state.user.role === 'CUSTOMER') result = await request('/customers/me', {base: state.apiBase || '/api', token: state.token});
+      else if (state.user.role === 'MARKETER') result = await request('/marketers/me', {base: state.apiBase || '/api', token: state.token});
+      else if (state.user.role === 'EDITOR') result = await request('/editors/me', {base: state.apiBase || '/api', token: state.token});
+      if (result) {
+        state.profile = result.customer || result.marketer || result.editor || state.profile;
       }
-    }, 250);
+    } catch (_) {
+      // Profile data is optional for entering the app. Never bounce a valid login back to the login screen.
+    }
+  }
+
+  async function handleSubmit(formName, event) {
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+
+    const form = document.getElementById(formName === 'signup' ? 'signup-form' : 'login-form');
+    if (!form || form.dataset.authBusy === '1') return;
+    form.dataset.authBusy = '1';
+    setAuthMessage('');
+    setBusy(formName, true);
+
+    try {
+      const base = resolveApiBase(formName);
+      state.apiBase = base;
+
+      let body;
+      if (formName === 'signup') {
+        const role = typeof signupRole === 'string' ? signupRole : 'CUSTOMER';
+        const fullName = document.getElementById('su-name')?.value.trim() || '';
+        const email = document.getElementById('su-email')?.value.trim() || '';
+        const phone = document.getElementById('su-phone')?.value.trim() || '';
+        const password = document.getElementById('su-password')?.value || '';
+        if (!fullName) throw new Error('اكتب الاسم بالكامل');
+        if (!email && !phone) throw new Error('اكتب البريد الإلكتروني أو رقم الهاتف');
+        if (password.length < 8) throw new Error('كلمة المرور لازم تكون 8 أحرف على الأقل');
+        body = { role, fullName, email: email || undefined, phone: phone || undefined, password };
+        if (role === 'CUSTOMER') {
+          const referralCode = document.getElementById('su-referral')?.value.trim() || '';
+          if (referralCode) body.referralCode = referralCode;
+        }
+      } else {
+        const identifier = document.getElementById('login-identifier')?.value.trim() || '';
+        const password = document.getElementById('login-password')?.value || '';
+        if (!identifier || !password) throw new Error('اكتب البريد/الهاتف وكلمة المرور');
+        body = { identifier, password };
+      }
+
+      const result = await request(formName === 'signup' ? '/auth/signup' : '/auth/login', {
+        base,
+        method: 'POST',
+        body
+      });
+
+      persistSession(result);
+
+      // Enter the actual app immediately. Profile loading is secondary and cannot kick
+      // the user back to the auth screen.
+      showAuthenticatedApp();
+      void refreshProfileInBackground();
+
+      toast(formName === 'signup' ? 'تم إنشاء الحساب ودخولك للتطبيق' : 'تم تسجيل الدخول', 'ok');
+    } catch (error) {
+      clearAuthStorage();
+      state.token = null;
+      state.user = null;
+      state.profile = null;
+      document.getElementById('app-shell').classList.remove('active');
+      document.getElementById('auth-screen').style.display = 'flex';
+      setAuthMessage(error?.message || 'حصل خطأ أثناء تسجيل الدخول');
+    } finally {
+      form.dataset.authBusy = '0';
+      setBusy(formName, false);
+    }
+  }
+
+  function bootstrapSavedSession() {
+    const token = storageGet(TOKEN_KEY);
+    const rawUser = storageGet(USER_KEY);
+    if (!token || !rawUser) return;
+
+    try {
+      const user = JSON.parse(rawUser);
+      if (!user?.id || !user?.role || user.role === 'OWNER' || user.role === 'ADMIN') {
+        clearAuthStorage();
+        return;
+      }
+
+      state.token = token;
+      state.user = user;
+      state.apiBase = isLocal ? (document.getElementById('login-apibase')?.value || 'http://localhost:4000/api') : '/api';
+
+      document.getElementById('auth-screen').style.display = 'none';
+      document.getElementById('app-shell').classList.add('active');
+      enterApp();
+
+      // Verify the saved token without blocking the UI. A failure clears the stale session.
+      request('/auth/me', {base: state.apiBase, token})
+        .then(result => {
+          if (result?.user) {
+            state.user = result.user;
+            storageSet(USER_KEY, JSON.stringify(result.user));
+            void refreshProfileInBackground();
+          }
+        })
+        .catch(error => {
+          if (error?.status === 401) {
+            clearAuthStorage();
+            state.token = null;
+            state.user = null;
+            state.profile = null;
+            document.getElementById('app-shell').classList.remove('active');
+            document.getElementById('auth-screen').style.display = 'flex';
+            setAuthMessage('انتهت جلسة الدخول. سجل دخولك مرة أخرى.');
+          }
+        });
+    } catch (_) {
+      clearAuthStorage();
+    }
+  }
+
+  function install() {
+    // Start clean: old v2 auth state was part of the previous broken flow.
+    OLD_KEYS.forEach(storageRemove);
+
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+
+    if (loginForm) {
+      loginForm.addEventListener('submit', event => { void handleSubmit('login', event); }, true);
+    }
+    if (signupForm) {
+      signupForm.addEventListener('submit', event => { void handleSubmit('signup', event); }, true);
+    }
+
+    if (!isLocal) {
+      const loginBase = document.getElementById('login-apibase');
+      const signupBase = document.getElementById('signup-apibase');
+      if (loginBase) loginBase.value = '/api';
+      if (signupBase) signupBase.value = '/api';
+    }
+
+    bootstrapSavedSession();
+  }
+
+  window.shifraAuthV3 = { clearAuthStorage, bootstrapSavedSession };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', install, {once: true});
+  } else {
+    install();
   }
 })();
 </script>
