@@ -352,7 +352,7 @@
       <div class="field"><label>البريد أو الهاتف</label><input type="text" id="login-identifier" class="ltr" required></div>
       <div class="field"><label>كلمة المرور</label><input type="password" id="login-password" class="ltr" required></div>
       <details class="adv"><summary>إعدادات متقدمة</summary>
-        <div class="field" style="margin-top:10px"><label>عنوان السيرفر</label><input type="text" id="login-apibase" class="ltr" value="https://api-production-2964.up.railway.app/api"></div>
+        <div class="field" style="margin-top:10px"><label>عنوان السيرفر</label><input type="text" id="login-apibase" class="ltr" value="/api"></div>
       </details>
       <button type="submit" class="btn btn-primary" id="login-submit">دخول</button>
     </form>
@@ -427,7 +427,7 @@
    shipping three separate apps with duplicated plumbing.
    Session token lives in memory only (not localStorage).
    ============================================================ */
-const state = { token:null, user:null, profile:null, apiBase:'http://localhost:4000/api', view:null };
+const state = { token:null, user:null, profile:null, apiBase:'/api', view:null };
 
 // Smart default: if this page itself isn't running on localhost (i.e. it's
 // deployed behind the real domain), assume the API lives at /api on that same
@@ -436,7 +436,7 @@ const state = { token:null, user:null, profile:null, apiBase:'http://localhost:4
 // plain editable field, never hidden or hardcoded away from the user.
 (function setSmartApiDefault(){
   const isLocal = ['localhost','127.0.0.1'].includes(location.hostname) || location.protocol === 'file:';
-  const guess = isLocal ? 'http://localhost:4000/api' : 'https://api-production-2964.up.railway.app/api';
+  const guess = isLocal ? 'http://localhost:4000/api' : '/api';
   state.apiBase = guess;
   document.getElementById('login-apibase').value = guess;
   document.getElementById('signup-apibase').value = guess;
