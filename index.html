@@ -725,7 +725,16 @@ body::before{
     .page-title{font-size:21px}
   }
 </style>
-</head>
+<style id="shifra-owner-command-center">
+.owner-kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px}
+.owner-kpi{position:relative;overflow:hidden;padding:17px;border-radius:17px;background:linear-gradient(145deg,rgba(18,22,30,.96),rgba(10,13,18,.92));border:1px solid rgba(255,255,255,.07)}
+.owner-kpi .k{font-size:11px;color:#738096;text-transform:uppercase;letter-spacing:.75px}.owner-kpi .v{font-family:var(--mono);font-size:25px;font-weight:800;margin-top:8px;color:#f5f7fb}.owner-kpi .s{font-size:11px;color:#677486;margin-top:4px}
+.owner-section{margin-top:22px}.owner-section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:10px}.owner-section-head .title{font-size:13px;font-weight:800;color:#b7c0cd;letter-spacing:.35px}
+.owner-tool-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.owner-tool{min-height:105px;text-align:start;position:relative;overflow:hidden;padding:14px;border-radius:15px;border:1px solid rgba(255,255,255,.065);background:linear-gradient(145deg,rgba(17,20,27,.92),rgba(10,13,18,.88));color:#eaf0f7}.owner-tool:hover{transform:translateY(-2px);border-color:rgba(139,92,246,.25)}.owner-tool .ic{font-size:20px}.owner-tool .tt{font-weight:800;margin-top:10px;font-size:13px}.owner-tool .ss{font-size:10.5px;color:#667387;margin-top:3px;line-height:1.5}
+.owner-split{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}.owner-online{display:inline-block;width:7px;height:7px;border-radius:50%;background:#34d399;margin-inline-end:5px}.owner-offline{display:inline-block;width:7px;height:7px;border-radius:50%;background:#526071;margin-inline-end:5px}.owner-bar{height:7px;background:rgba(255,255,255,.055);border-radius:99px;overflow:hidden}.owner-bar>i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#7c5cff,#38bdf8)}
+.owner-chat-shell{display:grid;grid-template-columns:300px 1fr;gap:12px;min-height:520px}.owner-contact-list{border:1px solid rgba(255,255,255,.065);border-radius:16px;overflow:auto;background:rgba(11,14,19,.75)}.owner-contact{display:block;width:100%;text-align:start;padding:12px 13px;background:transparent;border:0;border-bottom:1px solid rgba(255,255,255,.045);color:#e7edf5}.owner-contact:hover,.owner-contact.active{background:rgba(139,92,246,.08)}.owner-chat{display:flex;flex-direction:column;min-height:520px;border:1px solid rgba(255,255,255,.065);border-radius:16px;background:rgba(11,14,19,.76);overflow:hidden}.owner-chat-head{padding:13px 15px;border-bottom:1px solid rgba(255,255,255,.055)}.owner-chat-body{flex:1;padding:14px;overflow:auto;display:flex;flex-direction:column;gap:8px}.owner-msg{max-width:82%;padding:9px 11px;border-radius:13px;border:1px solid rgba(255,255,255,.06);background:#121722}.owner-msg.mine{align-self:flex-start;background:linear-gradient(145deg,rgba(111,76,255,.20),rgba(61,45,126,.14))}.owner-msg.theirs{align-self:flex-end}.owner-chat-compose{display:flex;gap:8px;padding:10px;border-top:1px solid rgba(255,255,255,.055)}
+@media(max-width:980px){.owner-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.owner-tool-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.owner-split{grid-template-columns:1fr}.owner-chat-shell{grid-template-columns:1fr}}@media(max-width:600px){.owner-tool-grid{grid-template-columns:1fr}.owner-kpi .v{font-size:20px}.owner-chat-shell{min-height:600px}}
+</style></head>
 <body>
 
 <div id="auth-screen">
@@ -971,12 +980,24 @@ document.getElementById('user-menu-btn').addEventListener('click', () => {
 
 /* ---------------- Role-adaptive nav + router ---------------- */
 const NAV_BY_ROLE = {
-  CUSTOMER: [ {id:'projects', label:'مشاريعي', icon:'▦'} ],
+  CUSTOMER: [ {id:'projects', label:'مشاريعي', icon:'▦'}, {id:'direct', label:'رسائل', icon:'💬'} ],
   MARKETER: [ {id:'opportunities', label:'الفرص', icon:'◆'}, {id:'customers', label:'عملائي', icon:'☺'},
-              {id:'projects', label:'مشاريعي', icon:'▦'}, {id:'earnings', label:'أرباحي', icon:'%'} ],
-  EDITOR:   [ {id:'projects', label:'مهامي', icon:'▦'}, {id:'earnings', label:'أرباحي', icon:'%'} ],
-  OWNER:    [ {id:'owner-home', label:'لوحة المالك', icon:'◆'} ],
-  ADMIN:    [ {id:'owner-home', label:'لوحة الإدارة', icon:'◆'} ],
+              {id:'projects', label:'مشاريعي', icon:'▦'}, {id:'earnings', label:'أرباحي', icon:'%'}, {id:'direct', label:'رسائل', icon:'💬'} ],
+  EDITOR:   [ {id:'projects', label:'مهامي', icon:'▦'}, {id:'earnings', label:'أرباحي', icon:'%'}, {id:'direct', label:'رسائل', icon:'💬'} ],
+  OWNER: [
+    {id:'owner-home', label:'مركز القيادة', icon:'◆'},
+    {id:'owner-direct', label:'مراسلات مباشرة', icon:'💬'},
+    {id:'owner-project-chat', label:'محادثات المشاريع', icon:'☷'},
+    {id:'owner-finance', label:'الأرباح والخسائر', icon:'₿'},
+    {id:'owner-team', label:'الفريق والحضور', icon:'◉'},
+    {id:'owner-ops', label:'العمليات والاختناقات', icon:'⚙'},
+    {id:'owner-accounts', label:'كل الحسابات', icon:'👥'},
+    {id:'owner-payments', label:'المدفوعات', icon:'▤'},
+    {id:'owner-payouts', label:'المستحقات', icon:'⇄'},
+    {id:'owner-audit', label:'التتبع والتدقيق', icon:'▧'},
+    {id:'owner-weekly', label:'الأداء الأسبوعي', icon:'★'}
+  ],
+  ADMIN: [ {id:'direct', label:'رسائل', icon:'💬'}, {id:'projects', label:'المشاريع', icon:'▦'} ],
 };
 const VIEW_META = {
   opportunities:{title:'فرص جديدة', sub:'عملاء محتاجين مسوّق'},
@@ -985,7 +1006,18 @@ const VIEW_META = {
              MARKETER:{title:'مشاريعي', sub:'المشاريع اللي بتتابعها'},
              EDITOR:{title:'مهامي', sub:'الشغل المُسند ليك'} },
   earnings:{title:'أرباحي', sub:'المستحق والمدفوع'},
-  'owner-home':{title:'لوحة المالك', sub:'تم الدخول من نفس شاشة الحسابات الأخرى'},
+  direct:{title:'الرسائل', sub:'محادثات مباشرة داخل شفرة'},
+  'owner-home':{title:'مركز قيادة المالك', sub:'الأرقام الحية، الأشخاص، المال، والاختناقات في مكان واحد'},
+  'owner-direct':{title:'المراسلات المباشرة', sub:'عمر ويوسف يقدروا يفتحوا محادثة مع أي حساب نشط'},
+  'owner-project-chat':{title:'محادثات المشاريع', sub:'كل محادثات العملاء والمسوقين والمحررين'},
+  'owner-finance':{title:'الأرباح والخسائر', sub:'قراءة مالية من الـLedger الفعلي'},
+  'owner-team':{title:'الفريق والحضور', sub:'المسجلين، الفاتحين، غير الفاتحين، والمشاركين في العمل'},
+  'owner-ops':{title:'العمليات والاختناقات', sub:'حالات المشاريع، التأخير، الدفع، والشكاوى'},
+  'owner-accounts':{title:'كل الحسابات', sub:'المستخدمون والجلسات والحالة'},
+  'owner-payments':{title:'المدفوعات', sub:'مراجعة إثباتات الدفع ومتابعة الحالة'},
+  'owner-payouts':{title:'المستحقات', sub:'المبالغ الجاهزة والمدفوعة والفاشلة'},
+  'owner-audit':{title:'التتبع والتدقيق', sub:'سجل العمليات الحساسة والخطوات الأخيرة'},
+  'owner-weekly':{title:'الأداء الأسبوعي', sub:'التحدي الحالي ومؤشرات الأداء'},
 };
 function enterApp(){
   document.getElementById('auth-screen').style.display = 'none';
