@@ -450,11 +450,17 @@ function toast(msg, kind){
   setTimeout(()=> el.remove(), 4200);
 }
 async function api(path, opts={}){
+  const method = opts.method || 'GET';
+  const headers = Object.assign(
+    {'Content-Type':'application/json','Cache-Control':'no-cache','Pragma':'no-cache'},
+    state.token ? {Authorization:'Bearer '+state.token} : {}
+  );
   const res = await fetch(state.apiBase + path, {
-    method: opts.method || 'GET',
-    headers: Object.assign({'Content-Type':'application/json'}, state.token ? {Authorization:'Bearer '+state.token} : {}),
+    method,
+    headers,
+    cache:'no-store',
     body: opts.body ? JSON.stringify(opts.body) : undefined,
-  }).catch(()=>{ throw new Error('تعذر الوصول للسيرفر — ' + state.apiBase); });
+  }).catch(()=>{ throw new Error('تعذر الوصول للسيرفر — '+state.apiBase); });
   let json = {};
   try { json = await res.json(); } catch(e) {}
   if(!res.ok){ if(res.status===401) doLogout(); throw new Error((json.error && json.error.message) || ('HTTP '+res.status)); }
