@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>شفرة</title>
+<title>SHIFRA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -27,7 +27,6 @@
     font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
     background-image: radial-gradient(ellipse 800px 500px at 50% -15%, rgba(139,92,246,0.12), transparent 60%);
     background-attachment:fixed;
-    overflow-x:hidden;
   }
   .ltr{ direction:ltr; unicode-bidi:isolate; font-family:var(--mono); }
   .mono{ font-family:var(--mono); direction:ltr; unicode-bidi:isolate; }
@@ -58,13 +57,9 @@
   .field input:focus, .field select:focus, .field textarea:focus{ border-color:var(--purple); }
   .field-row{ display:flex; gap:10px; }
   .field-row .field{ flex:1; }
-  .role-picker{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:10px; }
-  .role-opt{ background:var(--bg-elev-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px 6px 12px; text-align:center; color:var(--text-dim); transition:all .15s; }
-  .role-opt .role-ic{ font-size:20px; margin-bottom:6px; }
-  .role-opt .role-name{ font-size:12.5px; font-weight:700; }
-  .role-opt .role-tag{ font-size:10px; margin-top:2px; opacity:.8; line-height:1.3; }
+  .role-picker{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:16px; }
+  .role-opt{ background:var(--bg-elev-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px 6px; text-align:center; font-size:12px; font-weight:600; color:var(--text-dim); transition:all .15s; }
   .role-opt.active{ border-color:var(--purple); background:var(--purple-soft); color:#e4d9ff; }
-  .role-desc{ background:var(--bg-elev-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:11px 13px; font-size:12.5px; color:var(--text-dim); margin-bottom:16px; line-height:1.6; }
   .btn{ border:none; border-radius:var(--radius-sm); padding:13px 18px; font-size:14.5px; font-weight:600; transition:filter .15s, transform .1s; }
   .btn:active{ transform:scale(.98); }
   .btn-primary{ background:var(--purple); color:#fff; width:100%; }
@@ -148,16 +143,6 @@
   .price-hero .amt{ font-family:var(--mono); font-size:34px; font-weight:600; }
   .price-hero .lbl{ font-size:12.5px; color:var(--text-faint); margin-top:4px; }
   .timeline{ position:relative; padding-inline-start:22px; }
-  .chat-box{ background:var(--bg-elev); border:1px solid var(--border); border-radius:var(--radius); padding:14px; margin-bottom:10px; }
-  .chat-messages{ max-height:320px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding-inline-end:4px; margin-bottom:12px; }
-  .chat-msg{ max-width:80%; padding:9px 13px; border-radius:14px; font-size:13.5px; line-height:1.5; }
-  .chat-msg.mine{ align-self:flex-end; background:var(--purple); color:#fff; border-end-end-radius:4px; }
-  .chat-msg.theirs{ align-self:flex-start; background:var(--bg-elev-2); border-end-start-radius:4px; }
-  .chat-msg .chat-meta{ font-size:10.5px; opacity:.75; margin-bottom:3px; font-weight:600; }
-  .chat-msg .chat-time{ font-size:10px; opacity:.6; margin-top:3px; text-align:end; font-family:var(--mono); direction:ltr; }
-  .chat-input-row{ display:flex; gap:8px; }
-  .chat-input-row textarea{ flex:1; min-height:42px; max-height:100px; }
-  .chat-input-row button{ flex-shrink:0; align-self:flex-end; }
   .timeline::before{ content:''; position:absolute; inset-inline-start:6px; top:4px; bottom:4px; width:1px; background:var(--border); }
   .timeline-item{ position:relative; padding-bottom:16px; font-size:13px; }
   .timeline-item::before{ content:''; position:absolute; inset-inline-start:-22px; top:3px; width:9px; height:9px; border-radius:50%; background:var(--purple); }
@@ -176,172 +161,12 @@
   .toast.err{ border-color:rgba(248,113,113,.4); color:#fecaca; } .toast.ok{ border-color:rgba(52,211,153,.4); color:#bbf7d0; }
   .fab-actions{ display:flex; flex-direction:column; gap:10px; margin-top:18px; }
 </style>
-
-<style id="shefra-premium-ui">
-  :root{
-    --brand-a:#9b7cff;
-    --brand-b:#6d45ff;
-    --brand-c:#38bdf8;
-    --glass:rgba(19,19,24,.72);
-    --glow:rgba(139,92,246,.30);
-  }
-  html{scroll-behavior:smooth;color-scheme:dark}
-  body{
-    background-image:
-      radial-gradient(ellipse 700px 420px at 15% -8%, rgba(155,124,255,.18), transparent 62%),
-      radial-gradient(ellipse 650px 460px at 92% 5%, rgba(56,189,248,.08), transparent 68%),
-      linear-gradient(180deg,#08080d 0%,#0b0b11 45%,#09090f 100%);
-    animation:shefraAmbient 16s ease-in-out infinite alternate;
-  }
-  @keyframes shefraAmbient{
-    0%{background-position:0 0,100% 0,0 0}
-    100%{background-position:28px 16px,calc(100% - 22px) 18px,0 0}
-  }
-  .brand-mark{
-    position:relative;
-    overflow:hidden;
-    background:
-      radial-gradient(circle at 28% 22%,rgba(255,255,255,.28),transparent 28%),
-      linear-gradient(145deg,var(--brand-a),var(--brand-b) 55%,#4c1d95);
-    box-shadow:0 8px 28px -8px var(--glow), inset 0 1px 0 rgba(255,255,255,.18);
-    animation:shefraLogoFloat 4.5s ease-in-out infinite;
-  }
-  .brand-mark::after{
-    content:"";
-    position:absolute; inset:-40% -70%;
-    background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.34) 50%,transparent 65%);
-    transform:translateX(-80%);
-    animation:shefraShine 6s ease-in-out infinite;
-    pointer-events:none;
-  }
-  @keyframes shefraLogoFloat{50%{transform:translateY(-2px) rotate(-1deg)}}
-  @keyframes shefraShine{0%,62%{transform:translateX(-90%)}78%,100%{transform:translateX(90%)}}
-
-  .brand-text{
-    background:linear-gradient(110deg,#fff 0%,#e9e2ff 45%,#c9b8ff 80%);
-    -webkit-background-clip:text;background-clip:text;color:transparent;
-  }
-  .page-title{
-    background:linear-gradient(110deg,#fff 0%,#e8dcff 48%,#b7e8ff 100%);
-    -webkit-background-clip:text;background-clip:text;color:transparent;
-    letter-spacing:.1px;
-  }
-  .card,.list-card,.chat-box,.table-wrap,.role-opt,.auth-tabs,.field input,.field select,.field textarea{
-    transition:
-      transform .25s cubic-bezier(.2,.8,.2,1),
-      border-color .25s ease,
-      box-shadow .25s ease,
-      background-color .25s ease;
-  }
-  .card,.list-card,.chat-box{
-    position:relative;
-    overflow:hidden;
-  }
-  .card::before,.list-card::before,.chat-box::before{
-    content:"";
-    position:absolute;inset:0;pointer-events:none;
-    background:linear-gradient(115deg,rgba(255,255,255,.045),transparent 24%,transparent 75%,rgba(155,124,255,.04));
-    opacity:.72;
-  }
-  .card:hover,.list-card:hover,.chat-box:hover{
-    transform:translateY(-3px);
-    border-color:rgba(155,124,255,.28);
-    box-shadow:0 16px 42px -24px rgba(0,0,0,.9),0 0 0 1px rgba(155,124,255,.05);
-  }
-  .btn,.nav-item,.auth-tab,.role-opt,.user-menu-btn{
-    position:relative;
-    overflow:hidden;
-    transition:
-      transform .18s cubic-bezier(.2,.8,.2,1),
-      filter .2s ease,
-      background .2s ease,
-      border-color .2s ease,
-      color .2s ease,
-      box-shadow .2s ease;
-  }
-  .btn:hover,.nav-item:hover,.auth-tab:hover,.role-opt:hover,.user-menu-btn:hover{
-    transform:translateY(-1px);
-  }
-  .btn-primary{
-    background:linear-gradient(110deg,var(--brand-b),#7c3aed 55%,#5b21b6);
-    box-shadow:0 10px 25px -16px rgba(139,92,246,.95),inset 0 1px 0 rgba(255,255,255,.12);
-  }
-  .btn-primary:hover{
-    filter:brightness(1.1);
-    box-shadow:0 14px 30px -16px rgba(139,92,246,1),0 0 0 1px rgba(255,255,255,.06);
-  }
-  .btn:focus-visible,.nav-item:focus-visible,.auth-tab:focus-visible,.role-opt:focus-visible,.field input:focus,.field select:focus,.field textarea:focus{
-    outline:none;
-    box-shadow:0 0 0 3px rgba(139,92,246,.18),0 0 0 1px rgba(139,92,246,.7);
-  }
-  .bottom-nav{
-    background:rgba(8,8,13,.78)!important;
-    box-shadow:0 -12px 34px -26px rgba(155,124,255,.7);
-  }
-  .nav-item.active{
-    position:relative;
-    box-shadow:inset 0 0 0 1px rgba(155,124,255,.10),0 8px 20px -18px rgba(155,124,255,.95);
-  }
-  .nav-item.active::after{
-    content:"";
-    position:absolute;
-    inset-inline-start:12px;
-    inset-inline-end:12px;
-    bottom:2px;
-    height:2px;
-    border-radius:999px;
-    background:linear-gradient(90deg,transparent,var(--brand-a),transparent);
-    animation:shefraPulse 2.1s ease-in-out infinite;
-  }
-  @keyframes shefraPulse{50%{opacity:.35;transform:scaleX(.78)}}
-
-  .badge{
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
-  }
-  .spinner{filter:drop-shadow(0 0 6px rgba(255,255,255,.25))}
-  .toast{
-    backdrop-filter:blur(16px);
-    background:rgba(27,27,36,.86)!important;
-    box-shadow:0 18px 48px -20px rgba(0,0,0,.85),0 0 0 1px rgba(155,124,255,.06);
-  }
-  .modal-overlay{backdrop-filter:blur(8px)!important;background:rgba(2,2,8,.64)!important}
-  .modal{
-    background:linear-gradient(180deg,rgba(25,25,34,.96),rgba(17,17,24,.96))!important;
-    box-shadow:0 28px 90px -30px rgba(0,0,0,.96),0 0 0 1px rgba(155,124,255,.07);
-  }
-  #content.ui-refresh > *{animation:shefraRouteIn .48s cubic-bezier(.16,1,.3,1) both}
-  #content.ui-refresh .card,#content.ui-refresh .list-card,#content.ui-refresh .chat-box,
-  #content.ui-refresh .table-wrap{animation:shefraCardIn .52s cubic-bezier(.16,1,.3,1) both}
-  #content.ui-refresh > *:nth-child(2){animation-delay:.035s}
-  #content.ui-refresh > *:nth-child(3){animation-delay:.07s}
-  #content.ui-refresh > *:nth-child(4){animation-delay:.105s}
-  @keyframes shefraRouteIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-  @keyframes shefraCardIn{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:none}}
-
-  .ui-ripple{
-    position:absolute!important;
-    border-radius:999px;
-    pointer-events:none;
-    width:18px;height:18px;
-    transform:translate(-50%,-50%) scale(0);
-    background:rgba(255,255,255,.22);
-    animation:shefraRipple .55s ease-out forwards;
-  }
-  @keyframes shefraRipple{to{transform:translate(-50%,-50%) scale(14);opacity:0}}
-  ::-webkit-scrollbar{width:9px;height:9px}
-  ::-webkit-scrollbar-track{background:transparent}
-  ::-webkit-scrollbar-thumb{background:#292934;border-radius:999px}
-  ::-webkit-scrollbar-thumb:hover{background:#3a3a49}
-  @media (prefers-reduced-motion:reduce){
-    *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important}
-  }
-</style>
 </head>
 <body>
 
 <div id="auth-screen">
   <div class="auth-card">
-    <div class="brand"><div class="brand-mark">ش</div><div><div class="brand-text">شفرة</div><div class="brand-sub" style="text-align:start">شفرة</div></div></div>
+    <div class="brand"><div class="brand-mark">ش</div><div><div class="brand-text">SHIFRA</div><div class="brand-sub" style="text-align:start">شفرة</div></div></div>
     <div class="auth-tabs">
       <button class="auth-tab active" id="tab-login">دخول</button>
       <button class="auth-tab" id="tab-signup">حساب جديد</button>
@@ -359,20 +184,10 @@
 
     <form id="signup-form" style="display:none">
       <div class="role-picker">
-        <button type="button" class="role-opt active" data-role="CUSTOMER">
-          <div class="role-ic">🎬</div><div class="role-name">عميل</div>
-          <div class="role-tag">اطلب مشروعك</div>
-        </button>
-        <button type="button" class="role-opt" data-role="MARKETER">
-          <div class="role-ic">🤝</div><div class="role-name">مسوّق</div>
-          <div class="role-tag">تواصل واكسب</div>
-        </button>
-        <button type="button" class="role-opt" data-role="EDITOR">
-          <div class="role-ic">🎞️</div><div class="role-name">محرر</div>
-          <div class="role-tag">نفّذ واربح</div>
-        </button>
+        <button type="button" class="role-opt active" data-role="CUSTOMER">عميل</button>
+        <button type="button" class="role-opt" data-role="MARKETER">مسوّق</button>
+        <button type="button" class="role-opt" data-role="EDITOR">محرر</button>
       </div>
-      <div class="role-desc" id="role-desc"></div>
       <div class="field"><label>الاسم بالكامل</label><input type="text" id="su-name" required></div>
       <div class="field"><label>البريد الإلكتروني</label><input type="email" id="su-email" class="ltr"></div>
       <div class="field"><label>رقم الهاتف</label><input type="text" id="su-phone" class="ltr"></div>
@@ -383,13 +198,13 @@
       </details>
       <button type="submit" class="btn btn-primary" id="signup-submit">إنشاء الحساب</button>
     </form>
-    <div class="auth-note">شفرة — Creative Services Management</div>
+    <div class="auth-note">SHIFRA — Creative Services Management</div>
   </div>
 </div>
 
 <div id="app-shell">
   <nav class="sidebar">
-    <div class="brand"><div class="brand-mark">ش</div><div><div class="brand-text" style="font-size:15px">شفرة</div></div></div>
+    <div class="brand"><div class="brand-mark">ش</div><div><div class="brand-text" style="font-size:15px">SHIFRA</div></div></div>
     <div class="bottom-nav" id="nav-list-desktop" style="display:flex"></div>
     <div class="sidebar-footer">
       <div style="font-size:13px; font-weight:600; padding:0 10px" id="side-user-name">—</div>
@@ -399,7 +214,7 @@
   </nav>
   <div class="main">
     <div class="app-topbar">
-      <div class="brand"><div class="brand-mark">ش</div><div class="brand-text">شفرة</div></div>
+      <div class="brand"><div class="brand-mark">ش</div><div class="brand-text">SHIFRA</div></div>
       <button class="user-menu-btn" id="user-menu-btn">؟</button>
     </div>
     <div class="page-head">
@@ -420,7 +235,7 @@
 
 <script>
 /* ============================================================
-   شفرة — Customer / Marketer / Editor app.
+   SHIFRA — Customer / Marketer / Editor app.
    One codebase, role-adaptive: the backend already knows who's
    who (spec #69 "ONE BACKEND, SAME BUSINESS LOGIC"), so the nav
    and available actions adapt to req.user.role rather than
@@ -464,18 +279,6 @@ const money = (minor) => (Number(minor)/100).toLocaleString('en-US',{minimumFrac
 const fmtDate = (d) => d ? new Date(d).toLocaleString('ar-EG',{dateStyle:'medium', timeStyle:'short'}) : '—';
 const fmtDay = (d) => d ? new Date(d).toLocaleDateString('ar-EG',{dateStyle:'medium'}) : '—';
 function esc(s){ const d=document.createElement('div'); d.textContent=(s===null||s===undefined)?'':s; return d.innerHTML; }
-function whatsappUrl(phone,text=''){
-  if(!phone) return null;
-  const raw=String(phone).replace(/[^\d+]/g,'');
-  let n=raw;
-  if(n.startsWith('+')) n=n.slice(1); else if(n.startsWith('00')) n=n.slice(2); else if(n.startsWith('0')) n='20'+n.slice(1);
-  return 'https://wa.me/'+n+(text?'?text='+encodeURIComponent(text):'');
-}
-function openWhatsApp(phone,text=''){
-  const url=whatsappUrl(phone,text);
-  if(!url){ toast('رقم WhatsApp غير متوفر في الحساب','err'); return false; }
-  window.open(url,'_blank','noopener'); return true;
-}
 const STATUS_BADGE = {
   NEW:'gray', CLIENT_ASSIGNED:'gray', DETAILS_COLLECTED:'gray', PRICE_NEGOTIATION:'amber',
   PRICE_ACCEPTED:'blue', PRICE_LOCKED:'blue', PAYMENT_PENDING:'amber', PAYMENT_CONFIRMED:'blue',
@@ -499,13 +302,6 @@ document.getElementById('modal-overlay').addEventListener('click', (e)=>{ if(e.t
 
 /* ---------------- Auth: tabs + role picker ---------------- */
 let signupRole = 'CUSTOMER';
-const ROLE_DESCRIPTIONS = {
-  CUSTOMER: 'اطلب خدمة مونتاج، تابع حالة مشروعك أول بأول، وافق على السعر، وراجع الشغل قبل التسليم النهائي.',
-  MARKETER: 'اجلب عملاء (أو استلم عملاء من النظام)، اتفاوض على السعر، وتابع مشروعهم لحد التسليم. تاخد عمولة من كل مشروع.',
-  EDITOR: 'استلم مشاريع مُسندة ليك، نفّذها، ارفع المعاينة، وسلّم الشغل النهائي. تاخد نصيبك من كل مشروع بتخلّصه.',
-};
-function updateRoleDesc(){ document.getElementById('role-desc').textContent = ROLE_DESCRIPTIONS[signupRole]; }
-updateRoleDesc();
 document.getElementById('tab-login').addEventListener('click', ()=> switchAuthTab('login'));
 document.getElementById('tab-signup').addEventListener('click', ()=> switchAuthTab('signup'));
 function switchAuthTab(which){
@@ -519,7 +315,6 @@ document.querySelectorAll('.role-opt').forEach(btn => btn.addEventListener('clic
   document.querySelectorAll('.role-opt').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   signupRole = btn.dataset.role;
-  updateRoleDesc();
   document.getElementById('su-referral-field').style.display = signupRole === 'CUSTOMER' ? 'block' : 'none';
 }));
 
@@ -572,7 +367,7 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
     const { token } = await api('/auth/signup', {method:'POST', body});
     state.token = token;
     await loadMeAndEnter();
-    toast('أهلًا بيك في شفرة', 'ok');
+    toast('أهلًا بيك في SHIFRA', 'ok');
   } catch(err){ authError(err.message); }
   finally { btn.disabled = false; btn.textContent = orig; }
 });
@@ -596,79 +391,26 @@ function doLogout(){
   document.getElementById('auth-screen').style.display = 'flex';
   document.getElementById('login-password').value = '';
 }
-function openChangePasswordModal(){
-  modal(`<h3>تغيير كلمة المرور</h3>
-    <div class="field"><label>كلمة المرور الحالية</label><input type="password" id="cp-current" class="ltr"></div>
-    <div class="field"><label>كلمة المرور الجديدة (8 أحرف على الأقل)</label><input type="password" id="cp-new" class="ltr"></div>
-    <div class="field"><label>تأكيد كلمة المرور الجديدة</label><input type="password" id="cp-confirm" class="ltr"></div>
-    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
-      <button class="btn btn-primary" id="cp-submit">تغيير</button></div>`);
-  document.getElementById('cp-submit').addEventListener('click', async (e) => {
-    const current = document.getElementById('cp-current').value;
-    const next = document.getElementById('cp-new').value;
-    const confirm = document.getElementById('cp-confirm').value;
-    if (!current || !next) { toast('املا الخانتين', 'err'); return; }
-    if (next.length < 8) { toast('كلمة المرور الجديدة لازم 8 أحرف على الأقل', 'err'); return; }
-    if (next !== confirm) { toast('كلمة المرور الجديدة والتأكيد مش متطابقين', 'err'); return; }
-    e.target.disabled = true;
-    try {
-      await api('/auth/change-password', {method:'POST', body:{currentPassword: current, newPassword: next}});
-      closeModal(); toast('اتغيّرت كلمة المرور بنجاح', 'ok');
-    } catch(err){ toast(err.message, 'err'); e.target.disabled = false; }
-  });
-}
 document.getElementById('logout-btn-desktop').addEventListener('click', doLogout);
 document.getElementById('user-menu-btn').addEventListener('click', () => {
   modal(`<h3>${esc(state.user.fullName)}</h3>
     <div class="kv"><span class="k">الدور</span><span class="v">${esc(state.user.role)}</span></div>
     ${state.profile && state.profile.referral_code ? `<div class="kv"><span class="k">كود الدعوة</span><span class="v mono">${esc(state.profile.referral_code)}</span></div>` : ''}
-    <div class="modal-actions"><button class="btn btn-ghost" id="modal-change-pw">تغيير كلمة المرور</button>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button>
       <button class="btn btn-danger" id="modal-logout">تسجيل الخروج</button></div>`);
   document.getElementById('modal-logout').addEventListener('click', doLogout);
-  document.getElementById('modal-change-pw').addEventListener('click', openChangePasswordModal);
 });
 
 /* ---------------- Role-adaptive nav + router ---------------- */
 const NAV_BY_ROLE = {
-  CUSTOMER: [
-    {id:'home', label:'الرئيسية', icon:'⌂'},
-    {id:'projects', label:'مشاريعي', icon:'▦'},
-    {id:'conversations', label:'محادثات', icon:'💬'},
-    {id:'complaints', label:'شكاوى', icon:'⚠'},
-    {id:'profile', label:'حسابي', icon:'👤'}
-  ],
-  MARKETER: [
-    {id:'marketerHome', label:'الرئيسية', icon:'⌂'},
-    {id:'weeklyChallenge', label:'تحدي الأسبوع', icon:'🎁'},
-    {id:'matchEditors', label:'طلبات العميل / الممنتجين', icon:'🎬'},
-    {id:'opportunities', label:'الفرص', icon:'◆'},
-    {id:'customers', label:'عملائي', icon:'☺'},
-    {id:'projects', label:'مشاريعي', icon:'▦'},
-    {id:'conversations', label:'محادثات', icon:'💬'},
-    {id:'ratings', label:'تقييماتي', icon:'★'},
-    {id:'earnings', label:'أرباحي', icon:'%'}
-  ],
-  EDITOR: [
-    {id:'weeklyChallenge', label:'تحدي الأسبوع', icon:'🎁'},
-    {id:'projects', label:'مهامي', icon:'▦'},
-    {id:'editorProfile', label:'خبرتي وتخصصي', icon:'🧩'},
-    {id:'conversations', label:'محادثات', icon:'💬'},
-    {id:'ratings', label:'تقييماتي', icon:'★'},
-    {id:'earnings', label:'أرباحي', icon:'%'}
-  ],
+  CUSTOMER: [ {id:'projects', label:'مشاريعي', icon:'▦'} ],
+  MARKETER: [ {id:'opportunities', label:'الفرص', icon:'◆'}, {id:'customers', label:'عملائي', icon:'☺'},
+              {id:'projects', label:'مشاريعي', icon:'▦'}, {id:'earnings', label:'أرباحي', icon:'%'} ],
+  EDITOR:   [ {id:'projects', label:'مهامي', icon:'▦'}, {id:'earnings', label:'أرباحي', icon:'%'} ],
 };
 const VIEW_META = {
-  home:{title:'الرئيسية', sub:'لوحة العميل ومتابعة كل طلباتك'},
-  marketerHome:{title:'الرئيسية', sub:'مركز تشغيل المسوّق ومتابعة العملاء والمشاريع والأرباح'},
-  weeklyChallenge:{title:'تحدي الأسبوع', sub:'اعرف التحدي والجائزة وشوف تقييم أدائك من بيانات شغلك الفعلية'},
-  matchEditors:{title:'طلبات العميل / الممنتجين', sub:'اكتب احتياجات العميل وسيقترح لك النظام الممنتجين الأنسب ثم تواصل معهم عبر WhatsApp'},
-  editorProfile:{title:'خبرتي وتخصصي', sub:'حدد كل أنواع المونتاج والمحتوى والبرامج التي تتقنها حتى يتم ترشيحك للطلبات المناسبة'},
-  profile:{title:'حسابي', sub:'بياناتك وأمان حسابك'},
   opportunities:{title:'فرص جديدة', sub:'عملاء محتاجين مسوّق'},
   customers:{title:'عملائي', sub:'العملاء اللي بتتابعهم'},
-  conversations:{title:'المحادثات', sub:'تواصل مباشر مع العميل والمسوّق والمحرر'},
-  complaints:{title:'الشكاوى', sub:'متابعة الشكاوى التي أرسلتها'},
-  ratings:{title:'تقييماتي', sub:'التقييمات التي حصلت عليها من العملاء'},
   projects:{ CUSTOMER:{title:'مشاريعي', sub:'كل طلباتك في مكان واحد'},
              MARKETER:{title:'مشاريعي', sub:'المشاريع اللي بتتابعها'},
              EDITOR:{title:'مهامي', sub:'الشغل المُسند ليك'} },
@@ -744,206 +486,6 @@ async function goView(id){
 }
 const RENDERERS = {};
 
-
-/* ================= CUSTOMER HOME / DASHBOARD ================= */
-RENDERERS.home = async (el) => {
-  if (state.user.role !== 'CUSTOMER') {
-    el.innerHTML = '<div class="empty-state">هذه الصفحة متاحة للعميل فقط.</div>';
-    return;
-  }
-
-  const [{projects}, {conversations}, {notifications}] = await Promise.all([
-    api('/projects'),
-    api('/conversations'),
-    api('/notifications'),
-  ]);
-
-  const active = projects.filter(p => !['DELIVERED','CANCELLED','REJECTED','REFUNDED'].includes(p.status));
-  const pendingPayment = projects.filter(p => ['PRICE_LOCKED','PAYMENT_PENDING'].includes(p.status));
-  const waitingApproval = projects.filter(p => ['PREVIEW_READY'].includes(p.status));
-  const delivered = projects.filter(p => p.status === 'DELIVERED');
-  const unread = notifications.filter(n => !n.is_read).length;
-
-  const nextDeadline = active
-    .filter(p => p.deadline)
-    .sort((a,b) => new Date(a.deadline) - new Date(b.deadline))[0];
-
-  const latest = projects[0];
-  const latestConversation = conversations[0];
-
-  const quickAction = (view,label,icon) => `
-    <button class="card" data-home-view="${view}" style="border:none;text-align:start;cursor:pointer">
-      <div style="font-size:22px;margin-bottom:7px">${icon}</div>
-      <div style="font-weight:700">${label}</div>
-    </button>`;
-
-  el.innerHTML = `
-    <div class="grid grid-2" style="margin-bottom:14px">
-      <div class="card">
-        <div style="font-size:12px;color:var(--text-faint)">كل الطلبات</div>
-        <div style="font-size:30px;font-weight:700;font-family:var(--mono);margin-top:5px">${projects.length}</div>
-      </div>
-      <div class="card">
-        <div style="font-size:12px;color:var(--text-faint)">طلبات نشطة</div>
-        <div style="font-size:30px;font-weight:700;font-family:var(--mono);margin-top:5px">${active.length}</div>
-      </div>
-      <div class="card">
-        <div style="font-size:12px;color:var(--text-faint)">بانتظار الدفع</div>
-        <div style="font-size:30px;font-weight:700;font-family:var(--mono);margin-top:5px;color:${pendingPayment.length?'var(--amber)':'var(--green)'}">${pendingPayment.length}</div>
-      </div>
-      <div class="card">
-        <div style="font-size:12px;color:var(--text-faint)">بانتظار اعتمادك</div>
-        <div style="font-size:30px;font-weight:700;font-family:var(--mono);margin-top:5px;color:${waitingApproval.length?'var(--purple)':'var(--green)'}">${waitingApproval.length}</div>
-      </div>
-    </div>
-
-    <div class="card" style="margin-bottom:14px">
-      <div style="font-weight:700;margin-bottom:8px">مركز المتابعة</div>
-      <div class="kv"><span class="k">تم التسليم</span><span class="v">${delivered.length}</span></div>
-      <div class="kv"><span class="k">إشعارات غير مقروءة</span><span class="v">${unread}</span></div>
-      <div class="kv"><span class="k">محادثات نشطة</span><span class="v">${conversations.length}</span></div>
-      <div class="kv"><span class="k">أقرب موعد تسليم</span><span class="v mono">${nextDeadline ? fmtDay(nextDeadline.deadline) : 'مفيش موعد محدد'}</span></div>
-    </div>
-
-    <div class="section-title">آخر طلب</div>
-    ${latest ? `
-      <button class="card list-card" id="home-latest-project" style="text-align:start">
-        <div class="list-card-top">
-          <span class="list-card-title">${esc(latest.order_number)}</span>
-          ${badge(latest.status)}
-        </div>
-        <div class="list-card-meta">
-          <span>الكمية: ${esc(latest.quantity)}</span>
-          <span>${latest.deadline ? 'الديدلاين: '+fmtDay(latest.deadline) : 'من غير موعد تسليم'}</span>
-        </div>
-      </button>
-    ` : '<div class="empty-state" style="padding:30px"><div class="ic">▦</div>لسه مفيش طلبات</div>'}
-
-    <div class="section-title">آخر محادثة</div>
-    ${latestConversation ? `
-      <button class="card list-card" id="home-latest-conversation" style="text-align:start">
-        <div style="font-weight:700">${esc(latestConversation.order_number)}</div>
-        <div class="list-card-meta" style="margin-top:5px">
-          ${latestConversation.latest_message ? esc(latestConversation.latest_sender_name || 'رسالة')+': '+esc(latestConversation.latest_message) : 'ابدأ المحادثة مع فريقك'}
-        </div>
-      </button>
-    ` : '<div class="empty-state" style="padding:30px"><div class="ic">💬</div>مفيش محادثات لسه</div>'}
-
-    <div class="section-title">وصول سريع</div>
-    <div class="grid grid-2">
-      ${quickAction('projects','مشاريعي','▦')}
-      ${quickAction('conversations','المحادثات','💬')}
-      ${quickAction('profile','حسابي وأمان الحساب','👤')}
-      <button class="card" id="home-marketer-wa" style="border:none;text-align:start;cursor:pointer">
-        <div style="font-size:22px;margin-bottom:7px">🟢</div>
-        <div style="font-weight:700">إرسال الطلبات على WhatsApp</div>
-        <div style="font-size:11px;color:var(--text-faint);margin-top:3px">ابعت الصور والفيديوهات للمسوّق مباشرة</div>
-      </button>
-      <button class="card" id="home-bell-action" style="border:none;text-align:start;cursor:pointer">
-        <div style="font-size:22px;margin-bottom:7px">🔔</div>
-        <div style="font-weight:700">الإشعارات</div>
-        <div style="font-size:11px;color:var(--text-faint);margin-top:3px">${unread} غير مقروء</div>
-      </button>
-    </div>
-  `;
-
-  document.getElementById('home-latest-project')?.addEventListener('click', () => {
-    document.getElementById('content').dataset.detail = latest.id;
-    goView('projects');
-  });
-  document.getElementById('home-latest-conversation')?.addEventListener('click', () => goView('conversations'));
-  document.querySelectorAll('[data-home-view]').forEach(btn => btn.addEventListener('click', () => goView(btn.dataset.homeView)));
-  document.getElementById('home-marketer-wa')?.addEventListener('click', () => {
-    if(!state.profile?.marketer_phone){toast('المسوّق غير مضاف له رقم WhatsApp بعد','err');return;}
-    openWhatsApp(state.profile.marketer_phone,'مرحباً '+(state.profile.marketer_name||'')+'، عندي طلب مونتاج جديد. هبعتلك كل الصور والفيديوهات والتفاصيل هنا على WhatsApp.');
-  });
-  document.getElementById('home-bell-action')?.addEventListener('click', () => document.getElementById('bell-btn').click());
-};
-
-/* ================= CUSTOMER PROFILE ================= */
-RENDERERS.profile = async (el) => {
-  if (state.user.role !== 'CUSTOMER') {
-    el.innerHTML = '<div class="empty-state">هذه الصفحة متاحة للعميل فقط.</div>';
-    return;
-  }
-  const customer = state.profile || {};
-  el.innerHTML = `
-    <div class="card" style="margin-bottom:14px">
-      <div style="font-size:12px;color:var(--text-faint)">الاسم</div>
-      <div style="font-size:20px;font-weight:700;margin-top:4px">${esc(customer.full_name || state.user.fullName)}</div>
-      <div class="kv"><span class="k">البريد</span><span class="v mono">${esc(customer.email || state.user.email || '—')}</span></div>
-      <div class="kv"><span class="k">الهاتف</span><span class="v mono">${esc(customer.phone || state.user.phone || '—')}</span></div>
-      <div class="kv"><span class="k">نوع الحساب</span><span class="v">عميل</span></div>
-      <div class="kv"><span class="k">تاريخ الانضمام</span><span class="v mono">${customer.created_at ? fmtDate(customer.created_at) : '—'}</span></div>
-    </div>
-
-    <div class="card" style="margin-bottom:14px">
-      <div style="font-weight:700;margin-bottom:8px">الأمان</div>
-      <div style="font-size:12.5px;color:var(--text-dim);margin-bottom:12px">تقدر تغيّر كلمة المرور من غير ما تخرج من حسابك.</div>
-      <button class="btn btn-primary btn-block" id="profile-change-pw">تغيير كلمة المرور</button>
-    </div>
-
-    <div class="card">
-      <div style="font-weight:700;margin-bottom:8px">التحكم بالحساب</div>
-      <button class="btn btn-ghost btn-block" id="profile-logout">تسجيل الخروج</button>
-    </div>
-  `;
-
-  document.getElementById('profile-change-pw').addEventListener('click', openChangePasswordModal);
-  document.getElementById('profile-logout').addEventListener('click', doLogout);
-};
-
-/* ================= RATINGS FOR MARKETER / EDITOR ================= */
-RENDERERS.ratings = async (el) => {
-  if (!['MARKETER','EDITOR'].includes(state.user.role)) {
-    el.innerHTML = '<div class="empty-state">التقييمات متاحة للمسوّق والمحرر.</div>';
-    return;
-  }
-  const {summary, ratings} = await api('/ratings/me');
-  const stars = n => '★'.repeat(Math.round(n)) + '☆'.repeat(5-Math.round(n));
-  el.innerHTML = `
-    <div class="card" style="margin-bottom:16px;text-align:center">
-      <div style="font-size:12px;color:var(--text-faint)">متوسط تقييمك</div>
-      <div style="font-size:34px;font-weight:700;font-family:var(--mono);margin-top:4px">${summary.average.toFixed(2)}</div>
-      <div style="color:var(--amber);font-size:24px;letter-spacing:2px">${stars(summary.average)}</div>
-      <div style="font-size:12px;color:var(--text-faint);margin-top:3px">${summary.count} تقييم</div>
-    </div>
-    <div class="section-title">آخر التقييمات</div>
-    ${ratings.length ? ratings.map(r => `
-      <div class="card" style="margin-bottom:9px">
-        <div class="list-card-top">
-          <span style="font-weight:700">${esc(r.customer_name)}</span>
-          <span style="color:var(--amber);letter-spacing:1px">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</span>
-        </div>
-        <div class="list-card-meta" style="margin-bottom:6px">${esc(r.order_number)} · ${fmtDate(r.created_at)}</div>
-        <div style="font-size:13px;color:var(--text-dim)">${r.comment ? esc(r.comment) : 'من غير تعليق'}</div>
-      </div>
-    `).join('') : '<div class="empty-state"><div class="ic">★</div>لسه مفيش تقييمات.</div>'}
-  `;
-};
-
-/* ================= CUSTOMER COMPLAINTS ================= */
-RENDERERS.complaints = async (el) => {
-  if (state.user.role !== 'CUSTOMER') {
-    el.innerHTML = '<div class="empty-state">الشكاوى متاحة للعميل.</div>';
-    return;
-  }
-  const {complaints} = await api('/complaints/me');
-  const label = s => ({OPEN:'مفتوحة',IN_REVIEW:'قيد المراجعة',RESOLVED:'تم الحل',REJECTED:'مرفوضة'}[s] || s);
-  const cat = s => ({COMMUNICATION:'تواصل',DELAY:'تأخير',MISLEADING:'معلومات مضللة',QUALITY:'جودة',PAYMENT:'دفع',BEHAVIOR:'سلوك',OTHER:'أخرى'}[s] || s);
-  el.innerHTML = complaints.length ? complaints.map(c => `
-    <div class="card" style="margin-bottom:10px">
-      <div class="list-card-top">
-        <span class="list-card-title">${esc(c.order_number)}</span>
-        <span class="badge ${c.status==='RESOLVED'?'badge-green':c.status==='REJECTED'?'badge-red':'badge-amber'}">${label(c.status)}</span>
-      </div>
-      <div class="list-card-meta">${esc(c.target_name)} · ${esc(c.target_role)} · ${cat(c.category)}</div>
-      <div style="margin-top:8px;font-size:13px">${esc(c.description)}</div>
-      ${c.resolution_note ? `<div style="margin-top:8px;color:var(--text-dim);font-size:12px">رد الإدارة: ${esc(c.resolution_note)}</div>` : ''}
-    </div>
-  `).join('') : '<div class="empty-state"><div class="ic">⚠</div>لسه مفيش شكاوى.</div>';
-};
-
 /* ================= PROJECTS (shared list, role-adaptive) ================= */
 RENDERERS.projects = async (el) => {
   if (el.dataset.detail) return renderProjectDetail(el, el.dataset.detail);
@@ -952,64 +494,21 @@ RENDERERS.projects = async (el) => {
   const headerAction = state.user.role === 'MARKETER'
     ? `<button class="btn btn-primary btn-sm" id="new-project-btn" style="margin-bottom:14px">+ مشروع جديد</button>` : '';
 
-  const isCustomer = state.user.role === 'CUSTOMER';
-  const statuses = ['PRICE_NEGOTIATION','PRICE_ACCEPTED','PRICE_LOCKED','PAYMENT_PENDING','PAYMENT_CONFIRMED','EDITOR_ASSIGNED','IN_PRODUCTION','PREVIEW_READY','REVISION_REQUESTED','FINAL_APPROVED','READY_FOR_DELIVERY','DELIVERED'];
-  const search = el.dataset.search || '';
-  const filter = el.dataset.status || '';
-
-  const filtered = projects.filter(p => {
-    const matchesSearch = !search || (p.order_number || '').toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = !filter || p.status === filter;
-    return matchesSearch && matchesStatus;
-  });
-
-  if (isCustomer) {
-    el.innerHTML = `
-      <div class="field" style="margin-bottom:10px">
-        <label>بحث برقم الطلب</label>
-        <input id="customer-project-search" class="ltr" placeholder="SH-0001" value="${esc(search)}">
-      </div>
-      <div class="field" style="margin-bottom:14px">
-        <label>تصفية حسب الحالة</label>
-        <select id="customer-project-filter">
-          <option value="">كل الطلبات</option>
-          ${statuses.map(s => `<option value="${s}">${s}</option>`).join('')}
-        </select>
-      </div>
-      <div style="font-size:12px;color:var(--text-faint);margin-bottom:10px">
-        ${filtered.length} من ${projects.length} طلب
-      </div>
-    `;
+  if (!projects.length) {
+    el.innerHTML = headerAction + `<div class="empty-state"><div class="ic">▦</div>مفيش مشاريع لسه</div>`;
   } else {
-    el.innerHTML = '';
-  }
-
-  if (!filtered.length) {
-    el.innerHTML += headerAction + `<div class="empty-state"><div class="ic">▦</div>${projects.length ? 'مفيش طلبات مطابقة' : 'مفيش مشاريع لسه'}</div>`;
-  } else {
-    el.innerHTML += headerAction + filtered.map(p => `
+    el.innerHTML = headerAction + projects.map(p => `
       <button class="card list-card clickable" data-id="${p.id}">
         <div class="list-card-top"><span class="list-card-title">${esc(p.order_number)}</span>${badge(p.status)}</div>
         <div class="list-card-meta">
           <span>الكمية: ${esc(p.quantity)}</span>
           ${p.deadline ? `<span>الديدلاين: ${fmtDay(p.deadline)}</span>` : ''}
-          <span>آخر تحديث: ${fmtDate(p.updated_at)}</span>
         </div>
       </button>`).join('');
+    el.querySelectorAll('[data-id]').forEach(card => card.addEventListener('click', () => {
+      el.dataset.detail = card.dataset.id; RENDERERS.projects(el);
+    }));
   }
-
-  el.querySelectorAll('[data-id]').forEach(card => card.addEventListener('click', () => {
-    el.dataset.detail = card.dataset.id; RENDERERS.projects(el);
-  }));
-
-  if (isCustomer) {
-    const searchInput = document.getElementById('customer-project-search');
-    const filterInput = document.getElementById('customer-project-filter');
-    filterInput.value = filter;
-    searchInput.addEventListener('input', () => { el.dataset.search = searchInput.value.trim(); RENDERERS.projects(el); });
-    filterInput.addEventListener('change', () => { el.dataset.status = filterInput.value; RENDERERS.projects(el); });
-  }
-
   const newBtn = document.getElementById('new-project-btn');
   if (newBtn) newBtn.addEventListener('click', () => openCreateProjectFlow(el));
 };
@@ -1048,149 +547,6 @@ async function openCreateProjectFlow(listEl){
   });
 }
 
-/* ================= MARKETER HOME / OPERATIONS ================= */
-function marketerCsv(filename, rows){
-  if(!rows || !rows.length){ toast('مفيش بيانات للتصدير','err'); return; }
-  var keys=Object.keys(rows[0]);
-  var lines=[keys.join(','), ...rows.map(function(r){ return keys.map(function(k){ return '\"'+String(r[k] ?? '').replace(/\"/g,'\"\"')+'\"'; }).join(','); })];
-  var blob=new Blob(['\\uFEFF'+lines.join('\\n')],{type:'text/csv;charset=utf-8;'});
-  var url=URL.createObjectURL(blob), a=document.createElement('a');
-  a.href=url; a.download=filename; a.click(); setTimeout(function(){URL.revokeObjectURL(url);},500);
-}
-function marketerOp(icon,title,value,action,sub){
-  return '<button class="card" data-mk-action="'+action+'" style="text-align:start;border:none;cursor:pointer;width:100%;min-height:108px">'+
-    '<div style="font-size:20px;margin-bottom:5px">'+icon+'</div>'+
-    '<div style="font-weight:700">'+esc(title)+'</div>'+
-    '<div style="font-size:22px;font-weight:700;font-family:var(--mono);margin-top:5px">'+esc(value)+'</div>'+
-    (sub ? '<div style="font-size:11px;color:var(--text-faint);margin-top:3px">'+esc(sub)+'</div>' : '')+</button>';
-}
-
-RENDERERS.marketerHome = async function(el){
-  var r=await Promise.all([api('/marketers/me'),api('/opportunities'),api('/customers'),api('/projects'),api('/conversations'),api('/me/earnings'),api('/ratings/me'),api('/notifications')]);
-  var marketer=r[0].marketer, opportunities=r[1].opportunities, customers=r[2].customers, projects=r[3].projects, conversations=r[4].conversations, earnings=r[5], rating=r[6], notifications=r[7].notifications;
-  var terminal=['DELIVERED','CANCELLED','REJECTED','REFUNDED'];
-  var active=projects.filter(function(p){return !terminal.includes(p.status);});
-  var overdue=active.filter(function(p){return p.deadline && new Date(p.deadline).getTime()<Date.now();});
-  var next48=active.filter(function(p){if(!p.deadline)return false;var t=new Date(p.deadline).getTime();return t>=Date.now()&&t<=Date.now()+48*3600*1000;});
-  var pricing=projects.filter(function(p){return ['DETAILS_COLLECTED','PRICE_NEGOTIATION','PRICE_ACCEPTED'].includes(p.status);});
-  var waitingPayment=projects.filter(function(p){return ['PRICE_LOCKED','PAYMENT_PENDING'].includes(p.status);});
-  var inProduction=projects.filter(function(p){return ['EDITOR_ASSIGNED','IN_PRODUCTION','PREVIEW_READY','REVISION_REQUESTED'].includes(p.status);});
-  var delivered=projects.filter(function(p){return p.status==='DELIVERED';});
-  var unread=notifications.filter(function(n){return !n.is_read;}).length;
-  var quietChats=conversations.filter(function(x){return !x.latest_message;}).length;
-  var clientsWithoutActiveProject=customers.filter(function(c){return !projects.some(function(p){return p.customer_id===c.id && !terminal.includes(p.status);});});
-  var html='';
-  html += '<div class="card" style="margin-bottom:14px"><div class="list-card-top"><div><div style="font-size:20px;font-weight:700">أهلاً '+esc(marketer.full_name||state.user.fullName)+' 👋</div><div style="font-size:12px;color:var(--text-faint);margin-top:4px">مركز تشغيل المسوّق</div></div><span class="badge badge-purple">MARKETER</span></div>';
-  html += '<div class="btn-row" style="margin-top:12px;flex-wrap:wrap"><button class="btn btn-primary btn-sm" id="mk-copy-referral">نسخ كود الدعوة</button><button class="btn btn-ghost btn-sm" id="mk-new-project">+ مشروع جديد</button><button class="btn btn-ghost btn-sm" id="mk-open-chat">فتح المحادثات</button><button class="btn btn-ghost btn-sm" id="mk-refresh">تحديث</button></div></div>';
-  html += '<div class="section-title">أهم المؤشرات</div><div class="grid grid-4">';
-  html += marketerOp('🎯','فرص متاحة',opportunities.length,'opportunities');
-  html += marketerOp('👥','عملائي',customers.length,'customers');
-  html += marketerOp('📦','مشاريع نشطة',active.length,'projects');
-  html += marketerOp('🚨','مشاريع متأخرة',overdue.length,'projects');
-  html += marketerOp('⏰','خلال 48 ساعة',next48.length,'projects');
-  html += marketerOp('💬','محادثات',conversations.length,'conversations');
-  html += marketerOp('🔔','غير مقروء',unread,'notifications');
-  html += marketerOp('📝','تحتاج تسعير',pricing.length,'projects');
-  html += marketerOp('💳','بانتظار الدفع',waitingPayment.length,'projects');
-  html += marketerOp('🎬','قيد التنفيذ',inProduction.length,'projects');
-  html += marketerOp('✅','تم التسليم',delivered.length,'projects');
-  html += marketerOp('⭐','متوسط التقييم',Number(rating.summary.average).toFixed(2),'ratings',rating.summary.count+' تقييم');
-  html += marketerOp('💰','إجمالي الأرباح',money(earnings.totalMinor)+' EGP','earnings');
-  html += marketerOp('💸','تم صرفه',money(earnings.paidMinor)+' EGP','earnings');
-  html += marketerOp('⏳','بانتظار الصرف',money(earnings.pendingMinor)+' EGP','earnings');
-  html += marketerOp('📭','محادثات بدون رسالة',quietChats,'conversations');
-  html += marketerOp('🧭','عملاء بلا مشروع نشط',clientsWithoutActiveProject.length,'followup');
-  html += '</div>';
-  html += '<div class="section-title">أدوات إضافية</div><div class="grid grid-3">';
-  html += marketerOp('📇','تصدير العملاء','CSV','export-customers');
-  html += marketerOp('🧾','تصدير الأرباح','CSV','export-earnings');
-  html += marketerOp('📅','متابعة المواعيد القريبة',next48.length,'projects');
-  html += marketerOp('🤝','الفرص الجديدة',opportunities.length,'opportunities');
-  html += marketerOp('📣','بدء متابعة العملاء','فتح قائمة العملاء','customers');
-  html += marketerOp('🔎','البحث في المشاريع','فتح المشاريع','projects');
-  html += '</div>';
-  html += '<div class="section-title">آخر المحادثات</div>';
-  if(conversations.length){ html += conversations.slice(0,5).map(function(x){ return '<button class="card list-card" data-mk-chat="'+x.id+'" style="text-align:start;margin-bottom:8px"><div class="list-card-top"><span class="list-card-title">'+esc(x.order_number)+'</span>'+badge(x.status)+'</div><div class="list-card-meta">العميل: '+esc(x.customer_name)+'</div><div style="margin-top:6px;font-size:12px;color:var(--text-dim)">'+(x.latest_message?esc(x.latest_message):'ابدأ المحادثة مع العميل')+'</div></button>'; }).join(''); }
-  else { html += '<div class="empty-state"><div class="ic">💬</div>مفيش محادثات لسه.</div>'; }
-  el.innerHTML=html;
-  document.getElementById('mk-copy-referral').addEventListener('click',async function(){try{await navigator.clipboard.writeText(marketer.referral_code||'');toast('اتنسخ كود الدعوة','ok');}catch(e){modal('<h3>كود الدعوة</h3><div class="mono" style="font-size:20px">'+esc(marketer.referral_code||'—')+'</div>');}});
-  document.getElementById('mk-new-project').addEventListener('click',function(){openCreateProjectFlow(el);});
-  document.getElementById('mk-open-chat').addEventListener('click',function(){goView('conversations');});
-  document.getElementById('mk-refresh').addEventListener('click',function(){RENDERERS.marketerHome(el);});
-  el.querySelectorAll('[data-mk-chat]').forEach(function(btn){btn.addEventListener('click',function(){goView('conversations');});});
-  el.querySelectorAll('[data-mk-action]').forEach(function(btn){btn.addEventListener('click',async function(){var a=btn.dataset.mkAction;
-    if(['opportunities','customers','projects','conversations','ratings','earnings'].includes(a)) return goView(a);
-    if(a==='notifications'){document.getElementById('bell-btn').click();return;}
-    if(a==='export-customers'){marketerCsv('shifra-my-customers.csv',customers);return;}
-    if(a==='export-earnings'){marketerCsv('shifra-my-earnings.csv',earnings.earnings);return;}
-    if(a==='followup'){modal('<h3>عملاء بلا مشروع نشط</h3>'+(clientsWithoutActiveProject.length?clientsWithoutActiveProject.map(function(x){return '<div class="kv"><span class="k">'+esc(x.full_name)+'</span><span class="v">'+esc(x.phone||x.email||'—')+'</span></div>';}).join(''):'<div class="empty-state">مفيش عملاء في القائمة.</div>'));return;}
-  });});
-};
-
-/* ================= EDITOR PROFILE ================= */
-RENDERERS.editorProfile = async function(el){
-  if(state.user.role!=='EDITOR'){el.innerHTML='<div class="empty-state">الصفحة متاحة للمحرر.</div>';return;}
-  const [{editor},{serviceTypes,contentTypes,editingLevels}]=await Promise.all([api('/editors/me'),api('/services/catalog')]);
-  const ex=editor.expertise||{};
-  const csv=function(a){return Array.isArray(a)?a.join(', '):'';};
-  const checkGroup=function(title,items,selected,name){
-    return '<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:10px">'+title+'</div><div class="grid grid-2">'+items.map(function(x){var checked=selected.includes(x.code)?'checked':'';return '<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" name="'+name+'" value="'+esc(x.code)+'" '+checked+'><span>'+esc(x.name_ar||x.name_en||x.code)+'</span></label>';}).join('')+'</div></div>';
-  };
-  el.innerHTML='<div class="card" style="margin-bottom:14px"><div class="kv"><span class="k">الاسم</span><span class="v">'+esc(editor.full_name||state.user.fullName)+'</span></div><div class="kv"><span class="k">WhatsApp</span><span class="v mono">'+esc(editor.phone||'—')+'</span></div></div>'
-    +'<div class="field"><label>التخصص الرئيسي</label><input id="ed-specialty" value="'+esc(editor.specialty||'')+'" placeholder="مثال: مونتاج إعلانات عقارية"></div>'
-    +'<div class="field"><label>نبذة وخبرة</label><textarea id="ed-bio" rows="3" placeholder="اكتب خبرتك بالتفصيل...">'+esc(editor.bio||'')+'</textarea></div>'
-    +'<div class="field"><label>التوافر</label><select id="ed-availability"><option value="AVAILABLE">متاح</option><option value="BUSY">مشغول جزئياً</option><option value="PAUSED">متوقف مؤقتاً</option></select></div>'
-    +'<div class="field"><label>أقصى عدد مشاريع نشطة</label><input id="ed-max" type="number" min="1" max="50" value="'+Number(editor.max_active_projects||3)+'"></div>'
-    +checkGroup('أنواع الخدمات التي تتقنها',serviceTypes,ex.services||[],'ed-service')
-    +checkGroup('أنواع المحتوى التي تتقنها',contentTypes,ex.contentTypes||[],'ed-content')
-    +checkGroup('مستويات المونتاج',editingLevels,ex.editingLevels||[],'ed-level')
-    +'<div class="field"><label>الأساليب / Styles</label><input id="ed-styles" value="'+esc(csv(ex.styles))+'" placeholder="Cinematic, UGC, Reels"></div>'
-    +'<div class="field"><label>البرامج / Software</label><input id="ed-software" value="'+esc(csv(ex.software))+'" placeholder="Premiere, After Effects, CapCut"></div>'
-    +'<div class="field"><label>التخصصات / Niches</label><input id="ed-specialties" value="'+esc(csv(ex.specialties))+'" placeholder="عقارات, طبي, مطاعم"></div>'
-    +'<div class="field"><label>كلمات إضافية للمطابقة</label><input id="ed-keywords" value="'+esc(csv(ex.keywords))+'" placeholder="motion graphics, subtitles, color grading"></div>'
-    +'<div class="btn-row"><button class="btn btn-primary" id="ed-save">حفظ الخبرة</button><button class="btn btn-ghost" id="ed-wa-preview">معاينة WhatsApp</button></div>';
-  document.getElementById('ed-availability').value=editor.availability_status||'AVAILABLE';
-  function checked(name){return Array.from(el.querySelectorAll('input[name="'+name+'"]:checked')).map(function(x){return x.value;});}
-  document.getElementById('ed-save').addEventListener('click',async function(e){
-    e.target.disabled=true;
-    const body={specialty:document.getElementById('ed-specialty').value.trim(),bio:document.getElementById('ed-bio').value.trim(),availabilityStatus:document.getElementById('ed-availability').value,maxActiveProjects:Number(document.getElementById('ed-max').value||3),expertise:{services:checked('ed-service'),contentTypes:checked('ed-content'),editingLevels:checked('ed-level'),styles:document.getElementById('ed-styles').value.split(',').map(x=>x.trim()).filter(Boolean),software:document.getElementById('ed-software').value.split(',').map(x=>x.trim()).filter(Boolean),specialties:document.getElementById('ed-specialties').value.split(',').map(x=>x.trim()).filter(Boolean),keywords:document.getElementById('ed-keywords').value.split(',').map(x=>x.trim()).filter(Boolean)}};
-    try{const r=await api('/editors/me',{method:'PATCH',body});state.profile=r.editor;toast('تم حفظ خبرتك وتخصصك','ok');}catch(err){toast(err.message,'err');}finally{e.target.disabled=false;}
-  });
-  document.getElementById('ed-wa-preview').addEventListener('click',function(){openWhatsApp(editor.phone,'مرحباً، أنا المحرر '+(editor.full_name||state.user.fullName)+' في شفرة.');});
-};
-
-/* ================= CUSTOMER REQUEST -> EDITOR MATCHING ================= */
-RENDERERS.matchEditors = async function(el){
-  if(state.user.role!=='MARKETER'){el.innerHTML='<div class="empty-state">الصفحة متاحة للمسوّق.</div>';return;}
-  const [{customers},{serviceTypes,contentTypes,editingLevels}]=await Promise.all([api('/customers'),api('/services/catalog')]);
-  let rows=[{id:1}];
-  function rowHtml(row,idx){
-    return '<div class="card mk-request-row" data-row="'+row.id+'" style="margin-bottom:12px"><div class="list-card-top"><b>طلب '+(idx+1)+'</b><button type="button" class="btn btn-ghost btn-sm" data-remove-row="'+row.id+'">حذف</button></div>'
-      +'<div class="field"><label>وصف الطلب</label><input data-f="title" placeholder="مثال: 3 ريلز عقارات"></div>'
-      +'<div class="grid grid-3"><div class="field"><label>الخدمة</label><select data-f="service">'+serviceTypes.map(function(x){return '<option value="'+esc(x.code)+'">'+esc(x.name_ar||x.name_en)+'</option>';}).join('')+'</select></div>'
-      +'<div class="field"><label>نوع المحتوى</label><select data-f="content">'+contentTypes.map(function(x){return '<option value="'+esc(x.code)+'">'+esc(x.name_ar||x.name_en)+'</option>';}).join('')+'</select></div>'
-      +'<div class="field"><label>مستوى المونتاج</label><select data-f="level">'+editingLevels.map(function(x){return '<option value="'+esc(x.code)+'">'+esc(x.name_ar||x.name_en)+'</option>';}).join('')+'</select></div></div>'
-      +'<div class="field"><label>كل التفاصيل التي قالها العميل</label><textarea data-f="requirements" rows="3" placeholder="المدة، الأسلوب، النصوص، المؤثرات، اللقطات المطلوبة، وأي ملاحظات..."></textarea></div>'
-      +'</div>';
-  }
-  el.innerHTML='<div class="card" style="margin-bottom:14px"><div class="field"><label>العميل</label><select id="match-customer">'+customers.map(function(c){return '<option value="'+esc(c.id)+'">'+esc(c.full_name)+(c.phone?' · '+esc(c.phone):'')+'</option>';}).join('')+'</select></div><div class="btn-row"><button class="btn btn-primary btn-sm" id="add-request-row">+ أضف طلب آخر</button><button class="btn btn-ghost btn-sm" id="run-matching">اعثر على الممنتجين المناسبين</button><button class="btn btn-ghost btn-sm" id="wa-customer">فتح WhatsApp مع العميل</button></div></div>'
-    +'<div id="request-rows">'+rowHtml(rows[0],0)+'</div><div id="match-results"></div>';
-  document.getElementById('add-request-row').addEventListener('click',function(){rows.push({id:Date.now()});document.getElementById('request-rows').insertAdjacentHTML('beforeend',rowHtml(rows[rows.length-1],rows.length-1));bindRemove();});
-  function bindRemove(){el.querySelectorAll('[data-remove-row]').forEach(function(b){b.onclick=function(){const id=String(b.dataset.removeRow);rows=rows.filter(function(x){return String(x.id)!==id;});b.closest('.mk-request-row')?.remove();};});}
-  bindRemove();
-  document.getElementById('wa-customer').addEventListener('click',function(){const customer=customers.find(function(x){return String(x.id)===String(document.getElementById('match-customer').value);});if(customer)openWhatsApp(customer.phone,'مرحباً '+customer.full_name+'، ابعتلي كل صور وفيديوهات ومتطلبات المونتاج على WhatsApp.');});
-  document.getElementById('run-matching').addEventListener('click',async function(e){
-    const reqs=Array.from(el.querySelectorAll('.mk-request-row')).map(function(card,i){return {id:String(i+1),title:card.querySelector('[data-f="title"]').value.trim()||('طلب '+(i+1)),serviceTypeCode:card.querySelector('[data-f="service"]').value,contentTypeCode:card.querySelector('[data-f="content"]').value,editingLevelCode:card.querySelector('[data-f="level"]').value,requirements:card.querySelector('[data-f="requirements"]').value.trim()};});
-    e.target.disabled=true; e.target.textContent='جاري المطابقة...';
-    const selectedCustomerId=Number(document.getElementById('match-customer').value); try{const data=await api('/editor-matches',{method:'POST',body:{customerId:selectedCustomerId,requests:reqs}});
-      const html=data.results.map(function(result){return '<div class="card" style="margin-bottom:14px"><div class="section-title" style="margin-top:0">'+esc(result.request.title)+'</div>'+
-        (result.recommendations.length?result.recommendations.map(function(ed){return '<div class="card" style="margin-bottom:8px;border:1px solid var(--border)"><div class="list-card-top"><b>'+esc(ed.name)+'</b><span class="badge badge-purple">'+ed.score+'/100</span></div><div class="list-card-meta">'+(ed.specialty?esc(ed.specialty)+' · ':'')+esc(ed.availabilityStatus)+' · حمل '+ed.activeProjects+'/'+ed.maxActiveProjects+'</div><div style="font-size:12px;color:var(--text-dim);margin-top:6px">'+esc(ed.reasons.join(' · '))+'</div><div class="btn-row" style="margin-top:8px"><button class="btn btn-primary btn-sm" data-match-wa="'+esc(ed.phone||'')+'" data-match-name="'+esc(ed.name)+'" data-match-title="'+esc(result.request.title)+'">WhatsApp</button><button class="btn btn-ghost btn-sm" disabled>التعيين يتم بعد إنشاء المشروع</button></div></div>';}).join(''):'<div class="empty-state">مفيش ممنتج مناسب ببيانات كافية. اطلب من الممنتجين إكمال صفحة خبرتهم.</div>')+'</div>';}).join('');
-      document.getElementById('match-results').innerHTML=html;
-      el.querySelectorAll('[data-match-wa]').forEach(function(b){b.onclick=function(){openWhatsApp(b.dataset.matchWa,'مرحباً '+b.dataset.matchName+'، عندنا '+b.dataset.matchTitle+' من شفرة. هبعتلك كل التفاصيل والملفات على WhatsApp.');};});
-    }catch(err){toast(err.message,'err');}finally{e.target.disabled=false;e.target.textContent='اعثر على الممنتجين المناسبين';}
-  });
-};
-
 /* ================= OPPORTUNITIES (marketer) ================= */
 RENDERERS.opportunities = async (el) => {
   const { opportunities } = await api('/opportunities');
@@ -1208,128 +564,6 @@ RENDERERS.opportunities = async (el) => {
   }));
 };
 
-/* ================= CONVERSATIONS (all customer/marketer/editor roles) ================= */
-RENDERERS.conversations = async (el) => {
-  const { conversations } = await api('/conversations');
-
-  if (!conversations.length) {
-    el.innerHTML = `
-      <div class="empty-state">
-        <div class="ic">💬</div>
-        مفيش محادثات لسه.
-        <div style="margin-top:8px;font-size:12px">
-          أول ما يبقى عندك مشروع مرتبط بعميل، هتظهر المحادثة هنا.
-        </div>
-      </div>`;
-    return;
-  }
-
-  el.innerHTML = `
-    <div class="section-title">محادثاتك</div>
-    ${conversations.map(c => `
-      <button class="card list-card" data-conversation="${c.id}" style="text-align:start;margin-bottom:10px">
-        <div class="list-card-top">
-          <span class="list-card-title">${esc(c.order_number)}</span>
-          ${badge(c.status)}
-        </div>
-        <div style="font-weight:600;margin-bottom:4px">
-          العميل: ${esc(c.customer_name)}
-        </div>
-        <div class="list-card-meta">
-          <span>المسوّق: ${esc(c.marketer_name || '—')}</span>
-          <span>المحرر: ${esc(c.editor_name || 'لسه ماتعيّنش')}</span>
-        </div>
-        <div style="margin-top:9px;color:var(--text-dim);font-size:12.5px">
-          ${c.latest_message ? `${esc(c.latest_sender_name || 'رسالة')}: ${esc(c.latest_message)}` : 'ابدأ المحادثة مع الفريق'}
-        </div>
-        <div style="margin-top:6px;color:var(--text-faint);font-size:11px">
-          ${c.latest_message_at ? fmtDate(c.latest_message_at) : 'مفيش رسائل لسه'}
-        </div>
-      </button>
-    `).join('')}
-    <div id="standalone-chat-panel"></div>
-  `;
-
-  el.querySelectorAll('[data-conversation]').forEach(btn => {
-    btn.addEventListener('click', () => renderConversationView(el, btn.dataset.conversation));
-  });
-};
-
-async function renderConversationView(host, projectId){
-  const panel = document.getElementById('standalone-chat-panel');
-  panel.innerHTML = '<div class="card"><span class="spinner"></span> جارِ تحميل المحادثة...</div>';
-
-  try {
-    const [{project}, {messages}] = await Promise.all([
-      api(`/projects/${projectId}`),
-      api(`/projects/${projectId}/messages`),
-    ]);
-
-    panel.innerHTML = `
-      <div class="section-title">محادثة ${esc(project.order_number)}</div>
-      <div class="chat-box">
-        <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:12px">
-          <div>
-            <div style="font-weight:700;font-size:16px">${esc(project.customer_name)}</div>
-            <div style="font-size:12px;color:var(--text-faint)">
-              المسوّق: ${esc(project.marketer_name || '—')} ·
-              المحرر: ${esc(project.editor_name || 'لسه ماتعيّنش')}
-            </div>
-          </div>
-          ${badge(project.status)}
-        </div>
-
-        <div class="chat-messages" id="standalone-chat-messages">
-          ${renderChatMessages(messages)}
-        </div>
-
-        <div class="chat-input-row">
-          <textarea id="standalone-chat-input" placeholder="اكتب رسالتك..." rows="1"></textarea>
-          <button class="btn btn-primary btn-sm" id="standalone-chat-send">إرسال</button>
-        </div>
-      </div>
-    `;
-
-    const box = document.getElementById('standalone-chat-messages');
-    if (box) box.scrollTop = box.scrollHeight;
-
-    const send = async () => {
-      const input = document.getElementById('standalone-chat-input');
-      const button = document.getElementById('standalone-chat-send');
-      const body = input.value.trim();
-      if (!body) return;
-
-      button.disabled = true;
-      try {
-        await api(`/projects/${projectId}/messages`, {
-          method:'POST',
-          body:{body}
-        });
-        input.value = '';
-        const refreshed = await api(`/projects/${projectId}/messages`);
-        document.getElementById('standalone-chat-messages').innerHTML = renderChatMessages(refreshed.messages);
-        document.getElementById('standalone-chat-messages').scrollTop =
-          document.getElementById('standalone-chat-messages').scrollHeight;
-        toast('تم إرسال الرسالة','ok');
-      } catch(err) {
-        toast(err.message,'err');
-      } finally {
-        button.disabled = false;
-      }
-    };
-
-    document.getElementById('standalone-chat-send').addEventListener('click', send);
-    document.getElementById('standalone-chat-input').addEventListener('keydown', e => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        send();
-      }
-    });
-  } catch(err) {
-    panel.innerHTML = `<div class="empty-state"><div class="ic">⚠</div>${esc(err.message)}</div>`;
-  }
-};
-
 /* ================= CUSTOMERS (marketer) ================= */
 RENDERERS.customers = async (el) => {
   const { customers } = await api('/customers');
@@ -1339,11 +573,7 @@ RENDERERS.customers = async (el) => {
       <div class="list-card-top"><span style="font-weight:600">${esc(c.full_name)}</span>
         <span class="badge badge-gray">${c.acquisition_source === 'EXTERNAL' ? 'خارجي' : 'داخلي'}</span></div>
       <div class="list-card-meta">${c.email ? esc(c.email) : esc(c.phone || '')}</div>
-      <div class="btn-row" style="margin-top:8px">
-        ${c.phone ? `<button class="btn btn-ghost btn-sm" data-wa-customer="${esc(c.phone)}" data-wa-name="${esc(c.full_name)}">WhatsApp العميل</button>` : '<span class="field-hint">لا يوجد رقم WhatsApp</span>'}
-      </div>
     </div>`).join('');
-  el.querySelectorAll('[data-wa-customer]').forEach(b=>b.addEventListener('click',()=>openWhatsApp(b.dataset.waCustomer,'مرحباً '+b.dataset.waName+'، ابعتلي كل تفاصيل الشغل على WhatsApp.')));
 };
 
 /* ================= EARNINGS (marketer / editor) ================= */
@@ -1384,13 +614,11 @@ async function getCatalog(){
 }
 
 async function renderProjectDetail(el, id){
-  const role = state.user.role;
-  const [{project}, priceRes, paymentsRes, revisionsRes, earningsRes, catalog, messagesRes, ratingsRes, complaintsRes] = await Promise.all([
+  const [{project}, priceRes, paymentsRes, revisionsRes, earningsRes, catalog] = await Promise.all([
     api(`/projects/${id}`), api(`/projects/${id}/price-agreements`), api(`/projects/${id}/payments`),
-    api(`/projects/${id}/revisions`), api(`/projects/${id}/earnings`), getCatalog(), api(`/projects/${id}/messages`),
-    role === 'CUSTOMER' ? api(`/projects/${id}/ratings`) : Promise.resolve({ratings:[]}),
-    role === 'CUSTOMER' ? api('/complaints/me') : Promise.resolve({complaints:[]}),
+    api(`/projects/${id}/revisions`), api(`/projects/${id}/earnings`), getCatalog(),
   ]);
+  const role = state.user.role;
   const latestAgreement = priceRes.priceAgreements[0] || null; // ordered DESC by version
   const activePayment = paymentsRes.payments.find(p => ['PENDING','PROOF_SUBMITTED','PROOF_REJECTED'].includes(p.status));
   const openRevision = revisionsRes.revisions.find(r => r.status === 'OPEN');
@@ -1412,18 +640,6 @@ async function renderProjectDetail(el, id){
     <div class="kv"><span class="k">الديدلاين</span><span class="v mono">${project.deadline ? fmtDay(project.deadline) : '—'}</span></div>
     ${project.notes ? `<div class="kv"><span class="k">ملاحظات</span><span class="v">${esc(project.notes)}</span></div>` : ''}
   </div>`);
-  if (role === 'CUSTOMER' || role === 'MARKETER' || role === 'EDITOR') {
-    const waButtons = [];
-    if (project.marketer_phone) waButtons.push('<button class="btn btn-ghost btn-sm" id="wa-marketer-project">WhatsApp المسوّق</button>');
-    if (project.editor_phone) waButtons.push('<button class="btn btn-ghost btn-sm" id="wa-editor-project">WhatsApp الممنتج</button>');
-    if (role !== 'CUSTOMER' && project.customer_name) {
-      const customerPhone = project.customer_phone || '';
-      if (customerPhone) waButtons.push('<button class="btn btn-ghost btn-sm" id="wa-customer-project">WhatsApp العميل</button>');
-    }
-    if (waButtons.length) {
-      blocks.push('<div class="card" style="margin-bottom:14px"><div style="font-weight:700;margin-bottom:8px">التواصل والملفات</div><div style="font-size:12px;color:var(--text-faint);margin-bottom:9px">استخدم WhatsApp لإرسال الصور والفيديوهات والملفات. شفرة لا يخزن الوسائط هنا في هذه المرحلة.</div><div class="btn-row">'+waButtons.join('')+'</div></div>');
-    }
-  }
 
   /* ---- Price ---- */
   blocks.push(`<div class="section-title">السعر</div>`);
@@ -1497,79 +713,13 @@ async function renderProjectDetail(el, id){
         <div class="t-time">${fmtDate(r.created_at)} · ${badge(r.status)}</div></div>`).join('')}</div>`);
   }
 
-  if (role === 'CUSTOMER') {
-    const rated = new Set(ratingsRes.ratings.map(r => r.target_role));
-    if (project.status === 'DELIVERED') {
-      blocks.push(`<div class="section-title">التقييم</div>
-        <div class="card" style="margin-bottom:10px">
-          <div style="font-size:12.5px;color:var(--text-dim);margin-bottom:10px">
-            بعد استلام الفيديو تقدر تقيّم المسوّق والمحرر كل واحد بشكل مستقل.
-          </div>
-          <div class="btn-row" style="flex-wrap:wrap">
-            ${!rated.has('MARKETER') ? '<button class="btn btn-primary" data-rate-role="MARKETER">⭐ تقييم المسوّق</button>' : '<span class="badge badge-green">تم تقييم المسوّق</span>'}
-            ${project.editor_name ? (!rated.has('EDITOR') ? '<button class="btn btn-primary" data-rate-role="EDITOR">⭐ تقييم المحرر</button>' : '<span class="badge badge-green">تم تقييم المحرر</span>') : ''}
-          </div>
-        </div>`);
-    }
-    blocks.push(`<div class="section-title">الدعم والشكاوى</div>
-      <div class="card" style="margin-bottom:10px">
-        <div style="font-size:12.5px;color:var(--text-dim);margin-bottom:10px">
-          لو حصلت مشكلة مع المسوّق أو المحرر، تقدر ترفع شكوى للإدارة من هنا.
-        </div>
-        <button class="btn btn-danger btn-block" id="open-complaint-btn">تقديم شكوى</button>
-      </div>`);
+  if (myEarning) {
+    blocks.push(`<div class="section-title">نصيبك من المشروع ده</div>
+      <div class="card"><div class="price-hero"><div class="amt">${money(myEarning.amount_minor)} EGP</div></div></div>`);
   }
-
-  blocks.push(`<div class="section-title">المحادثة</div>
-    <div class="chat-box">
-      <div class="chat-messages" id="chat-messages">${renderChatMessages(messagesRes.messages)}</div>
-      <div class="chat-input-row">
-        <textarea id="chat-input" placeholder="اكتب رسالة..." rows="1"></textarea>
-        <button class="btn btn-primary btn-sm" id="chat-send-btn">إرسال</button>
-      </div>
-    </div>`);
 
   el.innerHTML = blocks.join('');
   wireProjectDetailActions(el, project, id);
-  wireChat(el, id);
-  scrollChatToBottom();
-}
-
-function renderChatMessages(messages){
-  if (!messages.length) return '<div class="empty-state" style="padding:20px"><div class="ic">💬</div>ابدأ المحادثة</div>';
-  return messages.map(m => {
-    const mine = m.sender_id === state.user.id;
-    return `<div class="chat-msg ${mine?'mine':'theirs'}">
-      ${!mine ? `<div class="chat-meta">${esc(m.sender_name)}</div>` : ''}
-      <div>${esc(m.body)}</div>
-      <div class="chat-time">${fmtDate(m.created_at)}</div>
-    </div>`;
-  }).join('');
-}
-function scrollChatToBottom(){
-  const box = document.getElementById('chat-messages');
-  if (box) box.scrollTop = box.scrollHeight;
-}
-function wireChat(el, id){
-  const sendBtn = document.getElementById('chat-send-btn');
-  const input = document.getElementById('chat-input');
-  const send = async () => {
-    const body = input.value.trim();
-    if (!body) return;
-    sendBtn.disabled = true;
-    try {
-      await api(`/projects/${id}/messages`, {method:'POST', body:{body}});
-      input.value = '';
-      const { messages } = await api(`/projects/${id}/messages`);
-      document.getElementById('chat-messages').innerHTML = renderChatMessages(messages);
-      scrollChatToBottom();
-    } catch(err){ toast(err.message, 'err'); }
-    finally { sendBtn.disabled = false; }
-  };
-  sendBtn.addEventListener('click', send);
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
-  });
 }
 
 function wireProjectDetailActions(el, project, id){
@@ -1688,107 +838,7 @@ function wireProjectDetailActions(el, project, id){
     try { await api(`/projects/${id}/revisions/${btn.dataset.resolveRevision}/resolve`, {method:'POST'}); toast('اتحل التعديل','ok'); refresh(); }
     catch(err){ toast(err.message,'err'); btn.disabled = false; }
   }));
-  document.getElementById('wa-marketer-project')?.addEventListener('click',()=>openWhatsApp(project.marketer_phone,'مرحباً '+project.marketer_name+'، عندي تفاصيل وملفات للمشروع '+project.order_number+'. هبعتها لك هنا على WhatsApp.'));
-  document.getElementById('wa-editor-project')?.addEventListener('click',()=>openWhatsApp(project.editor_phone,'مرحباً '+project.editor_name+'، ده بخصوص المشروع '+project.order_number+'. هبعت لك الصور والفيديوهات والملاحظات هنا على WhatsApp.'));
-  document.getElementById('wa-customer-project')?.addEventListener('click',()=>openWhatsApp(project.customer_phone,'مرحباً '+project.customer_name+'، بخصوص المشروع '+project.order_number+'. هبعت لك آخر التحديثات هنا على WhatsApp.'));
-
-
-  el.querySelectorAll('[data-rate-role]').forEach(btn => btn.addEventListener('click', () => {
-    const targetRole = btn.dataset.rateRole;
-    modal(`<h3>تقييم ${targetRole === 'MARKETER' ? 'المسوّق' : 'المحرر'}</h3>
-      <div class="field">
-        <label>التقييم من 1 إلى 5</label>
-        <select id="rating-stars" class="ltr">
-          <option value="5">5 ⭐⭐⭐⭐⭐</option>
-          <option value="4">4 ⭐⭐⭐⭐</option>
-          <option value="3">3 ⭐⭐⭐</option>
-          <option value="2">2 ⭐⭐</option>
-          <option value="1">1 ⭐</option>
-        </select>
-      </div>
-      <div class="field"><label>تعليق اختياري</label><textarea id="rating-comment" rows="3" maxlength="1000"></textarea></div>
-      <div class="modal-actions">
-        <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
-        <button class="btn btn-primary" id="submit-rating">إرسال التقييم</button>
-      </div>`);
-    document.getElementById('submit-rating').addEventListener('click', async () => {
-      const stars = Number(document.getElementById('rating-stars').value);
-      const comment = document.getElementById('rating-comment').value.trim();
-      try {
-        await api(`/projects/${id}/ratings`, {method:'POST', body:{targetRole, stars, comment}});
-        closeModal(); toast('تم إرسال التقييم','ok'); refresh();
-      } catch(err){ toast(err.message,'err'); }
-    });
-  }));
-
-  const complaintBtn = document.getElementById('open-complaint-btn');
-  if (complaintBtn) complaintBtn.addEventListener('click', () => {
-    modal(`<h3>تقديم شكوى</h3>
-      <div class="field">
-        <label>الشكوى على</label>
-        <select id="complaint-target">
-          <option value="MARKETER">المسوّق</option>
-          ${project.editor_name ? '<option value="EDITOR">المحرر</option>' : ''}
-        </select>
-      </div>
-      <div class="field">
-        <label>نوع المشكلة</label>
-        <select id="complaint-category">
-          <option value="COMMUNICATION">التواصل</option>
-          <option value="DELAY">التأخير</option>
-          <option value="MISLEADING">معلومات غير صحيحة</option>
-          <option value="QUALITY">الجودة</option>
-          <option value="PAYMENT">الدفع</option>
-          <option value="BEHAVIOR">السلوك</option>
-          <option value="OTHER">أخرى</option>
-        </select>
-      </div>
-      <div class="field"><label>اشرح المشكلة</label><textarea id="complaint-desc" rows="4" maxlength="2000" placeholder="اكتب اللي حصل بالتفصيل..."></textarea></div>
-      <div class="modal-actions">
-        <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
-        <button class="btn btn-danger" id="submit-complaint">إرسال الشكوى</button>
-      </div>`);
-    document.getElementById('submit-complaint').addEventListener('click', async () => {
-      const targetRole = document.getElementById('complaint-target').value;
-      const category = document.getElementById('complaint-category').value;
-      const description = document.getElementById('complaint-desc').value.trim();
-      if (!description) { toast('اكتب تفاصيل المشكلة','err'); return; }
-      try {
-        await api(`/projects/${id}/complaints`, {method:'POST', body:{targetRole, category, description}});
-        closeModal(); toast('تم إرسال الشكوى للإدارة','ok');
-        goView('complaints');
-      } catch(err){ toast(err.message,'err'); }
-    });
-  }));
 }
-</script>
-
-<script id="shefra-premium-motion">
-(() => {
-  const install = () => {
-    const content = document.getElementById('content');
-    if (content) {
-      const pulse = () => {
-        content.classList.remove('ui-refresh');
-        requestAnimationFrame(() => content.classList.add('ui-refresh'));
-      };
-      new MutationObserver(pulse).observe(content,{childList:true});
-    }
-    document.addEventListener('click', (event) => {
-      const target = event.target.closest('button,.btn,.nav-item,.auth-tab,.role-opt,.user-menu-btn');
-      if (!target || target.disabled) return;
-      const rect = target.getBoundingClientRect();
-      const ripple = document.createElement('span');
-      ripple.className = 'ui-ripple';
-      ripple.style.left = ((event.clientX - rect.left) || rect.width/2) + 'px';
-      ripple.style.top = ((event.clientY - rect.top) || rect.height/2) + 'px';
-      target.appendChild(ripple);
-      setTimeout(() => ripple.remove(), 600);
-    }, {passive:true});
-  };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',install,{once:true});
-  else install();
-})();
 </script>
 </body>
 </html>
