@@ -1427,81 +1427,71 @@ async function renderProjectDetail(el, id){
     }
   }
 
-  /* ---- Protected watermarked video preview / handoff ---- */
+  /* ---- WhatsApp-only media handoff / in-app text tracking ---- */
   if (videoPreview) {
     const statusLabel = {
-      EDITOR_SENT:'الممنتج أرسل النسخة المائية',
-      MARKETER_RECEIVED:'المسوق استلم النسخة المائية',
-      CUSTOMER_REVIEW:'في انتظار مراجعة العميل',
+      EDITOR_SENT:'الممنتج أرسل النسخة المائية على WhatsApp',
+      MARKETER_RECEIVED:'المسوق استلم النسخة المائية على WhatsApp',
+      CUSTOMER_REVIEW:'العميل يشاهد النسخة على WhatsApp',
       REVISION_REQUESTED:'العميل طلب تعديل',
       PAYMENT_PENDING:'في انتظار تسعير/دفع التسليم النهائي',
       PAYMENT_CONFIRMED:'الدفع النهائي اتأكد',
-      ORIGINAL_SENT:'الأصل اتبعت للمسوق',
-      ORIGINAL_RECEIVED:'المسوق استلم الأصل',
+      ORIGINAL_SENT:'الأصل اتبعت للمسوق على WhatsApp',
+      ORIGINAL_RECEIVED:'المسوق استلم الأصل على WhatsApp',
       DELIVERED:'تم التسليم'
     }[videoPreview.status] || videoPreview.status;
     const paymentMinor = videoPreview.release_amount_minor;
     const paymentStatus = videoPreview.release_payment_status;
-    const media = videoPreview.has_preview_video
-      ? '<video id="protected-preview-video" controls playsinline preload="metadata" controlsList="nodownload noplaybackrate" disablePictureInPicture style="width:100%;height:100%;object-fit:contain;display:block;background:#000"></video>'
-      : (videoPreview.thumbnail_data_url
-          ? '<img src="'+videoPreview.thumbnail_data_url+'" alt="صورة قديمة للمعاينة" style="width:100%;height:100%;object-fit:cover;display:block">'
-          : '<div style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-faint);font-size:12px">لا توجد معاينة مرفوعة</div>');
     blocks.push(
-      '<div class="section-title">النسخة المائية للمراجعة</div>'+
+      '<div class="section-title">تسليم الملفات — WhatsApp فقط</div>'+
       '<div class="card" style="margin-bottom:12px;border-color:rgba(139,92,246,.28)">'+
-        '<div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap">'+
-          '<div style="width:100%;max-width:430px;aspect-ratio:16/9;border-radius:12px;overflow:hidden;border:1px solid var(--border);background:#050509">'+
-            media+
-          '</div>'+
-          '<div style="flex:1;min-width:220px">'+
-            '<div style="font-size:16px;font-weight:800">نسخة مراجعة مائية — v'+Number(videoPreview.version)+'</div>'+
-            '<div style="margin-top:4px"><span class="badge badge-purple">'+esc(statusLabel)+'</span></div>'+
-            '<div style="font-size:12px;color:var(--text-faint);margin-top:9px">دي نسخة فيديو حقيقية عليها علامة/صورة شفافة مدمجة بداخل الفيديو. النسخة الأصلية بدون العلامة لا يتم تخزينها داخل شفرة ولا تُفتح قبل تأكيد الدفع النهائي.</div>'+
-            (videoPreview.editor_note ? '<div style="margin-top:10px;font-size:12.5px;color:var(--text-dim)">ملاحظة الممنتج: '+esc(videoPreview.editor_note)+'</div>' : '')+
-            (videoPreview.marketer_handoff_summary ? '<div style="margin-top:10px;padding:10px;background:var(--bg-elev-2);border-radius:10px;font-size:12.5px"><b>ملخص المسوق:</b><br>'+esc(videoPreview.marketer_handoff_summary)+'</div>' : '')+
-            ((videoPreview.release_payment_status && paymentMinor) ? '<div style="margin-top:10px" class="kv"><span class="k">الدفع النهائي</span><span class="v mono">'+money(paymentMinor)+' '+esc(videoPreview.release_currency||'EGP')+' · '+esc(videoPreview.release_method||'—')+'</span></div>' : '')+
-            ((paymentStatus==='WAITING_PAYMENT' && role==='CUSTOMER') ? '<button class="btn btn-primary btn-sm" id="final-release-proof" style="margin-top:10px">ارفع إثبات الدفع النهائي</button>' : '')+
-          '</div>'+
-        '</div>'+
+        '<div style="font-size:16px;font-weight:800">📱 لا يتم رفع صور أو فيديوهات أو تسجيلات داخل شفرة</div>'+
+        '<div style="margin-top:8px"><span class="badge badge-purple">'+esc(statusLabel)+'</span></div>'+
+        '<div style="font-size:12px;color:var(--text-faint);margin-top:9px">المعاينات والفيديو الأصلي وأي تسجيلات أو ملفات يتم إرسالها خارج التطبيق عبر WhatsApp. شفرة تحتفظ فقط بالحالة، الرسائل النصية، وبيانات المتابعة.</div>'+
+        (videoPreview.editor_note ? '<div style="margin-top:10px;font-size:12.5px;color:var(--text-dim)">ملاحظة الممنتج: '+esc(videoPreview.editor_note)+'</div>' : '')+
+        (videoPreview.marketer_handoff_summary ? '<div style="margin-top:10px;padding:10px;background:var(--bg-elev-2);border-radius:10px;font-size:12.5px"><b>ملخص المسوق:</b><br>'+esc(videoPreview.marketer_handoff_summary)+'</div>' : '')+
+        ((videoPreview.release_payment_status && paymentMinor) ? '<div style="margin-top:10px" class="kv"><span class="k">الدفع النهائي</span><span class="v mono">'+money(paymentMinor)+' '+esc(videoPreview.release_currency||'EGP')+' · '+esc(videoPreview.release_method||'—')+'</span></div>' : '')+
+        ((paymentStatus==='WAITING_PAYMENT' && role==='CUSTOMER') ? '<button class="btn btn-primary btn-sm" id="final-release-proof" style="margin-top:10px">أرسل رقم عملية الدفع</button>' : '')+
       '</div>'
     );
   }
 
   if (role==='EDITOR' && ['IN_PRODUCTION','PREVIEW_READY'].includes(project.status) && (!videoPreview || ['REVISION_REQUESTED'].includes(videoPreview.status))) {
     blocks.push('<div class="card" style="margin-bottom:12px">'+
-      '<div style="font-weight:800;margin-bottom:6px">إرسال النسخة المائية للمسوق</div>'+
-      '<div style="font-size:12px;color:var(--text-faint);margin-bottom:10px">الممنتج يجهز نسختين: نسخة مراجعة عليها صورة/علامة شفافة مدمجة داخل الفيديو، ونسخة أصلية نظيفة. ارفع نسخة المراجعة فقط هنا.</div>'+
-      '<div class="field"><label>فيديو المعاينة المائي — MP4 أو WebM، حتى 15MB</label><input id="preview-video-file" type="file" accept="video/mp4,video/webm"></div>'+
-      '<label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--text-dim);margin-bottom:10px"><input id="preview-watermark-confirm" type="checkbox" style="margin-top:3px"> أؤكد أن النسخة المرفوعة تحتوي بالفعل على العلامة/الصورة الشفافة وأنها ليست النسخة الأصلية.</label>'+
-      '<div class="field"><label>ملاحظة للمسوق</label><textarea id="preview-editor-note" rows="3" placeholder="مثلاً: تم تنفيذ كل المطلوب والنسخة دي للمراجعة فقط..."></textarea></div>'+
-      '<button class="btn btn-primary btn-block" id="send-video-preview">إرسال النسخة المائية</button>'+
+      '<div style="font-weight:800;margin-bottom:6px">جهّز النسخة المائية</div>'+
+      '<div style="font-size:12px;color:var(--text-faint);margin-bottom:10px">الممنتج يعمل نسختين خارج شفرة: نسخة مائية للمراجعة ونسخة أصلية نظيفة. ابعت النسخة المائية للمسوق على WhatsApp ثم أكد هنا.</div>'+
+      (project.marketer_phone ? '<button class="btn btn-ghost btn-sm" id="wa-preview-marketer">WhatsApp المسوق</button>' : '<div style="font-size:12px;color:var(--text-faint)">لا يوجد رقم WhatsApp للمسوق.</div>')+
+      '<label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--text-dim);margin:10px 0"><input id="preview-watermark-confirm" type="checkbox" style="margin-top:3px"> أؤكد أني جهزت النسخة المائية وأرسلتها للمسوق على WhatsApp.</label>'+
+      '<div class="field"><label>ملاحظة للمسوق</label><textarea id="preview-editor-note" rows="3" placeholder="مثلاً: تم تنفيذ كل المطلوب والنسخة المائية جاهزة للمراجعة..."></textarea></div>'+
+      '<button class="btn btn-primary btn-block" id="send-video-preview">تأكيد إرسال النسخة المائية عبر WhatsApp</button>'+
     '</div>');
   }
 
   if (role==='MARKETER' && videoPreview && videoPreview.status==='EDITOR_SENT') {
     blocks.push('<div class="card" style="margin-bottom:12px">'+
-      '<div style="font-weight:800">نسخة المراجعة المائية وصلت</div>'+
-      '<div style="font-size:12px;color:var(--text-faint);margin:6px 0 10px">ابعت نسخة المراجعة المائية للعميل، والنسخة الأصلية النظيفة تظل مع الممنتج حتى بعد تأكيد الدفع.</div>'+
-      '<div class="btn-row"><button class="btn btn-primary" id="marketer-receive-preview">استلمت النسخة المائية</button>'+
+      '<div style="font-weight:800">نسخة المراجعة المائية وصلت على WhatsApp</div>'+
+      '<div style="font-size:12px;color:var(--text-faint);margin:6px 0 10px">بعد ما تستلمها على WhatsApp، ابعتها للعميل على WhatsApp ثم أكد الخطوة هنا.</div>'+
+      '<div class="btn-row"><button class="btn btn-primary" id="marketer-receive-preview">استلمت النسخة على WhatsApp</button>'+
       (project.editor_phone ? '<button class="btn btn-ghost" id="wa-preview-editor">WhatsApp الممنتج</button>' : '')+
       '</div></div>');
   }
 
   if (role==='MARKETER' && videoPreview && videoPreview.status==='MARKETER_RECEIVED') {
     blocks.push('<div class="card" style="margin-bottom:12px">'+
-      '<div style="font-weight:800">ابعت النسخة المائية للعميل</div>'+
-      '<div style="font-size:12px;color:var(--text-faint);margin:6px 0 10px">العميل هيشوف النسخة المائية للمراجعة. بعد موافقته ينتقل الطلب مباشرة ليوسف للدفع النهائي.</div>'+
-      '<button class="btn btn-primary btn-block" id="send-preview-to-customer">إرسال للعميل للمراجعة</button>'+
-      '</div>');
+      '<div style="font-weight:800">إرسال النسخة المائية للعميل</div>'+
+      '<div style="font-size:12px;color:var(--text-faint);margin:6px 0 10px">ابعتها للعميل على WhatsApp. شفرة هتسجل فقط إن الإرسال حصل.</div>'+
+      (project.customer_phone ? '<button class="btn btn-ghost btn-sm" id="wa-preview-customer">WhatsApp العميل</button>' : '')+
+      '<button class="btn btn-primary btn-block" id="send-preview-to-customer" style="margin-top:9px">أكد أني أرسلتها للعميل على WhatsApp</button>'+
+    '</div>');
   }
 
   if (role==='CUSTOMER' && videoPreview && videoPreview.status==='CUSTOMER_REVIEW') {
     blocks.push('<div class="card" style="margin-bottom:12px">'+
-      '<div style="font-weight:800">راجع النسخة المائية</div>'+
-      '<div style="font-size:12px;color:var(--text-faint);margin:6px 0 10px">لو الفيديو عاجبك اضغط «تمام». ولو محتاج تعديل اكتب المطلوب بالتفصيل.</div>'+
-      '<div class="btn-row"><button class="btn btn-primary" id="customer-preview-ok">تمام</button><button class="btn btn-ghost" id="customer-preview-revision">عايز تعديل</button></div>'+
-      '</div>');
+      '<div style="font-weight:800">راجع الفيديو على WhatsApp</div>'+
+      '<div style="font-size:12px;color:var(--text-faint);margin:6px 0 10px">الفيديو نفسه موجود على WhatsApp، مش داخل شفرة. بعد ما تشوفه اضغط «تمام» أو اطلب تعديل كتابيًا.</div>'+
+      (project.marketer_phone ? '<button class="btn btn-ghost btn-sm" id="wa-review-marketer">WhatsApp المسوق</button>' : '')+
+      '<div class="btn-row" style="margin-top:9px"><button class="btn btn-primary" id="customer-preview-ok">تمام</button><button class="btn btn-ghost" id="customer-preview-revision">عايز تعديل</button></div>'+
+    '</div>');
   }
 
   if (role==='EDITOR' && videoPreview && videoPreview.status==='PAYMENT_CONFIRMED') {
@@ -1625,9 +1615,6 @@ async function renderProjectDetail(el, id){
 
   el.innerHTML = blocks.join('');
   wireProjectDetailActions(el, project, id);
-  if(videoPreview && videoPreview.has_preview_video){
-    loadProtectedPreviewVideo(id, videoPreview.id);
-  }
   wireChat(el, id);
   scrollChatToBottom();
 }
@@ -1646,31 +1633,6 @@ function renderChatMessages(messages){
 function scrollChatToBottom(){
   const box = document.getElementById('chat-messages');
   if (box) box.scrollTop = box.scrollHeight;
-}
-function fileToDataUrl(file){
-  return new Promise((resolve,reject)=>{
-    const reader=new FileReader();
-    reader.onload=()=>resolve(reader.result);
-    reader.onerror=()=>reject(new Error('تعذر قراءة الملف'));
-    reader.readAsDataURL(file);
-  });
-}
-async function loadProtectedPreviewVideo(projectId, previewId){
-  const el=document.getElementById('protected-preview-video');
-  if(!el) return;
-  try{
-    const res=await fetch(state.apiBase+`/projects/${projectId}/video-preview/media`,{
-      headers: state.token ? {Authorization:'Bearer '+state.token} : {}
-    });
-    if(!res.ok) throw new Error('تعذر تحميل المعاينة');
-    const blob=await res.blob();
-    const url=URL.createObjectURL(blob);
-    el.src=url;
-    el.dataset.objectUrl=url;
-    el.load();
-  }catch(err){
-    el.outerHTML='<div style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-faint);padding:20px;text-align:center">تعذر تحميل النسخة المائية حالياً. حدّث الصفحة وجرب مرة تانية.</div>';
-  }
 }
 function wireChat(el, id){
   const sendBtn = document.getElementById('chat-send-btn');
@@ -1749,23 +1711,22 @@ function wireProjectDetailActions(el, project, id){
     catch(err){ toast(err.message,'err'); initPayBtn.disabled = false; }
   });
 
+  document.getElementById('wa-preview-marketer')?.addEventListener('click',()=>openWhatsApp(project.marketer_phone,'مرحباً '+project.marketer_name+'، دي النسخة المائية للمشروع '+project.order_number+' للمراجعة. النسخة الأصلية هتفضل مع الممنتج لحد تأكيد الدفع.'));
+  document.getElementById('wa-preview-customer')?.addEventListener('click',()=>openWhatsApp(project.customer_phone,'مرحباً '+project.customer_name+'، هبعت لك دلوقتي نسخة المراجعة المائية للمشروع '+project.order_number+' على WhatsApp.'));
+  document.getElementById('wa-review-marketer')?.addEventListener('click',()=>openWhatsApp(project.marketer_phone,'بخصوص مشروع '+project.order_number+'، شوفت النسخة المائية على WhatsApp.'));
+
   const sendPreviewBtn=document.getElementById('send-video-preview');
   if(sendPreviewBtn) sendPreviewBtn.addEventListener('click',async()=>{
-    const file=document.getElementById('preview-video-file')?.files?.[0];
     const watermark=document.getElementById('preview-watermark-confirm')?.checked;
-    if(!file){toast('اختار فيديو المعاينة المائي','err');return;}
-    if(!['video/mp4','video/webm'].includes(file.type)){toast('الفيديو لازم MP4 أو WebM','err');return;}
-    if(file.size>15000000){toast('الفيديو كبير. الحد الأقصى 15MB','err');return;}
-    if(!watermark){toast('أكد إن الفيديو عليه العلامة الشفافة قبل الإرسال','err');return;}
+    if(!watermark){toast('أكد إن النسخة المائية اتبعتت للمسوق على WhatsApp','err');return;}
     sendPreviewBtn.disabled=true;
     try{
-      const dataUrl=await fileToDataUrl(file);
       await api(`/projects/${id}/video-preview`,{method:'POST',body:{
-        previewVideoDataUrl:dataUrl,
         watermarkConfirmed:true,
+        whatsappSent:true,
         editorNote:document.getElementById('preview-editor-note').value.trim()
       }});
-      toast('النسخة المائية اتبعتت للمسوق','ok');refresh();
+      toast('اتسجل إن النسخة المائية اتبعتت على WhatsApp','ok');refresh();
     }catch(err){toast(err.message,'err');sendPreviewBtn.disabled=false;}
   });
 
