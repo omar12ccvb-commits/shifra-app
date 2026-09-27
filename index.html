@@ -1385,16 +1385,18 @@ async function getCatalog(){
 
 async function renderProjectDetail(el, id){
   const role = state.user.role;
-  const [{project}, priceRes, paymentsRes, revisionsRes, earningsRes, catalog, messagesRes, ratingsRes, complaintsRes] = await Promise.all([
+  const [{project}, priceRes, paymentsRes, revisionsRes, earningsRes, catalog, messagesRes, ratingsRes, complaintsRes, videoPreviewRes] = await Promise.all([
     api(`/projects/${id}`), api(`/projects/${id}/price-agreements`), api(`/projects/${id}/payments`),
     api(`/projects/${id}/revisions`), api(`/projects/${id}/earnings`), getCatalog(), api(`/projects/${id}/messages`),
     role === 'CUSTOMER' ? api(`/projects/${id}/ratings`) : Promise.resolve({ratings:[]}),
     role === 'CUSTOMER' ? api('/complaints/me') : Promise.resolve({complaints:[]}),
+    api(`/projects/${id}/video-preview`),
   ]);
   const latestAgreement = priceRes.priceAgreements[0] || null; // ordered DESC by version
   const activePayment = paymentsRes.payments.find(p => ['PENDING','PROOF_SUBMITTED','PROOF_REJECTED'].includes(p.status));
   const openRevision = revisionsRes.revisions.find(r => r.status === 'OPEN');
   const myEarning = earningsRes.earnings[0] || null;
+  const videoPreview = videoPreviewRes.preview || null;
 
   const blocks = [];
   blocks.push(`<a class="backlink" href="#" id="back-to-list">‹ رجوع</a>`);
@@ -1423,6 +1425,102 @@ async function renderProjectDetail(el, id){
     if (waButtons.length) {
       blocks.push('<div class="card" style="margin-bottom:14px"><div style="font-weight:700;margin-bottom:8px">التواصل والملفات</div><div style="font-size:12px;color:var(--text-faint);margin-bottom:9px">استخدم WhatsApp لإرسال الصور والفيديوهات والملفات. شفرة لا يخزن الوسائط هنا في هذه المرحلة.</div><div class="btn-row">'+waButtons.join('')+'</div></div>');
     }
+  }
+
+  /* ---- Protected video preview / handoff ---- */
+  if (videoPreview) {
+    const statusLabel = {
+      EDITOR_SENT:'المونتير أرسل المعاينة',
+      MARKETER_RECEIVED:'المسوق استلم المعاينة',
+      CUSTOMER_REVIEW:'في انتظار مراجعة العميل',
+      REVISION_REQUESTED:'العميل طلب تعديل',
+      PAYMENT_PENDING:'في انتظار تسعير/دفع التسليم النهائي',
+      PAYMENT_CONFIRMED:'الدفع النهائي اتأكد',
+      ORIGINAL_SENT:'الأصل اتبعت للمسوق',
+      ORIGINAL_RECEIVED:'المسوق استلم الأصل',
+      DELIVERED:'تم التسليم'
+    }[videoPreview.status] || videoPreview.status;
+    const paymentMinor = videoPreview.release_amount_minor;
+    const paymentStatus = videoPreview.release_payment_status;
+    blocks.push(
+      '<div class="section-title">معاينة الفيديو الآمنة</div>'+
+      '<div class="card" style="margin-bottom:12px;border-color:rgba(139,92,246,.28)">'+
+        '<div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap">'+
+          '<div style="width:150px;max-width:42vw;aspect-ratio:16/9;border-radius:12px;overflow:hidden;border:1px solid var(--border);background:#050509">'+
+            '<img src="'+videoPreview.thumbnail_data_url+'" alt="معاينة صغيرة" style="width:100%;height:100%;object-fit:cover;display:block">'+
+          '</div>'+
+          '<div style="flex:1;min-width:220px">'+
+            '<div style="font-size:16px;font-weight:800">المعاينة رقم v'+Number(videoPreview.version)+'</div>'+
+            '<div style="margin-top:4px"><span class="badge badge-purple">'+esc(statusLabel)+'</span></div>'+
+            '<div style="font-size:12px;color:var(--text-faint);margin-top:9px">المعاينة داخل شفرة صورة صغيرة فقط. الفيديو الأصلي لا يتم فتحه أو تخزينه هنا، ويتم تسليمه عبر WhatsApp بعد تأكيد الدفع النهائي.</div>'+
+            (videoPreview.editor_note ? '<div style="margin-top:10px;font-size:12.5px;color:var(--text-dim)">ملاحظة المونتير: '+esc(videoPreview.editor_note)+'</div>' : '')+
+            (videoPreview.marketer_handoff_summary ? '<div style="margin-top:10px;padding:10px;background:var(--bg-elev-2);border-radius:10px;font-size:12.5px"><b>ملخص المسوق ليوسف:</b><br>'+esc(videoPreview.marketer_handoff_summary)+'</div>' : '')+
+            ((videoPreview.release_payment_status && paymentMinor) ? '<div style="margin-top:10px" class="kv"><span class="k">الدفع النهائي</span><span class="v mono">'+money(paymentMinor)+' '+esc(videoPreview.release_currency||'EGP')+' · '+esc(videoPreview.release_method||'—')+'</span></div>' : '')+
+            ((paymentStatus==='WAITING_PAYMENT' && role==='CUSTOMER') ? '<button class="btn btn-primary btn-sm" id="final-release-proof" style="margin-top:10px">ارفع إثبات الدفع النهائي</button>' : '')+
+          '</div>'+
+        '</div>'+
+      '</div>'
+    );
+  }
+
+  if (role==='EDITOR' && ['IN_PRODUCTION','PREVIEW_READY'].includes(project.status) && (!videoPreview || ['REVISION_REQUESTED'].includes(videoPreview.status))) {
+    blocks.push('<div class="card" style="margin-bottom:12px">'+
+      '<div style="font-weight:800;margin-bottom:6px">إرسال المعاينة للمسوق</div>'+
+      '<div style="font-size:12px;color:var(--text-faint);margin-bottom:10px">اختار صورة صغيرة من الفيديو فقط. الفيديو الأصلي يفضل عندك ويتم إرساله للمسوق على WhatsApp بعد تأكيد الدفع.</div>'+
+      '<div class="field"><label>صورة المعاينة</label><input id="preview-thumbnail-file" type="file" accept="image/jpeg,image/png,image/webp"></div>'+
+      '<div class="field"><label>ملاحظة للمسوق</label><textarea id="preview-editor-note" rows="3" placeholder="مثلاً: تم تنفيذ كل المطلوب..."></textarea></div>'+
+      '<button class="btn btn-primary btn-block" id="send-video-preview">إرسال المعاينة الآمنة</button>'+
+    '</div>');
+  }
+
+  if (role==='MARKETER' && videoPreview && videoPreview.status==='EDITOR_SENT') {
+    blocks.push('<div class="card" style="margin-bottom:12px">'+
+      '<div style="font-weight:800">المعاينة وصلت من المونتير</div>'+
+      '<div style="font-size:12px;color:var(--text-faint);margin:6px 0 10px">استلمت الأصل من المونتير على WhatsApp؟ اضغط استلام هنا لتثبيت المسؤولية، ثم ابعت المعاينة للعميل.</div>'+
+      '<div class="btn-row"><button class="btn btn-primary" id="marketer-receive-preview">استلمت المعاينة</button>'+
+      (project.editor_phone ? '<button class="btn btn-ghost" id="wa-preview-editor">WhatsApp المونتير</button>' : '')+
+      '</div></div>');
+  }
+
+  if (role==='MARKETER' && videoPreview && videoPreview.status==='MARKETER_RECEIVED') {
+    blocks.push('<div class="card" style="margin-bottom:12px">'+
+      '<div style="font-weight:800">المعاينة جاهزة لإرسالها للعميل</div>'+
+      '<div style="font-size:12px;color:var(--text-faint);margin:6px 0 10px">اكتب كل طلبات العميل وما تم تنفيذه. الملخص هينتقل تلقائياً ليوسف بعد موافقة العميل.</div>'+
+      '<button class="btn btn-primary btn-block" id="send-preview-to-customer">إرسال للعميل للمراجعة</button>'+
+      '</div>');
+  }
+
+  if (role==='CUSTOMER' && videoPreview && videoPreview.status==='CUSTOMER_REVIEW') {
+    blocks.push('<div class="card" style="margin-bottom:12px">'+
+      '<div style="font-weight:800">راجع المعاينة</div>'+
+      '<div style="font-size:12px;color:var(--text-faint);margin:6px 0 10px">لو كل حاجة تمام اضغط «تمام». لو محتاج تعديل اكتب المطلوب بالتفصيل.</div>'+
+      '<div class="btn-row"><button class="btn btn-primary" id="customer-preview-ok">تمام</button><button class="btn btn-ghost" id="customer-preview-revision">عايز تعديل</button></div>'+
+      '</div>');
+  }
+
+  if (role==='EDITOR' && videoPreview && videoPreview.status==='PAYMENT_CONFIRMED') {
+    blocks.push('<div class="card" style="margin-bottom:12px;border-color:rgba(52,211,153,.35)">'+
+      '<div style="font-weight:800">✅ الدفع النهائي اتأكد</div>'+
+      '<div style="font-size:12px;color:var(--text-faint);margin:6px 0 10px">ابعت الفيديو الأصلي للمسوق على WhatsApp، وبعدها أكد الاستلام هنا.</div>'+
+      '<button class="btn btn-primary btn-block" id="original-sent-btn">أرسلت الفيديو الأصلي للمسوق</button>'+
+      '</div>');
+  }
+
+  if (role==='MARKETER' && videoPreview && videoPreview.status==='ORIGINAL_SENT') {
+    blocks.push('<div class="card" style="margin-bottom:12px">'+
+      '<div style="font-weight:800">📦 الفيديو الأصلي اتبعت لك</div>'+
+      '<div style="font-size:12px;color:var(--text-faint);margin:6px 0 10px">استلمه من المونتير على WhatsApp ثم أكد الاستلام داخل التطبيق.</div>'+
+      '<button class="btn btn-primary btn-block" id="original-received-btn">استلمت الفيديو الأصلي</button>'+
+      '</div>');
+  }
+
+  if (role==='MARKETER' && videoPreview && videoPreview.status==='ORIGINAL_RECEIVED') {
+    blocks.push('<div class="card" style="margin-bottom:12px">'+
+      '<div style="font-weight:800">✅ الأصل عندك</div>'+
+      '<div style="font-size:12px;color:var(--text-faint);margin:6px 0 10px">ابعت الفيديو الأصلي للعميل عبر WhatsApp ثم اضغط الزر.</div>'+
+      (project.customer_phone ? '<button class="btn btn-ghost btn-sm" id="wa-original-customer">WhatsApp العميل</button>' : '')+
+      '<button class="btn btn-primary btn-block" id="deliver-original-btn" style="margin-top:9px">أرسلته للعميل</button>'+
+      '</div>');
   }
 
   /* ---- Price ---- */
@@ -1471,18 +1569,8 @@ async function renderProjectDetail(el, id){
   if (role === 'EDITOR' && project.status === 'EDITOR_ASSIGNED') {
     blocks.push(`<div class="section-title">الإنتاج</div><button class="btn btn-primary btn-block" id="start-prod-btn" style="margin-bottom:10px">بدء التنفيذ</button>`);
   }
-  if (role === 'EDITOR' && project.status === 'IN_PRODUCTION') {
-    blocks.push(`<div class="section-title">الإنتاج</div><button class="btn btn-primary btn-block" id="preview-ready-btn" style="margin-bottom:10px">المعاينة جاهزة</button>`);
-  }
   if (role === 'EDITOR' && project.status === 'READY_FOR_DELIVERY') {
     blocks.push(`<div class="section-title">التسليم</div><button class="btn btn-primary btn-block" id="deliver-btn" style="margin-bottom:10px">تسليم المشروع</button>`);
-  }
-  if (role === 'CUSTOMER' && project.status === 'PREVIEW_READY') {
-    blocks.push(`<div class="section-title">المعاينة</div>
-      <div class="btn-row" style="margin-bottom:10px">
-        <button class="btn btn-primary" id="final-approve-btn">اعتماد نهائي</button>
-        <button class="btn btn-ghost" id="request-revision-btn">اطلب تعديل</button>
-      </div>`);
   }
   if (role === 'EDITOR' && openRevision) {
     blocks.push(`<div class="section-title">تعديل مطلوب</div>
@@ -1549,6 +1637,14 @@ function renderChatMessages(messages){
 function scrollChatToBottom(){
   const box = document.getElementById('chat-messages');
   if (box) box.scrollTop = box.scrollHeight;
+}
+function fileToDataUrl(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(reader.result);
+    reader.onerror=()=>reject(new Error('تعذر قراءة الصورة'));
+    reader.readAsDataURL(file);
+  });
 }
 function wireChat(el, id){
   const sendBtn = document.getElementById('chat-send-btn');
@@ -1625,6 +1721,96 @@ function wireProjectDetailActions(el, project, id){
     initPayBtn.disabled = true;
     try { await api(`/projects/${id}/payments`, {method:'POST'}); toast('اتبعت طلب الدفع للعميل','ok'); refresh(); }
     catch(err){ toast(err.message,'err'); initPayBtn.disabled = false; }
+  });
+
+  const sendPreviewBtn=document.getElementById('send-video-preview');
+  if(sendPreviewBtn) sendPreviewBtn.addEventListener('click',async()=>{
+    const file=document.getElementById('preview-thumbnail-file')?.files?.[0];
+    if(!file){toast('اختار صورة صغيرة للمعاينة','err');return;}
+    if(!['image/jpeg','image/png','image/webp'].includes(file.type)){toast('الصورة لازم JPG أو PNG أو WebP','err');return;}
+    if(file.size>350000){toast('الصورة كبيرة. الحد الأقصى 350KB','err');return;}
+    sendPreviewBtn.disabled=true;
+    try{
+      const dataUrl=await fileToDataUrl(file);
+      await api(`/projects/${id}/video-preview`,{method:'POST',body:{thumbnailDataUrl:dataUrl,editorNote:document.getElementById('preview-editor-note').value.trim()}});
+      toast('المعاينة اتبعتت للمسوق','ok');refresh();
+    }catch(err){toast(err.message,'err');sendPreviewBtn.disabled=false;}
+  });
+
+  const receivePreviewBtn=document.getElementById('marketer-receive-preview');
+  if(receivePreviewBtn) receivePreviewBtn.addEventListener('click',async()=>{
+    receivePreviewBtn.disabled=true;
+    try{await api(`/projects/${id}/video-preview/${videoPreview.id}/marketer-receive`,{method:'POST'});toast('اتسجل استلام المعاينة','ok');refresh();}
+    catch(err){toast(err.message,'err');receivePreviewBtn.disabled=false;}
+  });
+  document.getElementById('wa-preview-editor')?.addEventListener('click',()=>openWhatsApp(project.editor_phone,'مرحباً '+project.editor_name+'، بخصوص المعاينة للمشروع '+project.order_number));
+
+  const sendToCustomerBtn=document.getElementById('send-preview-to-customer');
+  if(sendToCustomerBtn) sendToCustomerBtn.addEventListener('click',()=>{
+    modal(`<h3>إرسال المعاينة للعميل</h3>
+      <div class="field"><label>ملخص كل طلبات العميل وما تم تنفيذه</label><textarea id="marketer-handoff-summary" rows="5" placeholder="اكتب بالتفصيل طلب العميل والنتيجة..."></textarea></div>
+      <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" id="confirm-preview-to-customer">إرسال</button></div>`);
+    document.getElementById('confirm-preview-to-customer').addEventListener('click',async()=>{
+      const summary=document.getElementById('marketer-handoff-summary').value.trim();
+      if(!summary){toast('اكتب ملخص طلب العميل والتنفيذ','err');return;}
+      try{await api(`/projects/${id}/video-preview/${videoPreview.id}/send-to-customer`,{method:'POST',body:{marketerSummary:summary}});closeModal();toast('اتبعتت للعميل','ok');refresh();}
+      catch(err){toast(err.message,'err');}
+    });
+  });
+
+  const approvePreviewBtn=document.getElementById('customer-preview-ok');
+  if(approvePreviewBtn) approvePreviewBtn.addEventListener('click',async()=>{
+    approvePreviewBtn.disabled=true;
+    try{await api(`/projects/${id}/video-preview/${videoPreview.id}/customer-approve`,{method:'POST'});toast('تمام — اتنقل ليوسف للتسعير والدفع','ok');refresh();}
+    catch(err){toast(err.message,'err');approvePreviewBtn.disabled=false;}
+  });
+
+  const revisionPreviewBtn=document.getElementById('customer-preview-revision');
+  if(revisionPreviewBtn) revisionPreviewBtn.addEventListener('click',()=>{
+    modal(`<h3>طلب تعديل</h3>
+      <div class="field"><label>إيه اللي محتاج يتعدل؟</label><textarea id="preview-revision-text" rows="4"></textarea></div>
+      <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" id="confirm-preview-revision">إرسال</button></div>`);
+    document.getElementById('confirm-preview-revision').addEventListener('click',async()=>{
+      const text=document.getElementById('preview-revision-text').value.trim();
+      if(!text){toast('اكتب التعديل المطلوب','err');return;}
+      try{await api(`/projects/${id}/video-preview/${videoPreview.id}/customer-revision`,{method:'POST',body:{requestText:text}});closeModal();toast('اتبعث طلب التعديل للمونتير','ok');refresh();}
+      catch(err){toast(err.message,'err');}
+    });
+  });
+
+  const finalReleaseProofBtn=document.getElementById('final-release-proof');
+  if(finalReleaseProofBtn) finalReleaseProofBtn.addEventListener('click',()=>{
+    modal(`<h3>إثبات الدفع النهائي</h3>
+      <div class="field"><label>رقم العملية / المرجع</label><input id="final-proof-ref" class="ltr"></div>
+      <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" id="send-final-proof">إرسال</button></div>`);
+    document.getElementById('send-final-proof').addEventListener('click',async()=>{
+      const ref=document.getElementById('final-proof-ref').value.trim();
+      if(!ref){toast('اكتب المرجع','err');return;}
+      try{await api(`/release-payments/${videoPreview.release_payment_id}/proof`,{method:'POST',body:{proofReference:ref}});closeModal();toast('إثبات الدفع النهائي اتبعت ليوسف','ok');refresh();}
+      catch(err){toast(err.message,'err');}
+    });
+  });
+
+  const originalSentBtn=document.getElementById('original-sent-btn');
+  if(originalSentBtn) originalSentBtn.addEventListener('click',async()=>{
+    originalSentBtn.disabled=true;
+    try{await api(`/projects/${id}/original-sent`,{method:'POST'});toast('اتسجل إن الأصل اتبعت للمسوق','ok');refresh();}
+    catch(err){toast(err.message,'err');originalSentBtn.disabled=false;}
+  });
+
+  const originalReceivedBtn=document.getElementById('original-received-btn');
+  if(originalReceivedBtn) originalReceivedBtn.addEventListener('click',async()=>{
+    originalReceivedBtn.disabled=true;
+    try{await api(`/projects/${id}/original-received`,{method:'POST'});toast('اتسجل استلام الأصل','ok');refresh();}
+    catch(err){toast(err.message,'err');originalReceivedBtn.disabled=false;}
+  });
+
+  document.getElementById('wa-original-customer')?.addEventListener('click',()=>openWhatsApp(project.customer_phone,'مرحباً '+project.customer_name+'، بخصوص المشروع '+project.order_number+'. هبعت لك الفيديو الأصلي هنا على WhatsApp.'));
+  const deliverOriginalBtn=document.getElementById('deliver-original-btn');
+  if(deliverOriginalBtn) deliverOriginalBtn.addEventListener('click',async()=>{
+    deliverOriginalBtn.disabled=true;
+    try{await api(`/projects/${id}/deliver-original-to-customer`,{method:'POST'});toast('تم تسجيل تسليم الفيديو الأصلي للعميل','ok');refresh();}
+    catch(err){toast(err.message,'err');deliverOriginalBtn.disabled=false;}
   });
 
   el.querySelectorAll('[data-upload-proof]').forEach(btn => btn.addEventListener('click', () => {
