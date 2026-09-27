@@ -462,6 +462,7 @@ const NAV_BY_ROLE = {
     {id:'home', label:'الرئيسية', icon:'⌂'},
     {id:'projects', label:'مشاريعي', icon:'▦'},
     {id:'conversations', label:'محادثات', icon:'💬'},
+    {id:'complaints', label:'شكاوى', icon:'⚠'},
     {id:'profile', label:'حسابي', icon:'👤'}
   ],
   MARKETER: [
@@ -469,11 +470,13 @@ const NAV_BY_ROLE = {
     {id:'customers', label:'عملائي', icon:'☺'},
     {id:'projects', label:'مشاريعي', icon:'▦'},
     {id:'conversations', label:'محادثات', icon:'💬'},
+    {id:'ratings', label:'تقييماتي', icon:'★'},
     {id:'earnings', label:'أرباحي', icon:'%'}
   ],
   EDITOR: [
     {id:'projects', label:'مهامي', icon:'▦'},
     {id:'conversations', label:'محادثات', icon:'💬'},
+    {id:'ratings', label:'تقييماتي', icon:'★'},
     {id:'earnings', label:'أرباحي', icon:'%'}
   ],
 };
@@ -483,6 +486,8 @@ const VIEW_META = {
   opportunities:{title:'فرص جديدة', sub:'عملاء محتاجين مسوّق'},
   customers:{title:'عملائي', sub:'العملاء اللي بتتابعهم'},
   conversations:{title:'المحادثات', sub:'تواصل مباشر مع العميل والمسوّق والمحرر'},
+  complaints:{title:'الشكاوى', sub:'متابعة الشكاوى التي أرسلتها'},
+  ratings:{title:'تقييماتي', sub:'التقييمات التي حصلت عليها من العملاء'},
   projects:{ CUSTOMER:{title:'مشاريعي', sub:'كل طلباتك في مكان واحد'},
              MARKETER:{title:'مشاريعي', sub:'المشاريع اللي بتتابعها'},
              EDITOR:{title:'مهامي', sub:'الشغل المُسند ليك'} },
@@ -696,6 +701,57 @@ RENDERERS.profile = async (el) => {
 
   document.getElementById('profile-change-pw').addEventListener('click', openChangePasswordModal);
   document.getElementById('profile-logout').addEventListener('click', doLogout);
+};
+
+/* ================= RATINGS FOR MARKETER / EDITOR ================= */
+RENDERERS.ratings = async (el) => {
+  if (!['MARKETER','EDITOR'].includes(state.user.role)) {
+    el.innerHTML = '<div class="empty-state">التقييمات متاحة للمسوّق والمحرر.</div>';
+    return;
+  }
+  const {summary, ratings} = await api('/ratings/me');
+  const stars = n => '★'.repeat(Math.round(n)) + '☆'.repeat(5-Math.round(n));
+  el.innerHTML = \`
+    <div class="card" style="margin-bottom:16px;text-align:center">
+      <div style="font-size:12px;color:var(--text-faint)">متوسط تقييمك</div>
+      <div style="font-size:34px;font-weight:700;font-family:var(--mono);margin-top:4px">\${summary.average.toFixed(2)}</div>
+      <div style="color:var(--amber);font-size:24px;letter-spacing:2px">\${stars(summary.average)}</div>
+      <div style="font-size:12px;color:var(--text-faint);margin-top:3px">\${summary.count} تقييم</div>
+    </div>
+    <div class="section-title">آخر التقييمات</div>
+    \${ratings.length ? ratings.map(r => \`
+      <div class="card" style="margin-bottom:9px">
+        <div class="list-card-top">
+          <span style="font-weight:700">\${esc(r.customer_name)}</span>
+          <span style="color:var(--amber);letter-spacing:1px">\${'★'.repeat(r.stars)}\${'☆'.repeat(5-r.stars)}</span>
+        </div>
+        <div class="list-card-meta" style="margin-bottom:6px">\${esc(r.order_number)} · \${fmtDate(r.created_at)}</div>
+        <div style="font-size:13px;color:var(--text-dim)">\${r.comment ? esc(r.comment) : 'من غير تعليق'}</div>
+      </div>
+    \`).join('') : '<div class="empty-state"><div class="ic">★</div>لسه مفيش تقييمات.</div>'}
+  \`;
+};
+
+/* ================= CUSTOMER COMPLAINTS ================= */
+RENDERERS.complaints = async (el) => {
+  if (state.user.role !== 'CUSTOMER') {
+    el.innerHTML = '<div class="empty-state">الشكاوى متاحة للعميل.</div>';
+    return;
+  }
+  const {complaints} = await api('/complaints/me');
+  const label = s => ({OPEN:'مفتوحة',IN_REVIEW:'قيد المراجعة',RESOLVED:'تم الحل',REJECTED:'مرفوضة'}[s] || s);
+  const cat = s => ({COMMUNICATION:'تواصل',DELAY:'تأخير',MISLEADING:'معلومات مضللة',QUALITY:'جودة',PAYMENT:'دفع',BEHAVIOR:'سلوك',OTHER:'أخرى'}[s] || s);
+  el.innerHTML = complaints.length ? complaints.map(c => \`
+    <div class="card" style="margin-bottom:10px">
+      <div class="list-card-top">
+        <span class="list-card-title">\${esc(c.order_number)}</span>
+        <span class="badge \${c.status==='RESOLVED'?'badge-green':c.status==='REJECTED'?'badge-red':'badge-amber'}">\${label(c.status)}</span>
+      </div>
+      <div class="list-card-meta">\${esc(c.target_name)} · \${esc(c.target_role)} · \${cat(c.category)}</div>
+      <div style="margin-top:8px;font-size:13px">\${esc(c.description)}</div>
+      \${c.resolution_note ? \`<div style="margin-top:8px;color:var(--text-dim);font-size:12px">رد الإدارة: \${esc(c.resolution_note)}</div>\` : ''}
+    </div>
+  \`).join('') : '<div class="empty-state"><div class="ic">⚠</div>لسه مفيش شكاوى.</div>';
 };
 
 /* ================= PROJECTS (shared list, role-adaptive) ================= */
@@ -991,11 +1047,13 @@ async function getCatalog(){
 }
 
 async function renderProjectDetail(el, id){
-  const [{project}, priceRes, paymentsRes, revisionsRes, earningsRes, catalog, messagesRes] = await Promise.all([
-    api(`/projects/${id}`), api(`/projects/${id}/price-agreements`), api(`/projects/${id}/payments`),
-    api(`/projects/${id}/revisions`), api(`/projects/${id}/earnings`), getCatalog(), api(`/projects/${id}/messages`),
-  ]);
   const role = state.user.role;
+  const [{project}, priceRes, paymentsRes, revisionsRes, earningsRes, catalog, messagesRes, ratingsRes, complaintsRes] = await Promise.all([
+    api(\`/projects/\${id}\`), api(\`/projects/\${id}/price-agreements\`), api(\`/projects/\${id}/payments\`),
+    api(\`/projects/\${id}/revisions\`), api(\`/projects/\${id}/earnings\`), getCatalog(), api(\`/projects/\${id}/messages\`),
+    role === 'CUSTOMER' ? api(\`/projects/\${id}/ratings\`) : Promise.resolve({ratings:[]}),
+    role === 'CUSTOMER' ? api('/complaints/me') : Promise.resolve({complaints:[]}),
+  ]);
   const latestAgreement = priceRes.priceAgreements[0] || null; // ordered DESC by version
   const activePayment = paymentsRes.payments.find(p => ['PENDING','PROOF_SUBMITTED','PROOF_REJECTED'].includes(p.status));
   const openRevision = revisionsRes.revisions.find(r => r.status === 'OPEN');
@@ -1090,12 +1148,22 @@ async function renderProjectDetail(el, id){
         <div class="t-time">${fmtDate(r.created_at)} · ${badge(r.status)}</div></div>`).join('')}</div>`);
   }
 
-  if (myEarning) {
-    blocks.push(`<div class="section-title">نصيبك من المشروع ده</div>
-      <div class="card"><div class="price-hero"><div class="amt">${money(myEarning.amount_minor)} EGP</div></div></div>`);
+  if (role === 'CUSTOMER' && project.status === 'DELIVERED') {
+    const rated = new Set(ratingsRes.ratings.map(r => r.target_role));
+    blocks.push(\`<div class="section-title">التقييم والشكاوى</div>
+      <div class="card" style="margin-bottom:10px">
+        <div style="font-size:12.5px;color:var(--text-dim);margin-bottom:10px">
+          بعد استلام الفيديو تقدر تقيّم المسوّق والمحرر كل واحد بشكل مستقل.
+        </div>
+        <div class="btn-row" style="flex-wrap:wrap">
+          \${!rated.has('MARKETER') ? '<button class="btn btn-primary" data-rate-role="MARKETER">⭐ تقييم المسوّق</button>' : '<span class="badge badge-green">تم تقييم المسوّق</span>'}
+          \${project.editor_name ? (!rated.has('EDITOR') ? '<button class="btn btn-primary" data-rate-role="EDITOR">⭐ تقييم المحرر</button>' : '<span class="badge badge-green">تم تقييم المحرر</span>') : ''}
+          <button class="btn btn-danger" id="open-complaint-btn">تقديم شكوى</button>
+        </div>
+      </div>\`);
   }
 
-  blocks.push(`<div class="section-title">المحادثة</div>
+  blocks.push(\`<div class="section-title">المحادثة</div>
     <div class="chat-box">
       <div class="chat-messages" id="chat-messages">${renderChatMessages(messagesRes.messages)}</div>
       <div class="chat-input-row">
@@ -1260,8 +1328,76 @@ function wireProjectDetailActions(el, project, id){
   });
   el.querySelectorAll('[data-resolve-revision]').forEach(btn => btn.addEventListener('click', async () => {
     btn.disabled = true;
-    try { await api(`/projects/${id}/revisions/${btn.dataset.resolveRevision}/resolve`, {method:'POST'}); toast('اتحل التعديل','ok'); refresh(); }
+    try { await api(\`/projects/\${id}/revisions/\${btn.dataset.resolveRevision}/resolve\`, {method:'POST'}); toast('اتحل التعديل','ok'); refresh(); }
     catch(err){ toast(err.message,'err'); btn.disabled = false; }
+  }));
+
+  el.querySelectorAll('[data-rate-role]').forEach(btn => btn.addEventListener('click', () => {
+    const targetRole = btn.dataset.rateRole;
+    modal(\`<h3>تقييم \${targetRole === 'MARKETER' ? 'المسوّق' : 'المحرر'}</h3>
+      <div class="field">
+        <label>التقييم من 1 إلى 5</label>
+        <select id="rating-stars" class="ltr">
+          <option value="5">5 ⭐⭐⭐⭐⭐</option>
+          <option value="4">4 ⭐⭐⭐⭐</option>
+          <option value="3">3 ⭐⭐⭐</option>
+          <option value="2">2 ⭐⭐</option>
+          <option value="1">1 ⭐</option>
+        </select>
+      </div>
+      <div class="field"><label>تعليق اختياري</label><textarea id="rating-comment" rows="3" maxlength="1000"></textarea></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
+        <button class="btn btn-primary" id="submit-rating">إرسال التقييم</button>
+      </div>\`);
+    document.getElementById('submit-rating').addEventListener('click', async () => {
+      const stars = Number(document.getElementById('rating-stars').value);
+      const comment = document.getElementById('rating-comment').value.trim();
+      try {
+        await api(\`/projects/\${id}/ratings\`, {method:'POST', body:{targetRole, stars, comment}});
+        closeModal(); toast('تم إرسال التقييم','ok'); refresh();
+      } catch(err){ toast(err.message,'err'); }
+    });
+  }));
+
+  const complaintBtn = document.getElementById('open-complaint-btn');
+  if (complaintBtn) complaintBtn.addEventListener('click', () => {
+    modal(\`<h3>تقديم شكوى</h3>
+      <div class="field">
+        <label>الشكوى على</label>
+        <select id="complaint-target">
+          <option value="MARKETER">المسوّق</option>
+          \${project.editor_name ? '<option value="EDITOR">المحرر</option>' : ''}
+        </select>
+      </div>
+      <div class="field">
+        <label>نوع المشكلة</label>
+        <select id="complaint-category">
+          <option value="COMMUNICATION">التواصل</option>
+          <option value="DELAY">التأخير</option>
+          <option value="MISLEADING">معلومات غير صحيحة</option>
+          <option value="QUALITY">الجودة</option>
+          <option value="PAYMENT">الدفع</option>
+          <option value="BEHAVIOR">السلوك</option>
+          <option value="OTHER">أخرى</option>
+        </select>
+      </div>
+      <div class="field"><label>اشرح المشكلة</label><textarea id="complaint-desc" rows="4" maxlength="2000" placeholder="اكتب اللي حصل بالتفصيل..."></textarea></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
+        <button class="btn btn-danger" id="submit-complaint">إرسال الشكوى</button>
+      </div>\`);
+    document.getElementById('submit-complaint').addEventListener('click', async () => {
+      const targetRole = document.getElementById('complaint-target').value;
+      const category = document.getElementById('complaint-category').value;
+      const description = document.getElementById('complaint-desc').value.trim();
+      if (!description) { toast('اكتب تفاصيل المشكلة','err'); return; }
+      try {
+        await api(\`/projects/\${id}/complaints\`, {method:'POST', body:{targetRole, category, description}});
+        closeModal(); toast('تم إرسال الشكوى للإدارة','ok');
+        goView('complaints');
+      } catch(err){ toast(err.message,'err'); }
+    });
   }));
 }
 </script>
