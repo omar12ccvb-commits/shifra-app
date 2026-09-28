@@ -2890,8 +2890,9 @@ async function openOwnerPersonalChat(){
   try{
     const r=await api('/direct-conversations');
     const list=r.conversations||[];
-    const owner=list.find(x=>x.role==='OWNER' && /يوسف|youssef/i.test(x.full_name||'')) ||
+    const owner=list.find(x=>x.role==='OWNER' && /عمر\s*يوسف|omar\s*youssef/i.test(x.full_name||'')) ||
       list.find(x=>x.role==='OWNER' && /عمر|omar/i.test(x.full_name||'')) ||
+      list.find(x=>x.role==='OWNER' && /يوسف|youssef/i.test(x.full_name||'')) ||
       list.find(x=>x.role==='OWNER');
     if(!owner) throw new Error('حساب المالك غير متاح حاليًا');
     goView('direct');
