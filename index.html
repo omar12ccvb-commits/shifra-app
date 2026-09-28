@@ -1783,6 +1783,89 @@ body::before{
   }
 }
 </style>
+
+<style id="shifra-directory-v1">
+.team-directory-hero{
+  position:relative;overflow:hidden;margin-bottom:14px;padding:22px;
+  border:1px solid rgba(124,92,255,.18);border-radius:22px;
+  background:
+    radial-gradient(420px 220px at 100% 0%,rgba(56,189,248,.12),transparent 70%),
+    radial-gradient(420px 240px at 0% 100%,rgba(124,92,255,.12),transparent 72%),
+    linear-gradient(145deg,rgba(18,22,31,.96),rgba(10,13,20,.94));
+}
+.team-directory-hero h2{font:900 26px/1.3 Cairo,var(--font);margin-bottom:5px}
+.team-directory-hero p{font:500 11.5px/1.8 Cairo,var(--font);color:#91a0b3;max-width:780px}
+.team-directory-hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.team-directory-hero-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.team-ai-ad{
+  margin:14px 0;padding:18px;border-radius:20px;border:1px solid rgba(49,215,255,.16);
+  background:
+    radial-gradient(350px 180px at 0% 0%,rgba(49,215,255,.12),transparent 72%),
+    linear-gradient(115deg,rgba(124,92,255,.12),rgba(34,211,238,.06),rgba(52,211,153,.05));
+}
+.team-ai-ad-grid{display:grid;grid-template-columns:1.4fr .9fr;gap:14px;align-items:center}
+.team-ai-ad h3{font:900 22px/1.4 Cairo,var(--font)}
+.team-ai-ad p{font:500 11.5px/1.8 Cairo,var(--font);color:#8492a6;margin-top:4px}
+.team-ai-number{font:800 18px/1.3 IBM Plex Mono,monospace;letter-spacing:.5px;color:#dffaff;direction:ltr;text-align:right}
+.team-ai-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
+.team-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.team-card{
+  position:relative;overflow:hidden;padding:16px;border-radius:18px;
+  border:1px solid rgba(255,255,255,.07);
+  background:linear-gradient(145deg,rgba(17,21,29,.94),rgba(9,12,18,.94));
+  transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+.team-card:hover{transform:translateY(-3px);border-color:rgba(124,92,255,.28);box-shadow:0 22px 48px -38px rgba(124,92,255,.8)}
+.team-card-head{display:flex;align-items:center;gap:10px}
+.team-card-avatar{
+  width:48px;height:48px;flex:0 0 48px;border-radius:15px;display:grid;place-items:center;
+  font:900 16px Manrope,sans-serif;color:#fff;
+  background:linear-gradient(145deg,#7c5cff,#27c9e8);
+  box-shadow:0 16px 30px -22px rgba(49,215,255,.9);
+}
+.team-card-name{font:900 15px/1.3 Cairo,var(--font);overflow-wrap:anywhere}
+.team-card-title{font:700 10px/1.5 Cairo,var(--font);color:#93a0b2;margin-top:2px}
+.team-card-expertise{
+  margin-top:12px;padding:10px 11px;border-radius:12px;
+  background:rgba(124,92,255,.07);border:1px solid rgba(124,92,255,.13);
+  font:700 11.5px/1.75 Cairo,var(--font);color:#d9d2ff;
+}
+.team-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:11px}
+.team-stat{padding:9px;border-radius:11px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05);text-align:center}
+.team-stat .v{font:900 16px/1.1 Manrope,sans-serif;color:#f4f8ff}
+.team-stat .k{font:500 9px/1.4 Cairo,var(--font);color:#6f7e92;margin-top:4px}
+.team-card-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:11px}
+.team-status{font:700 10px/1.4 Cairo,var(--font)}
+.team-edit-hours{font-size:9.5px!important;padding:7px 9px!important}
+.customer-quick-start{
+  margin:14px 0;padding:16px;border-radius:20px;border:1px solid rgba(56,189,248,.16);
+  background:linear-gradient(145deg,rgba(56,189,248,.09),rgba(124,92,255,.06),rgba(255,255,255,.02));
+}
+.customer-quick-start-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.customer-quick-start-head .title{font:900 18px/1.4 Cairo,var(--font)}
+.customer-quick-start-head .sub{font:500 10.5px/1.7 Cairo,var(--font);color:#78879b}
+.customer-quick-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:11px}
+.customer-quick-btn{
+  border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:12px;text-align:start;
+  background:rgba(255,255,255,.035);color:#eef4fb;transition:.18s ease;
+}
+.customer-quick-btn:hover{transform:translateY(-2px);border-color:rgba(56,189,248,.26)}
+.customer-quick-btn .ic{font-size:20px}
+.customer-quick-btn .t{font:800 12px/1.5 Cairo,var(--font);margin-top:6px}
+.customer-quick-btn .s{font:500 9.5px/1.6 Cairo,var(--font);color:#718096;margin-top:2px}
+@media(max-width:980px){
+  .team-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .team-ai-ad-grid{grid-template-columns:1fr}
+}
+@media(max-width:650px){
+  .team-grid{grid-template-columns:1fr}
+  .team-directory-hero{padding:17px}
+  .team-directory-hero h2{font-size:23px}
+  .team-ai-ad{padding:15px}
+  .team-ai-number{text-align:start;font-size:16px}
+  .customer-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+</style>
 </head>
 <body>
 
@@ -2049,13 +2132,13 @@ document.getElementById('user-menu-btn').addEventListener('click', () => {
 /* ---------------- Role-adaptive nav + router ---------------- */
 const NAV_BY_ROLE = {
   CUSTOMER: [
-    {id:'customerHome', label:'مركز العميل', icon:'◆'}, {id:'ai-service', label:'خدمات AI', icon:'✦'},
+    {id:'customerHome', label:'مركز العميل', icon:'◆'}, {id:'people-directory', label:'الخبراء', icon:'👥'}, {id:'ai-service', label:'خدمات AI', icon:'✦'},
     {id:'customerTools', label:'الأدوات', icon:'✦'},
     {id:'projects', label:'مشاريعي', icon:'▦'},
     {id:'direct', label:'رسائل', icon:'💬'}
   ],
   MARKETER: [
-    {id:'marketerHome', label:'مركز المسوّق', icon:'◆'}, {id:'workflow-guide', label:'دليل المسار', icon:'📘'},
+    {id:'marketerHome', label:'مركز المسوّق', icon:'◆'}, {id:'people-directory', label:'الخبراء', icon:'👥'}, {id:'workflow-guide', label:'دليل المسار', icon:'📘'},
     {id:'marketer-tools', label:'أدوات المسوّق', icon:'✦'},
     {id:'opportunities', label:'الفرص', icon:'◆'}, {id:'customers', label:'عملائي', icon:'☺'},
     {id:'projects', label:'مشاريعي', icon:'▦'}, {id:'conversations', label:'المحادثات', icon:'☷'},
@@ -2064,14 +2147,14 @@ const NAV_BY_ROLE = {
     {id:'marketer-profile', label:'حسابي', icon:'⚿'}
   ],
   EDITOR: [
-    {id:'editorHome', label:'مركز المونتير', icon:'◆'}, {id:'workflow-guide', label:'دليل المسار', icon:'📘'},
+    {id:'editorHome', label:'مركز المونتير', icon:'◆'}, {id:'people-directory', label:'الخبراء', icon:'👥'}, {id:'workflow-guide', label:'دليل المسار', icon:'📘'},
     {id:'editorTools', label:'أدوات المونتير', icon:'✦'},
     {id:'projects', label:'مهامي', icon:'▦'},
     {id:'earnings', label:'أرباحي', icon:'%'},
     {id:'direct', label:'رسائل', icon:'💬'}
   ],
   OWNER: [
-    {id:'owner-home', label:'مركز القيادة', icon:'◆'},
+    {id:'owner-home', label:'مركز القيادة', icon:'◆'}, {id:'people-directory', label:'الخبراء', icon:'👥'},
     {id:'owner-tools', label:'أدوات المالك', icon:'✦'},
     {id:'owner-direct', label:'مراسلات مباشرة', icon:'💬'},
     {id:'owner-project-chat', label:'محادثات المشاريع', icon:'☷'},
@@ -2084,10 +2167,11 @@ const NAV_BY_ROLE = {
     {id:'owner-audit', label:'التتبع والتدقيق', icon:'▧'},
     {id:'owner-weekly', label:'الأداء الأسبوعي', icon:'★'}
   ],
-  ADMIN: [ {id:'direct', label:'رسائل', icon:'💬'}, {id:'projects', label:'المشاريع', icon:'▦'} ],
+  ADMIN: [ {id:'people-directory', label:'الخبراء', icon:'👥'}, {id:'direct', label:'رسائل', icon:'💬'}, {id:'projects', label:'المشاريع', icon:'▦'} ],
 };
 const VIEW_META = {
-  customerHome:{title:'مركز العميل', sub:'كل ما تحتاجه اليوم لمتابعة مشاريعك وتشغيل طلباتك بسرعة'},
+  customerHome:{title:'مركز العميل', sub:'كل ما تحتاجه اليوم لمتابعة مشاريعك وطلب الخدمة بسرعة'},
+  'people-directory':{title:'الخبراء والفريق', sub:'اعرف كل شخص متخصص في إيه وشوف إنجازاته وتقييمه وساعات عمله'},
   'ai-service':{title:'خدمات الذكاء الاصطناعي', sub:'خدمات AI ينفذها المالك شخصيًا من الفكرة حتى الفيديو النهائي'},
   customerTools:{title:'أدوات العميل', sub:'20 ميزة عملية — منها 10 مصممة للاستخدام اليومي'},
   opportunities:{title:'فرص جديدة', sub:'عملاء محتاجين مسوّق'},
@@ -2130,10 +2214,10 @@ function enterApp(){
   goView(firstView);
 }
 const MOBILE_PRIMARY_BY_ROLE = {
-  CUSTOMER:['customerHome','projects','direct','customerTools'],
-  MARKETER:['marketerHome','opportunities','projects','direct'],
-  EDITOR:['editorHome','projects','earnings','direct'],
-  OWNER:['owner-home','owner-direct','owner-finance','owner-team'],
+  CUSTOMER:['customerHome','people-directory','projects','direct'],
+  MARKETER:['marketerHome','opportunities','projects','people-directory'],
+  EDITOR:['editorHome','projects','earnings','people-directory'],
+  OWNER:['owner-home','people-directory','owner-direct','owner-finance'],
   ADMIN:['direct','projects']
 };
 function renderNav(){
@@ -3188,6 +3272,80 @@ RENDERERS['ai-service'] = async (el) => {
    '</section>';
   el.querySelector('#ai-talk-owner').addEventListener('click',openOwnerPersonalChat);
 };
+
+async function openDirectoryContact(userId){
+  try{
+    const r=await api('/direct-conversations');
+    const target=(r.conversations||[]).find(x=>String(x.id)===String(userId));
+    await goView('direct');
+    if(target){
+      const root=document.getElementById('content');
+      const btn=root?.querySelector('[data-direct-user="'+target.id+'"]');
+      if(btn) await renderDirectChat(root,target.id,btn);
+    }else{
+      toast('الحساب مش متاح للمراسلة حاليًا','err');
+    }
+  }catch(e){toast(e.message,'err');}
+}
+
+async function editDirectoryWorkHours(){
+  const current=state.user?.workHoursPerDay || '';
+  modal('<h3>ساعات عملي</h3>'+
+    '<div class="field"><label>عدد ساعات العمل اليومية</label><input id="directory-hours" type="number" min="1" max="24" value="'+esc(current)+'" placeholder="مثال: 8"></div>'+
+    '<div style="font-size:10.5px;color:var(--text-dim)">المعلومة هتظهر في بطاقة حسابك داخل دليل الفريق.</div>'+
+    '<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" id="directory-hours-save">حفظ</button></div>');
+  document.getElementById('directory-hours-save').addEventListener('click',async()=>{
+    const v=document.getElementById('directory-hours').value;
+    try{
+      const r=await api('/me/work-hours',{method:'PATCH',body:{workHoursPerDay:v||null}});
+      if(state.user) state.user.workHoursPerDay=r.workHoursPerDay;
+      closeModal(); toast('اتحفظت ساعات العمل','ok'); goView('people-directory');
+    }catch(e){toast(e.message,'err');}
+  });
+}
+
+RENDERERS['people-directory'] = async (el) => {
+  const {directory=[]}=await api('/directory');
+  const whatsapp='201029062771';
+  const waText='مرحبًا، أريد الاستفسار عن خدمة فيديوهات وصور بالذكاء الاصطناعي من SHIFRA.';
+  const cards=directory.map(p=>{
+    const initial=(p.fullName||'?').trim().charAt(0);
+    const rating=p.averageRating==null?'جديد':p.averageRating.toFixed(1)+' / 5';
+    const ratingSub=p.ratingCount ? p.ratingCount+' تقييم' : 'لا يوجد تقييم بعد';
+    const videos=p.completedVideos==null?'—':String(p.completedVideos);
+    const hours=p.workHoursPerDay==null?'لم يحدد':p.workHoursPerDay+' ساعات / يوم';
+    const available=p.availability==='AVAILABLE'?'متاح الآن':p.availability==='BUSY'?'مشغول حاليًا':p.availability==='PAUSED'?'متوقف مؤقتًا':'حالة العمل حسب الحساب';
+    const own=Number(p.id)===Number(state.user?.id);
+    return '<article class="team-card">'+
+      '<div class="team-card-head"><div class="team-card-avatar">'+esc(initial)+'</div><div style="min-width:0"><div class="team-card-name">'+esc(p.fullName)+'</div><div class="team-card-title">'+esc(p.title)+'</div></div></div>'+
+      '<div class="team-card-expertise">خبير في: '+esc(p.expertise)+'</div>'+
+      '<div class="team-stats">'+
+        '<div class="team-stat"><div class="v">'+videos+'</div><div class="k">فيديو مكتمل</div></div>'+
+        '<div class="team-stat"><div class="v">★ '+esc(rating)+'</div><div class="k">'+esc(ratingSub)+'</div></div>'+
+        '<div class="team-stat"><div class="v">'+esc(hours.replace(' ساعات / يوم',''))+'</div><div class="k">ساعات / يوم</div></div>'+
+      '</div>'+
+      '<div class="team-card-foot"><span class="team-status" style="color:'+(p.availability==='AVAILABLE'?'#5ee7b7':'#8d9aae')+'">● '+esc(available)+'</span>'+
+      (own?'<button class="btn btn-ghost team-edit-hours" data-edit-hours>تعديل ساعاتي</button>':'<button class="btn btn-primary btn-sm" data-open-contact="'+p.id+'">تواصل</button>')+
+      '</div></article>';
+  }).join('');
+
+  el.innerHTML=
+    '<section class="team-directory-hero">'+
+      '<div class="team-directory-hero-top"><div><h2>الخبراء والفريق 👥</h2><p>قبل ما تطلب الخدمة، شوف مين متخصص في إيه، اشتغل كام فيديو، تقييمه، وساعات عمله. كل الحسابات التشغيلية النشطة موجودة هنا.</p></div><span class="badge badge-purple">'+directory.length+' حساب نشط</span></div>'+
+      '<div class="team-directory-hero-actions"><button class="btn btn-primary btn-sm" id="directory-ai-open">✦ خدمات AI</button><button class="btn btn-ghost btn-sm" id="directory-wa-open">واتساب AI</button></div>'+
+    '</section>'+
+    '<section class="team-ai-ad"><div class="team-ai-ad-grid"><div><div style="font:800 10px/1.4 IBM Plex Mono,monospace;color:#6ee7ff;letter-spacing:2px">SHIFRA AI CREATIVE</div><h3>فيديوهات AI + صور AI</h3><p>تنفيذ فيديوهات وصور بالذكاء الاصطناعي حسب فكرتك، والتواصل مباشرة على واتساب.</p><div class="team-ai-actions"><button class="btn btn-primary btn-sm" id="directory-ai-chat">💬 تواصل واتساب</button><button class="btn btn-ghost btn-sm" id="directory-ai-app">فتح خدمة AI داخل التطبيق</button></div></div><div><div style="font:600 10px/1.4 Cairo,sans-serif;color:#70849a;margin-bottom:4px">رقم التواصل</div><div class="team-ai-number">01029062771</div></div></div></section>'+
+    '<div class="team-grid">'+(cards||'<div class="empty-state">مفيش حسابات نشطة حاليًا.</div>')+'</div>';
+
+  el.querySelector('#directory-ai-open')?.addEventListener('click',()=>goView('ai-service'));
+  el.querySelector('#directory-ai-app')?.addEventListener('click',()=>goView('ai-service'));
+  el.querySelector('#directory-ai-chat')?.addEventListener('click',()=>window.open('https://wa.me/'+whatsapp+'?text='+encodeURIComponent(waText),'_blank','noopener'));
+  el.querySelector('#directory-wa-open')?.addEventListener('click',()=>window.open('https://wa.me/'+whatsapp+'?text='+encodeURIComponent(waText),'_blank','noopener'));
+  el.querySelector('#directory-ai-chat')?.addEventListener('click',()=>window.open('https://wa.me/'+whatsapp+'?text='+encodeURIComponent(waText),'_blank','noopener'));
+  el.querySelectorAll('[data-open-contact]').forEach(b=>b.addEventListener('click',()=>openDirectoryContact(b.dataset.openContact)));
+  el.querySelectorAll('[data-edit-hours]').forEach(b=>b.addEventListener('click',editDirectoryWorkHours));
+};
+
 RENDERERS.customerHome = async (el) => {
   const [pr,nr,dr,cat] = await Promise.all([
     api('/projects'),
@@ -3257,6 +3415,7 @@ RENDERERS.customerHome = async (el) => {
     '</div>';
 
   el.querySelector('[data-ai-service-open]')?.addEventListener('click',()=>goView('ai-service'));
+  el.querySelectorAll('[data-quick-service]').forEach(b=>b.addEventListener('click',()=>customerStartQuickService(b.dataset.quickService)));
   el.querySelectorAll('[data-customer-jump]').forEach(b=>b.addEventListener('click',()=>goView(b.dataset.customerJump)));
   el.querySelectorAll('[data-customer-action]').forEach(b=>b.addEventListener('click',()=>customerHandleAction(b.dataset.customerAction,el,projects,notifications,cat)));
 };
@@ -3271,6 +3430,33 @@ RENDERERS.customerTools = async (el) => {
   el.querySelectorAll('[data-customer-action]').forEach(b=>b.addEventListener('click',()=>customerHandleAction(b.dataset.customerAction,el,projects,[],{})));
 };
 
+
+async function customerStartQuickService(kind){
+  if(kind==='ai'){ await goView('ai-service'); return; }
+  if(kind==='experts'){ await goView('people-directory'); return; }
+  if(kind==='help'){
+    const text='مرحبًا، أنا عميل في SHIFRA ومحتاج مساعدة في اختيار الخدمة المناسبة.';
+    window.open('https://wa.me/201029062771?text='+encodeURIComponent(text),'_blank','noopener');
+    return;
+  }
+  const marketerId=state.profile?.marketer_id;
+  if(marketerId){
+    try{
+      const r=await api('/direct-conversations');
+      const target=(r.conversations||[]).find(x=>String(x.id)===String(marketerId));
+      await goView('direct');
+      if(target){
+        const root=document.getElementById('content');
+        const btn=root?.querySelector('[data-direct-user="'+target.id+'"]');
+        if(btn) await renderDirectChat(root,target.id,btn);
+      }else{
+        toast('المسوّق المسؤول غير متاح للمراسلة الآن','err');
+      }
+      return;
+    }catch(e){toast(e.message,'err');return;}
+  }
+  await goView('people-directory');
+}
 async function customerHandleAction(action,host,projects=[],notifications=[],cat={}){
   const latest=projects[0]||null;
   if(action==='daily-brief'){
