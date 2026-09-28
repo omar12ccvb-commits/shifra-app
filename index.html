@@ -748,7 +748,43 @@ body::before{
 .mk-wa{font-size:11px;color:#8be0b8;text-decoration:none}.mk-wa:hover{text-decoration:underline}
 @media(max-width:980px){.mk-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.mk-tools{grid-template-columns:repeat(2,minmax(0,1fr))}.mk-split{grid-template-columns:1fr}}
 @media(max-width:600px){.mk-tools{grid-template-columns:1fr}.mk-kpis{gap:8px}.mk-kpi{padding:12px}.mk-kpi .val{font-size:19px}}
-</style></head>
+</style>
+<style id="shifra-customer-os">
+.customer-hero{padding:20px;border:1px solid rgba(120,150,190,.16);border-radius:22px;background:linear-gradient(135deg,rgba(84,112,160,.16),rgba(20,24,35,.72));box-shadow:0 18px 55px rgba(0,0,0,.16);margin-bottom:14px}
+.customer-hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.customer-hero h2{margin:0;font-size:22px;letter-spacing:-.4px}
+.customer-hero p{margin:7px 0 0;color:var(--text-dim);font-size:12.5px;line-height:1.7}
+.customer-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:16px}
+.customer-kpi{padding:13px;border-radius:16px;border:1px solid rgba(120,150,190,.12);background:rgba(8,12,19,.28)}
+.customer-kpi .k{font-size:10px;color:var(--text-faint)}
+.customer-kpi .v{font-size:21px;font-weight:800;margin-top:3px}
+.customer-kpi .s{font-size:10px;color:var(--text-dim);margin-top:3px}
+.customer-feature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.customer-feature{border:1px solid rgba(120,150,190,.12);background:rgba(10,14,22,.5);border-radius:17px;padding:13px;text-align:right;cursor:pointer;transition:.16s;min-height:108px;display:flex;flex-direction:column;justify-content:space-between}
+.customer-feature:hover{transform:translateY(-2px);border-color:rgba(130,160,220,.24);background:rgba(18,24,35,.75)}
+.customer-feature .top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.customer-feature .ic{font-size:19px}.customer-feature .title{font-weight:750;font-size:12.5px}.customer-feature .desc{font-size:10.5px;line-height:1.6;color:var(--text-dim);margin-top:7px}
+.customer-feature .daily{font-size:9px;padding:3px 7px;border-radius:999px;border:1px solid rgba(150,180,235,.18);background:rgba(100,140,220,.10);color:#b9c9eb}
+.customer-section-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:14px 0 9px}
+.customer-section-head .title{font-weight:800;font-size:13px}
+.customer-mini-list{display:grid;gap:8px}
+.customer-mini{padding:10px 11px;border-radius:14px;border:1px solid rgba(120,150,190,.10);background:rgba(8,12,18,.32)}
+.customer-mini .row{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.customer-progress{height:7px;border-radius:999px;background:rgba(255,255,255,.05);overflow:hidden;margin-top:7px}
+.customer-progress i{display:block;height:100%;background:linear-gradient(90deg,#6b8cff,#9b7cff);border-radius:inherit}
+.customer-tools-split{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.customer-chip-row{display:flex;flex-wrap:wrap;gap:7px}
+.customer-chip{padding:6px 9px;border-radius:999px;border:1px solid rgba(120,150,190,.12);background:rgba(11,15,22,.4);font-size:10.5px;color:var(--text-dim)}
+.customer-note-area{min-height:120px;resize:vertical}
+@media(max-width:760px){
+  .customer-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .customer-feature-grid{grid-template-columns:1fr}
+  .customer-tools-split{grid-template-columns:1fr}
+  .customer-hero{padding:16px}
+  .customer-hero h2{font-size:18px}
+}
+</style>
+</head>
 <body>
 
 <div id="auth-screen">
@@ -994,7 +1030,12 @@ document.getElementById('user-menu-btn').addEventListener('click', () => {
 
 /* ---------------- Role-adaptive nav + router ---------------- */
 const NAV_BY_ROLE = {
-  CUSTOMER: [ {id:'projects', label:'مشاريعي', icon:'▦'}, {id:'direct', label:'رسائل', icon:'💬'} ],
+  CUSTOMER: [
+    {id:'customerHome', label:'مركز العميل', icon:'◆'},
+    {id:'customerTools', label:'الأدوات', icon:'✦'},
+    {id:'projects', label:'مشاريعي', icon:'▦'},
+    {id:'direct', label:'رسائل', icon:'💬'}
+  ],
   MARKETER: [
     {id:'marketerHome', label:'مركز المسوّق', icon:'◆'},
     {id:'opportunities', label:'الفرص', icon:'◆'}, {id:'customers', label:'عملائي', icon:'☺'},
@@ -1020,6 +1061,8 @@ const NAV_BY_ROLE = {
   ADMIN: [ {id:'direct', label:'رسائل', icon:'💬'}, {id:'projects', label:'المشاريع', icon:'▦'} ],
 };
 const VIEW_META = {
+  customerHome:{title:'مركز العميل', sub:'كل ما تحتاجه اليوم لمتابعة مشاريعك وتشغيل طلباتك بسرعة'},
+  customerTools:{title:'أدوات العميل', sub:'20 ميزة عملية — منها 10 مصممة للاستخدام اليومي'},
   opportunities:{title:'فرص جديدة', sub:'عملاء محتاجين مسوّق'},
   customers:{title:'عملائي', sub:'العملاء اللي بتتابعهم'},
   projects:{ CUSTOMER:{title:'مشاريعي', sub:'كل طلباتك في مكان واحد'},
@@ -1422,6 +1465,240 @@ RENDERERS['marketer-profile'] = async (el) => {
 };
 
 /* ================= PROJECTS (shared list, role-adaptive) ================= */
+
+/* ================= CUSTOMER OS ================= */
+function customerDayKey(d=new Date()){
+  return d.toLocaleDateString('en-CA',{timeZone:'Africa/Cairo'});
+}
+function customerStore(key, fallback){
+  try{ const raw=localStorage.getItem('shifra_customer_'+key); return raw===null?fallback:JSON.parse(raw); }catch(e){return fallback;}
+}
+function customerSave(key,value){ try{localStorage.setItem('shifra_customer_'+key,JSON.stringify(value));}catch(e){} }
+async function customerSafe(path,fallback){
+  try{return await api(path);}catch(e){return fallback;}
+}
+function customerStreak(){
+  const today=customerDayKey(); const last=customerStore('last-day',null); let streak=Number(customerStore('streak',0))||0;
+  if(last!==today){
+    const prev=new Date(today+'T00:00:00'); prev.setDate(prev.getDate()-1);
+    const prevKey=customerDayKey(prev);
+    streak = last===prevKey ? streak+1 : 1;
+    customerSave('last-day',today); customerSave('streak',streak);
+  }
+  return streak||1;
+}
+function customerCopy(text){
+  return navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(text) : Promise.reject(new Error('Clipboard unavailable'));
+}
+function customerStatusScore(p){
+  const order=['NEW','CLIENT_ASSIGNED','DETAILS_COLLECTED','PRICE_NEGOTIATION','PRICE_ACCEPTED','PRICE_LOCKED','PAYMENT_PENDING','PAYMENT_CONFIRMED','EDITOR_ASSIGNED','IN_PRODUCTION','PREVIEW_READY','REVISION_REQUESTED','FINAL_APPROVED','READY_FOR_DELIVERY','DELIVERED'];
+  const i=order.indexOf(p.status); return i<0?20:Math.round((i+1)/order.length*100);
+}
+function customerProjectLabel(p){
+  return p.order_number || ('SH-'+p.id);
+}
+function customerFeature(icon,title,desc,action,daily=false){
+  return '<button class="customer-feature" data-customer-action="'+action+'"><div><div class="top"><span class="ic">'+icon+'</span>'+(daily?'<span class="daily">كل يوم</span>':'')+'</div><div class="title">'+esc(title)+'</div><div class="desc">'+esc(desc)+'</div></div><div style="font-size:10px;color:var(--text-faint)">فتح الأداة →</div></button>';
+}
+function customerIdeas(){
+  const ideas=[
+    'اختار فكرة واحدة من مشروعك الحالي وحولها لفيديو قصير.',
+    'حدّث بريف مشروعك الحالي بجملة واحدة توضّح النتيجة المطلوبة.',
+    'راجع أقرب موعد تسليم اليوم وحدد أهم قرار لازم يتم.',
+    'اكتب ملاحظة واحدة للمحرر تقلل دورة التعديلات القادمة.',
+    'قارن بين خدمتين قبل إنشاء طلب جديد بدل تكرار نفس الباقة.',
+    'احتفظ بنسخة من أفضل ملاحظاتك كقالب للمشاريع القادمة.',
+    'راجع المشاريع المسلّمة وحدد نوع المحتوى الذي تكرر طلبه أكثر.'
+  ];
+  const idx=Number(customerStore('idea-idx',0))||0;
+  return ideas[idx%ideas.length];
+}
+function customerOpenProject(id){
+  document.getElementById('content').dataset.detail=id;
+  goView('projects');
+  setTimeout(()=>RENDERERS.projects(document.getElementById('content')),0);
+}
+
+RENDERERS.customerHome = async (el) => {
+  const [pr,nr,dr,cat] = await Promise.all([
+    api('/projects'),
+    customerSafe('/notifications',{notifications:[]}),
+    customerSafe('/direct-conversations',{conversations:[]}),
+    customerSafe('/services/catalog',{serviceTypes:[],contentTypes:[],editingLevels:[]})
+  ]);
+  const projects=pr.projects||[], notifications=nr.notifications||[], direct=dr.conversations||[];
+  const active=projects.filter(p=>!['DELIVERED','CANCELLED','REJECTED','REFUNDED','ELIGIBLE_FOR_SETTLEMENT'].includes(p.status));
+  const delivered=projects.filter(p=>p.status==='DELIVERED'||p.status==='ELIGIBLE_FOR_SETTLEMENT').length;
+  const due48=projects.filter(p=>p.deadline&&new Date(p.deadline)>=new Date()&&new Date(p.deadline)<=new Date(Date.now()+48*3600*1000)).length;
+  const overdue=active.filter(p=>p.deadline&&new Date(p.deadline)<new Date()).length;
+  const unread=notifications.filter(n=>!n.is_read).length;
+  const streak=customerStreak();
+  const todayKey=customerDayKey();
+  const dailyDone=customerStore('daily-done-'+todayKey,[]);
+  const idea=customerIdeas();
+  const latest=projects[0]||null;
+  const latestScore=latest?customerStatusScore(latest):0;
+  const services=(cat.serviceTypes||[]).slice(0,8);
+  const dailyActions=[
+    ['ملخص اليوم','افتح ملخص المشاريع والمواعيد','daily-brief'],
+    ['مهام اليوم','علّم خطواتك الصغيرة كمكتملة','daily-tasks'],
+    ['سلسلة الدخول','تابع حضورك اليومي بدون مكافآت وهمية','streak'],
+    ['اقتراح اليوم','نصيحة تتغير يوميًا حسب حسابك','daily-tip'],
+    ['نبض المشاريع','شوف صحة أحدث مشروع في ثواني','project-pulse'],
+    ['مواعيد اليوم','ركّز على أقرب deadline','deadlines'],
+    ['رسائلك اليوم','اعرف مين بعت لك جديد','messages'],
+    ['اختصارات الخدمات','خلي الخدمات التي تستخدمها قريبة','service-shortcuts'],
+    ['فكرة اليوم','فكرة محتوى سريعة للاستخدام اليوم','daily-idea'],
+    ['آخر حركة','ارجع مباشرة لآخر مشروع اشتغلت عليه','resume']
+  ];
+  const dailyCards=[
+    dailyActions[0],dailyActions[1],dailyActions[2],dailyActions[3],dailyActions[4],
+    dailyActions[5],dailyActions[6],dailyActions[7],dailyActions[8],dailyActions[9]
+  ].map((x,i)=>customerFeature(['◉','✓','↗','✦','◌','⌁','💬','⚡','✎','↩'][i],x[0],x[1],x[2],true)).join('');
+  const strong=[
+    ['♻','إعادة طلب ذكية','جهّز طلبًا مشابهًا من مشروع سابق في ثوانٍ.','reorder'],
+    ['✎','منشئ بريف احترافي','ابنِ وصفًا واضحًا قبل التواصل مع الفريق.','brief-builder'],
+    ['₿','حاسبة الميزانية','احسب نطاق ميزانيتك قبل اختيار الخدمة.','budget'],
+    ['⇄','مقارنة الخدمات','قارن خدمات الكتالوج جنبًا إلى جنب.','compare'],
+    ['◫','تقويم التسليم','كل المواعيد المهمة في لوحة واحدة.','calendar'],
+    ['↻','متابعة التعديلات','اعرف المشاريع التي ما زالت تحتاج قرارًا منك.','revisions'],
+    ['▤','مركز الدفع','اعرف أي مشروع منتظر دفع أو تأكيد.','payments'],
+    ['★','المفضلة','احتفظ بالمشاريع التي ترجع لها كثيرًا.','favorites'],
+    ['📝','ملاحظاتي','مفكرة خاصة محلية داخل حسابك على الجهاز.','notes'],
+    ['◎','لوحة الإنجاز','إحصاءات تسليماتك ونشاط مشاريعك.','achievements']
+  ].map((x,i)=>customerFeature(x[0],x[1],x[2],x[3],false)).join('');
+  el.innerHTML =
+    '<div class="customer-hero">'+
+      '<div class="customer-hero-top"><div><h2>أهلاً '+esc(state.user.fullName)+' 👋</h2><p>مركز عميل سريع: راجع وضع شغلك، نفّذ خطوة اليوم، وارجع لمشاريعك بدون لف كتير.</p></div><span class="badge badge-purple">CUSTOMER OS</span></div>'+
+      '<div class="customer-kpis">'+
+        '<div class="customer-kpi"><div class="k">مشاريع نشطة</div><div class="v">'+active.length+'</div><div class="s">'+overdue+' متأخر · '+due48+' خلال 48 ساعة</div></div>'+
+        '<div class="customer-kpi"><div class="k">تم التسليم</div><div class="v">'+delivered+'</div><div class="s">إجمالي المشاريع المكتملة</div></div>'+
+        '<div class="customer-kpi"><div class="k">إشعارات جديدة</div><div class="v">'+unread+'</div><div class="s">'+direct.length+' محادثة مباشرة</div></div>'+
+        '<div class="customer-kpi"><div class="k">سلسلة حضور</div><div class="v">'+streak+' يوم</div><div class="s">آخر زيارة: اليوم</div></div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="customer-section-head"><div class="title">10 ميزات للاستخدام اليومي</div><span class="badge badge-gray">'+dailyDone.length+' مكتملة اليوم</span></div>'+
+    '<div class="customer-feature-grid">'+dailyCards+'</div>'+
+    '<div class="customer-section-head"><div class="title">10 أدوات قوية للحساب</div><button class="btn btn-ghost btn-sm" data-customer-jump="customerTools">عرض الأدوات</button></div>'+
+    '<div class="customer-feature-grid">'+strong+'</div>'+
+    '<div class="customer-tools-split" style="margin-top:12px">'+
+      '<div class="card"><div class="customer-section-head" style="margin-top:0"><div class="title">آخر مشروع</div><button class="btn btn-ghost btn-sm" data-customer-action="resume">فتح</button></div>'+
+        (latest?'<div class="customer-mini"><div class="row"><b>'+esc(customerProjectLabel(latest))+'</b>'+badge(latest.status)+'</div><div style="font-size:10.5px;color:var(--text-dim);margin-top:5px">صحة المسار: '+latestScore+'%</div><div class="customer-progress"><i style="width:'+latestScore+'%"></i></div></div>':'<div class="empty-state" style="padding:24px">مفيش مشاريع لسه.</div>')+
+      '</div>'+
+      '<div class="card"><div class="customer-section-head" style="margin-top:0"><div class="title">فكرة اليوم</div><button class="btn btn-ghost btn-sm" data-customer-action="daily-idea">تغيير</button></div><div style="font-size:12px;line-height:1.8;color:var(--text-dim)" id="customer-idea-text">'+esc(idea)+'</div></div>'+
+    '</div>';
+
+  el.querySelectorAll('[data-customer-jump]').forEach(b=>b.addEventListener('click',()=>goView(b.dataset.customerJump)));
+  el.querySelectorAll('[data-customer-action]').forEach(b=>b.addEventListener('click',()=>customerHandleAction(b.dataset.customerAction,el,projects,notifications,cat)));
+};
+
+RENDERERS.customerTools = async (el) => {
+  const {projects=[]}=await api('/projects');
+  const strong=[
+    ['♻','إعادة طلب ذكية','reorder'],['✎','منشئ بريف احترافي','brief-builder'],['₿','حاسبة الميزانية','budget'],['⇄','مقارنة الخدمات','compare'],['◫','تقويم التسليم','calendar'],
+    ['↻','متابعة التعديلات','revisions'],['▤','مركز الدفع','payments'],['★','المفضلة','favorites'],['📝','ملاحظاتي','notes'],['◎','لوحة الإنجاز','achievements']
+  ];
+  el.innerHTML='<div class="card" style="margin-bottom:12px"><b>20 ميزة عملية لحساب العميل</b><div style="font-size:11px;color:var(--text-dim);margin-top:5px">أول 10 منها مدمجة في مركز العميل للاستخدام اليومي، والعشرة دول أدوات تشغيل عميقة.</div></div><div class="customer-feature-grid">'+strong.map(x=>customerFeature(x[0],x[1],'فتح الميزة مباشرة',x[2])).join('')+'</div>';
+  el.querySelectorAll('[data-customer-action]').forEach(b=>b.addEventListener('click',()=>customerHandleAction(b.dataset.customerAction,el,projects,[],{})));
+};
+
+async function customerHandleAction(action,host,projects=[],notifications=[],cat={}){
+  const latest=projects[0]||null;
+  if(action==='daily-brief'){
+    const top=projects.slice(0,5);
+    const overdue=projects.filter(p=>p.deadline&&new Date(p.deadline)<new Date()&&!['DELIVERED','CANCELLED','REJECTED','REFUNDED'].includes(p.status));
+    modal('<h3>ملخص اليوم</h3>'+
+      '<div class="card" style="margin-bottom:8px"><div class="kv"><span class="k">إجمالي المشاريع</span><span class="v">'+projects.length+'</span></div><div class="kv"><span class="k">النشطة</span><span class="v">'+projects.filter(p=>!['DELIVERED','CANCELLED','REJECTED','REFUNDED','ELIGIBLE_FOR_SETTLEMENT'].includes(p.status)).length+'</span></div><div class="kv"><span class="k">المتأخر</span><span class="v">'+overdue.length+'</span></div></div>'+
+      '<div class="section-title">آخر المشاريع</div>'+((top.map(p=>'<div class="customer-mini" style="margin-bottom:7px"><div class="row"><b>'+esc(customerProjectLabel(p))+'</b>'+badge(p.status)+'</div><div style="font-size:10.5px;color:var(--text-dim);margin-top:4px">'+(p.deadline?fmtDay(p.deadline):'بدون موعد')+'</div></div>').join(''))||'<div class="empty-state">مفيش مشاريع.</div>')+
+      '<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');
+    return;
+  }
+  if(action==='daily-tasks'){
+    const key=customerDayKey(), done=customerStore('daily-done-'+key,[]);
+    const tasks=['راجع أحدث مشروع','افتح الإشعارات الجديدة','راجع أقرب موعد تسليم','اكتب ملاحظة للمشروع الحالي'];
+    modal('<h3>مهام اليوم</h3><div id="customer-task-list">'+tasks.map((t,i)=>'<label style="display:flex;align-items:center;gap:9px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05)"><input type="checkbox" data-task="'+i+'" '+(done.includes(i)?'checked':'')+'><span>'+esc(t)+'</span></label>').join('')+'</div><div class="modal-actions"><button class="btn btn-primary" id="customer-task-save">حفظ</button></div>');
+    document.getElementById('customer-task-save').onclick=()=>{const out=[...document.querySelectorAll('[data-task]:checked')].map(x=>Number(x.dataset.task));customerSave('daily-done-'+key,out);closeModal();toast('اتحفظ تقدم اليوم','ok');if(state.view==='customerHome')RENDERERS.customerHome(host);};
+    return;
+  }
+  if(action==='streak'){ modal('<h3>سلسلة الحضور</h3><div class="customer-kpi" style="margin-bottom:10px"><div class="k">اليوم</div><div class="v">'+customerStreak()+' يوم</div><div class="s">استمرار الاستخدام اليومي يساعدك تتابع مشاريعك في وقتها.</div></div><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">تمام</button></div>');return; }
+  if(action==='daily-tip'){ modal('<h3>اقتراح اليوم</h3><div style="font-size:13px;line-height:1.9;color:var(--text-dim)">قبل ما تبدأ طلب جديد، راجع آخر مشروع تم تسليمه لك وخد منه أفضل ملاحظاتك كقالب.</div><div class="modal-actions"><button class="btn btn-primary" onclick="closeModal()">حاضر</button></div>');return; }
+  if(action==='project-pulse'){
+    if(!latest){toast('مفيش مشروع لحد دلوقتي','err');return;}
+    modal('<h3>نبض المشروع '+esc(customerProjectLabel(latest))+'</h3><div class="customer-kpi" style="margin-bottom:8px"><div class="k">مرحلة المشروع</div><div class="v">'+customerStatusScore(latest)+'%</div><div class="s">'+esc(STATUS_LABEL_AR[latest.status]||latest.status)+'</div></div>'+(latest.deadline?'<div class="kv"><span class="k">الموعد</span><span class="v">'+fmtDay(latest.deadline)+'</span></div>':'')+'<div class="modal-actions"><button class="btn btn-primary" id="customer-pulse-open">فتح المشروع</button></div>');
+    document.getElementById('customer-pulse-open').onclick=()=>{closeModal();customerOpenProject(latest.id);}; return;
+  }
+  if(action==='deadlines' || action==='calendar'){
+    const rows=projects.filter(p=>p.deadline).sort((a,b)=>new Date(a.deadline)-new Date(b.deadline)).slice(0,12);
+    modal('<h3>'+ (action==='calendar'?'تقويم التسليم':'مواعيد اليوم') +'</h3>'+ (rows.length?rows.map(p=>'<div class="customer-mini" style="margin-bottom:7px"><div class="row"><b>'+esc(customerProjectLabel(p))+'</b><span class="badge '+(new Date(p.deadline)<new Date()?'badge-red':'badge-gray')+'">'+fmtDay(p.deadline)+'</span></div><div style="margin-top:5px">'+badge(p.status)+'</div></div>').join(''):'<div class="empty-state">مفيش مواعيد مسجلة.</div>')+'<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');return;
+  }
+  if(action==='messages'){
+    if(!notifications.length){const r=await customerSafe('/notifications',{notifications:[]});notifications=r.notifications||[];}
+    const unread=(notifications||[]).filter(n=>!n.is_read);
+    modal('<h3>رسائلك اليوم</h3>'+(unread.length?unread.map(n=>'<div class="customer-mini" style="margin-bottom:7px"><b>'+esc(n.title)+'</b><div style="font-size:10.5px;color:var(--text-dim);margin-top:4px">'+esc(n.body)+'</div></div>').join(''):'<div class="empty-state">مفيش جديد.</div>')+'<div class="modal-actions"><button class="btn btn-primary" onclick="closeModal();document.getElementById(\'bell-btn\').click()">فتح مركز الإشعارات</button></div>');return;
+  }
+  if(action==='service-shortcuts'){
+    const saved=customerStore('service-shortcuts',[]);
+    const list=(cat.serviceTypes||[]).slice(0,10);
+    modal('<h3>اختصارات الخدمات</h3><div class="customer-chip-row">'+(list.length?list.map((s,i)=>'<button class="customer-chip" data-service-shortcut="'+i+'">'+esc(s.name_ar||s.name_en||s.code||('خدمة '+(i+1)))+'</button>').join(''):'مفيش كتالوج متاح لسه.')+'</div><div style="font-size:10.5px;color:var(--text-faint);margin-top:10px">الاختيارات المفضلة تحفظ محليًا على الجهاز.</div><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');
+    document.querySelectorAll('[data-service-shortcut]').forEach(b=>b.onclick=()=>{const idx=Number(b.dataset.serviceShortcut);const out=[...new Set([...saved,idx])];customerSave('service-shortcuts',out);b.style.borderColor='rgba(120,160,230,.4)';toast('اتحفظ الاختصار','ok');});
+    return;
+  }
+  if(action==='daily-idea'){ const idx=(Number(customerStore('idea-idx',0))+1);customerSave('idea-idx',idx);if(host.querySelector('#customer-idea-text'))host.querySelector('#customer-idea-text').textContent=customerIdeas();toast('اتغيرت فكرة اليوم','ok');return; }
+  if(action==='resume'){
+    const id=Number(customerStore('last-project-id',latest&&latest.id));
+    const p=projects.find(x=>Number(x.id)===id)||latest;
+    if(!p){toast('مفيش مشروع نفتحه','err');return;}
+    customerSave('last-project-id',p.id); customerOpenProject(p.id); return;
+  }
+  if(action==='reorder'){
+    const candidates=projects.filter(p=>p.status==='DELIVERED'||p.status==='ELIGIBLE_FOR_SETTLEMENT');
+    if(!candidates.length){toast('لسه مفيش مشروع مسلّم لإعادة الطلب','err');return;}
+    const p=candidates[0];
+    modal('<h3>إعادة طلب ذكية</h3><div class="card" style="margin-bottom:9px"><div class="kv"><span class="k">المشروع المرجعي</span><span class="v mono">'+esc(customerProjectLabel(p))+'</span></div><div class="kv"><span class="k">الحالة</span><span class="v">'+badge(p.status)+'</span></div></div><div style="font-size:11px;color:var(--text-dim)">جهزنا لك رسالة مختصرة لطلب نسخة جديدة من نفس الفكرة. تقدر تنسخها وتبعتها في محادثتك الحالية أو للمسوّق.</div><textarea id="customer-reorder-text">عايز أكرر نفس الخدمة من المشروع '+esc(customerProjectLabel(p))+' مع نفس المواصفات، ونراجع أي تعديل جديد قبل التنفيذ.</textarea><div class="modal-actions"><button class="btn btn-primary" id="customer-reorder-copy">نسخ الطلب</button></div></div>');
+    document.getElementById('customer-reorder-copy').onclick=async()=>{const t=document.getElementById('customer-reorder-text').value;try{await customerCopy(t);toast('اتنسخ طلب إعادة الطلب','ok');}catch(e){toast('انسخ النص يدويًا','err');}}; return;
+  }
+  if(action==='brief-builder'){
+    const saved=customerStore('brief-draft',{goal:'',audience:'',tone:'',deliverable:'',notes:''});
+    modal('<h3>منشئ بريف احترافي</h3><div class="field"><label>الهدف</label><input id="cb-goal" value="'+esc(saved.goal)+'" placeholder="مثلاً: زيادة المشاهدات"></div><div class="field"><label>الجمهور</label><input id="cb-audience" value="'+esc(saved.audience)+'" placeholder="مين هيشوف المحتوى؟"></div><div class="field"><label>الأسلوب</label><input id="cb-tone" value="'+esc(saved.tone)+'" placeholder="سينمائي / هادئ / سريع"></div><div class="field"><label>المخرج المطلوب</label><input id="cb-deliverable" value="'+esc(saved.deliverable)+'" placeholder="فيديو 30 ثانية مثلاً"></div><div class="field"><label>ملاحظات إضافية</label><textarea id="cb-notes">'+esc(saved.notes)+'</textarea></div><div class="modal-actions"><button class="btn btn-primary" id="cb-save">حفظ ونسخ</button></div>');
+    document.getElementById('cb-save').onclick=async()=>{const draft={goal:document.getElementById('cb-goal').value.trim(),audience:document.getElementById('cb-audience').value.trim(),tone:document.getElementById('cb-tone').value.trim(),deliverable:document.getElementById('cb-deliverable').value.trim(),notes:document.getElementById('cb-notes').value.trim()};customerSave('brief-draft',draft);const txt='بريف SHIFRA\nالهدف: '+draft.goal+'\nالجمهور: '+draft.audience+'\nالأسلوب: '+draft.tone+'\nالمخرج: '+draft.deliverable+'\nملاحظات: '+draft.notes;try{await customerCopy(txt);toast('اتحفظ البريف واتنسخ','ok');}catch(e){toast('اتحفظ البريف','ok');}closeModal();}; return;
+  }
+  if(action==='budget'){
+    modal('<h3>حاسبة الميزانية</h3><div class="field"><label>الحد الأدنى</label><input type="number" id="cb-min" value="500"></div><div class="field"><label>الحد الأعلى</label><input type="number" id="cb-max" value="1500"></div><div class="field"><label>عدد الوحدات</label><input type="number" id="cb-qty" value="1" min="1"></div><div class="card" id="cb-total" style="margin-top:10px">الإجمالي المتوقع: <b>500–1,500 EGP</b></div><div class="modal-actions"><button class="btn btn-primary" onclick="closeModal()">تمام</button></div>');
+    const calc=()=>{const a=Number(document.getElementById('cb-min').value)||0,b=Number(document.getElementById('cb-max').value)||0,q=Number(document.getElementById('cb-qty').value)||1;document.getElementById('cb-total').innerHTML='الإجمالي المتوقع: <b>'+money(a*q*100)+'–'+money(b*q*100)+' EGP</b>';};['cb-min','cb-max','cb-qty'].forEach(id=>document.getElementById(id).addEventListener('input',calc)); calc(); return;
+  }
+  if(action==='compare'){
+    const list=(cat.serviceTypes||[]).slice(0,10);
+    modal('<h3>مقارنة الخدمات</h3><div class="customer-mini-list">'+(list.map((s,i)=>'<div class="customer-mini"><div class="row"><b>'+esc(s.name_ar||s.name_en||s.code||('خدمة '+(i+1)))+'</b><span class="badge badge-gray">'+esc(s.code||'SERVICE')+'</span></div><div style="font-size:10.5px;color:var(--text-dim);margin-top:4px">تقدر تقارنها مع خدمات أخرى من الكتالوج قبل بدء مشروع جديد.</div></div>').join('')||'<div class="empty-state">الكتالوج غير متاح.</div>')+'</div><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');return;
+  }
+  if(action==='revisions'){
+    const items=projects.filter(p=>p.status==='REVISION_REQUESTED'||p.status==='PREVIEW_READY');
+    modal('<h3>متابعة التعديلات</h3>'+(items.length?items.map(p=>'<button class="customer-mini clickable" data-rev-open="'+p.id+'" style="width:100%;text-align:right"><div class="row"><b>'+esc(customerProjectLabel(p))+'</b>'+badge(p.status)+'</div><div style="font-size:10.5px;color:var(--text-dim);margin-top:4px">'+(p.deadline?fmtDay(p.deadline):'بدون موعد')+'</div></button>').join(''):'<div class="empty-state">مفيش مشروع يحتاج مراجعة دلوقتي.</div>')+'<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');
+    document.querySelectorAll('[data-rev-open]').forEach(b=>b.onclick=()=>{closeModal();customerOpenProject(b.dataset.revOpen);}); return;
+  }
+  if(action==='payments'){
+    const items=projects.filter(p=>['PAYMENT_PENDING','PAYMENT_FAILED','PAYMENT_CONFIRMED'].includes(p.status));
+    modal('<h3>مركز الدفع</h3>'+(items.length?items.map(p=>'<button class="customer-mini clickable" data-pay-open="'+p.id+'" style="width:100%;text-align:right"><div class="row"><b>'+esc(customerProjectLabel(p))+'</b>'+badge(p.status)+'</div><div style="font-size:10.5px;color:var(--text-dim);margin-top:4px">افتح المشروع لمراجعة تفاصيل الدفع.</div></button>').join(''):'<div class="empty-state">مفيش مشاريع تحتاج حركة دفع حاليًا.</div>')+'<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');
+    document.querySelectorAll('[data-pay-open]').forEach(b=>b.onclick=()=>{closeModal();customerOpenProject(b.dataset.payOpen);}); return;
+  }
+  if(action==='favorites'){
+    const fav=customerStore('favorites',[]);
+    modal('<h3>المفضلة</h3><div class="customer-mini-list">'+projects.slice(0,20).map(p=>'<label class="customer-mini" style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span><b>'+esc(customerProjectLabel(p))+'</b><div style="font-size:10px;color:var(--text-dim);margin-top:3px">'+esc(STATUS_LABEL_AR[p.status]||p.status)+'</div></span><input type="checkbox" data-fav="'+p.id+'" '+(fav.includes(Number(p.id))?'checked':'')+'></label>').join('')+'</div><div class="modal-actions"><button class="btn btn-primary" id="fav-save">حفظ</button></div>');
+    document.getElementById('fav-save').onclick=()=>{const out=[...document.querySelectorAll('[data-fav]:checked')].map(x=>Number(x.dataset.fav));customerSave('favorites',out);closeModal();toast('اتحفظت المفضلة','ok');}; return;
+  }
+  if(action==='notes'){
+    const key='notes'; const note=customerStore(key,'');
+    modal('<h3>ملاحظاتي</h3><textarea id="customer-note" class="customer-note-area" placeholder="اكتب ملاحظاتك الخاصة…">'+esc(note)+'</textarea><div style="font-size:10px;color:var(--text-faint);margin-top:5px">الملاحظات دي محفوظة محليًا على الجهاز.</div><div class="modal-actions"><button class="btn btn-primary" id="customer-note-save">حفظ</button></div>');
+    document.getElementById('customer-note-save').onclick=()=>{customerSave(key,document.getElementById('customer-note').value);closeModal();toast('اتحفظت ملاحظاتك','ok');}; return;
+  }
+  if(action==='achievements'){
+    const done=projects.filter(p=>p.status==='DELIVERED'||p.status==='ELIGIBLE_FOR_SETTLEMENT').length;
+    const active=projects.filter(p=>!['DELIVERED','ELIGIBLE_FOR_SETTLEMENT','CANCELLED','REJECTED','REFUNDED'].includes(p.status)).length;
+    const revision=projects.filter(p=>p.status==='REVISION_REQUESTED').length;
+    modal('<h3>لوحة الإنجاز</h3><div class="customer-kpis"><div class="customer-kpi"><div class="k">مشاريع مكتملة</div><div class="v">'+done+'</div></div><div class="customer-kpi"><div class="k">نشطة</div><div class="v">'+active+'</div></div><div class="customer-kpi"><div class="k">تحتاج مراجعة</div><div class="v">'+revision+'</div></div><div class="customer-kpi"><div class="k">سلسلة الحضور</div><div class="v">'+customerStreak()+'</div></div></div><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');return;
+  }
+}
+
+
 RENDERERS.projects = async (el) => {
   if (el.dataset.detail) return renderProjectDetail(el, el.dataset.detail);
   const { projects } = await api('/projects');
