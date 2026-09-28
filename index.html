@@ -2140,21 +2140,25 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
       const ref = document.getElementById('su-referral').value.trim();
       if (ref) body.referralCode = ref;
     }
-    const { token } = await api('/auth/signup', {method:'POST', body});
-    state.token = token;
+    const result = await api('/auth/signup', {method:'POST', body});
+    if (!result.token || !result.user) throw new Error('السيرفر أنشأ الحساب لكنه لم يُرجع بيانات الجلسة');
+    state.token = result.token;
+    state.user = result.user;
     try {
-      localStorage.setItem(SESSION_TOKEN_KEY, token);
+      localStorage.setItem(SESSION_TOKEN_KEY, result.token);
       localStorage.setItem(SESSION_API_KEY, state.apiBase);
     } catch(e) {}
-    await loadMeAndEnter();
+    await loadMeAndEnter(result.customer || result.marketer || result.editor || null);
     toast('أهلًا بيك في SHIFRA', 'ok');
   } catch(err){ authError(err.message); }
   finally { btn.disabled = false; btn.textContent = orig; }
 });
 
-async function loadMeAndEnter(){
-  const me = await api('/auth/me');
-  state.user = me.user;
+async function loadMeAndEnter(profileOverride = null){
+  if (!state.user) {
+    const me = await api('/auth/me');
+    state.user = me.user;
+  }
   // OWNER/ADMIN use this exact same login form too. The backend already authenticates them,
   // so do not bounce them back to a separate login screen.
   if (state.user.role === 'OWNER' || state.user.role === 'ADMIN') {
@@ -2163,10 +2167,14 @@ async function loadMeAndEnter(){
     if (state.user.ownerKey === 'OMAR') setTimeout(() => startNotificationPolling(), 250);
     return;
   }
-  // fetch the role-specific profile (gives us referral_code / earnings context up front)
-  if (state.user.role === 'MARKETER') state.profile = (await api('/marketers/me')).marketer;
-  else if (state.user.role === 'EDITOR') state.profile = (await api('/editors/me')).editor;
-  else if (state.user.role === 'CUSTOMER') state.profile = (await api('/customers/me')).customer;
+  // On signup the backend already returns the role profile, so enter without making
+  // another dependent profile request first. Returning logins still load the profile normally.
+  state.profile = profileOverride || null;
+  if (!state.profile) {
+    if (state.user.role === 'MARKETER') state.profile = (await api('/marketers/me')).marketer;
+    else if (state.user.role === 'EDITOR') state.profile = (await api('/editors/me')).editor;
+    else if (state.user.role === 'CUSTOMER') state.profile = (await api('/customers/me')).customer;
+  }
   try { state.accountProfile = (await api('/me/profile')).profile; } catch(e) { state.accountProfile = null; }
   enterApp();
   setTimeout(() => { maybeOpenOnboarding(); startNotificationPolling(); }, 250);
