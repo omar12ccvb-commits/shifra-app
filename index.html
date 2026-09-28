@@ -1293,12 +1293,203 @@ body{
 .chat-active-view{display:flex;flex-direction:column;flex:1;min-width:0;min-height:0}
 .chat-active-view>.chat-window-head{flex-shrink:0}
 .chat-active-view>.owner-chat-body{flex:1;min-height:0}
+</style><style id="shifra-brand-identity-v6">
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@500;600;700;800&display=swap');
+
+:root{
+  --bg:#070a0f;
+  --bg-elev:#0e131a;
+  --bg-elev-2:#141b24;
+  --border:#202b38;
+  --border-soft:#17212b;
+  --text:#f7fbff;
+  --text-dim:#9aa9ba;
+  --text-faint:#657488;
+
+  --purple:#7c5cff;
+  --purple-hover:#6947f2;
+  --purple-soft:rgba(124,92,255,.14);
+  --purple-soft-2:rgba(124,92,255,.25);
+
+  --green:#34d399;
+  --green-soft:rgba(52,211,153,.13);
+  --red:#fb7185;
+  --red-soft:rgba(251,113,133,.13);
+  --amber:#f5b83d;
+  --amber-soft:rgba(245,184,61,.13);
+  --blue:#38bdf8;
+  --blue-soft:rgba(56,189,248,.13);
+
+  --brand-cyan:#31d7ff;
+  --brand-violet:#7c5cff;
+  --brand-indigo:#5965ff;
+  --brand-mint:#37e0ad;
+  --brand-gold:#f5c24b;
+  --font:'Manrope','IBM Plex Sans Arabic',sans-serif;
+  --arabic-font:'Cairo','IBM Plex Sans Arabic',sans-serif;
+}
+
+body{
+  font-family:var(--font);
+  background:
+    radial-gradient(900px 560px at 6% -12%,rgba(49,215,255,.14),transparent 60%),
+    radial-gradient(900px 620px at 96% -10%,rgba(124,92,255,.17),transparent 62%),
+    radial-gradient(800px 500px at 50% 110%,rgba(55,224,173,.07),transparent 68%),
+    linear-gradient(180deg,#05070b 0%,#080c12 52%,#06090e 100%);
+}
+body::before{
+  background:
+    linear-gradient(rgba(49,215,255,.018) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(124,92,255,.016) 1px,transparent 1px);
+  background-size:42px 42px;
+  mask-image:linear-gradient(to bottom,rgba(0,0,0,.65),transparent 92%);
+}
+.shifra-brand{
+  gap:12px!important;
+  align-items:center!important;
+}
+.shifra-mark{
+  width:58px!important;
+  height:58px!important;
+  min-width:58px!important;
+  border-radius:18px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:0!important;
+  position:relative!important;
+  overflow:hidden!important;
+  background:
+    radial-gradient(circle at 25% 20%,rgba(255,255,255,.22),transparent 25%),
+    linear-gradient(145deg,#17253a 0%,#253b65 34%,#5b4cff 72%,#22c8e8 100%)!important;
+  border:1px solid rgba(255,255,255,.14)!important;
+  box-shadow:
+    0 22px 40px -24px rgba(49,215,255,.65),
+    0 12px 36px -20px rgba(124,92,255,.95),
+    inset 0 1px 0 rgba(255,255,255,.20)!important;
+}
+.shifra-mark::before{
+  content:"";
+  position:absolute;
+  inset:1px;
+  border-radius:17px;
+  background:linear-gradient(145deg,rgba(255,255,255,.08),transparent 42%,rgba(55,224,173,.08));
+  pointer-events:none;
+}
+.shifra-mark span{
+  position:relative;
+  z-index:1;
+  font-family:'Manrope',sans-serif;
+  font-size:20px;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:-1.5px;
+  color:#fff;
+  text-shadow:0 3px 14px rgba(0,0,0,.28);
+}
+.shifra-mark small{
+  position:relative;
+  z-index:1;
+  margin-top:4px;
+  font-family:var(--arabic-font);
+  font-size:10px;
+  line-height:1;
+  font-weight:800;
+  letter-spacing:.1px;
+  color:rgba(255,255,255,.92);
+  text-shadow:0 2px 10px rgba(0,0,0,.25);
+}
+.shifra-wordmark{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  min-width:0;
+}
+.shifra-wordmark .brand-text{
+  font-family:'Manrope',sans-serif!important;
+  font-size:21px!important;
+  font-weight:800!important;
+  letter-spacing:3px!important;
+  line-height:1!important;
+  background:linear-gradient(105deg,#ffffff 0%,#dff7ff 28%,#a7baff 60%,#b9ffe6 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+.shifra-wordmark .brand-sub{
+  margin-top:5px;
+  font-family:var(--arabic-font)!important;
+  font-size:11px!important;
+  font-weight:700!important;
+  letter-spacing:2px!important;
+  color:#b7c4d4!important;
+  line-height:1.1!important;
+  text-transform:none!important;
+  text-align:start!important;
+}
+.app-topbar .shifra-mark{width:52px!important;height:52px!important;min-width:52px!important}
+.app-topbar .shifra-wordmark .brand-text{font-size:18px!important}
+.sidebar .shifra-brand{padding-inline:8px!important}
+.sidebar .shifra-mark{width:60px!important;height:60px!important;min-width:60px!important}
+.auth-card .shifra-brand{justify-content:center!important;margin-bottom:30px!important}
+.auth-card .shifra-wordmark .brand-text{font-size:24px!important}
+.auth-card .shifra-wordmark .brand-sub{font-size:12px!important}
+
+.page-title{
+  background:linear-gradient(100deg,#fff 0%,#dff9ff 34%,#c7c2ff 66%,#b8ffe9 100%)!important;
+  -webkit-background-clip:text!important;
+  background-clip:text!important;
+}
+.btn-primary{
+  background:linear-gradient(110deg,#5b4cff 0%,#7c5cff 42%,#24cfe9 100%)!important;
+  box-shadow:0 18px 38px -24px rgba(49,215,255,.85),0 14px 28px -22px rgba(124,92,255,.95),inset 0 1px 0 rgba(255,255,255,.16)!important;
+}
+.btn-primary:hover{
+  filter:brightness(1.08) saturate(1.06)!important;
+}
+.card::before,.list-card::before{
+  background:
+    linear-gradient(118deg,rgba(255,255,255,.028),transparent 30%,transparent 70%,rgba(49,215,255,.045)),
+    linear-gradient(200deg,rgba(124,92,255,.035),transparent 45%);
+}
+.badge-purple{
+  background:rgba(124,92,255,.13)!important;
+  color:#d9d0ff!important;
+  border:1px solid rgba(124,92,255,.16);
+}
+.badge-blue{background:rgba(56,189,248,.12)!important;color:#b5e8ff!important}
+.badge-green{background:rgba(52,211,153,.12)!important;color:#adf4d7!important}
+.badge-amber{background:rgba(245,184,61,.12)!important;color:#ffe19a!important}
+
+#nav-list-mobile .nav-item.active{
+  background:
+    linear-gradient(135deg,rgba(124,92,255,.18),rgba(49,215,255,.08),rgba(55,224,173,.06))!important;
+  border-color:rgba(155,190,255,.16)!important;
+  color:#f4fbff!important;
+}
+.owner-tool:nth-child(3n+1),.mk-tool:nth-child(4n+1),.editor-feature:nth-child(3n+1),.customer-feature:nth-child(3n+1){
+  box-shadow:inset 0 1px 0 rgba(124,92,255,.08);
+}
+.owner-tool:nth-child(3n+2),.mk-tool:nth-child(4n+2),.editor-feature:nth-child(3n+2),.customer-feature:nth-child(3n+2){
+  box-shadow:inset 0 1px 0 rgba(49,215,255,.08);
+}
+.owner-tool:nth-child(3n),.mk-tool:nth-child(4n),.editor-feature:nth-child(3n),.customer-feature:nth-child(3n){
+  box-shadow:inset 0 1px 0 rgba(55,224,173,.07);
+}
+@media(max-width:600px){
+  .shifra-wordmark .brand-text{font-size:17px!important;letter-spacing:2.2px!important}
+  .shifra-wordmark .brand-sub{font-size:9px!important;letter-spacing:1.4px!important}
+  .app-topbar .shifra-mark{width:48px!important;height:48px!important;min-width:48px!important}
+  .app-topbar .shifra-mark span{font-size:17px}
+  .app-topbar .shifra-mark small{font-size:9px}
+}
 </style></head>
 <body>
 
 <div id="auth-screen">
   <div class="auth-card">
-    <div class="brand"><div class="brand-mark">ش</div><div><div class="brand-text">SHIFRA</div><div class="brand-sub" style="text-align:start">شفرة</div></div></div>
+    <div class="brand shifra-brand"><div class="brand-mark shifra-mark"><span>SH</span><small>شفرة</small></div><div class="shifra-wordmark"><div class="brand-text">SHIFRA</div><div class="brand-sub">OPERATING SYSTEM</div></div></div>
     <div class="auth-tabs">
       <button class="auth-tab active" id="tab-login">دخول</button>
       <button class="auth-tab" id="tab-signup">حساب جديد</button>
@@ -1336,7 +1527,7 @@ body{
 
 <div id="app-shell">
   <nav class="sidebar">
-    <div class="brand"><div class="brand-mark">ش</div><div><div class="brand-text" style="font-size:15px">SHIFRA</div></div></div>
+    <div class="brand shifra-brand"><div class="brand-mark shifra-mark"><span>SH</span><small>شفرة</small></div><div class="shifra-wordmark"><div class="brand-text" style="font-size:16px">SHIFRA</div><div class="brand-sub">OPERATING SYSTEM</div></div></div>
     <div class="bottom-nav" id="nav-list-desktop" style="display:flex"></div>
     <div class="sidebar-footer">
       <div style="font-size:13px; font-weight:600; padding:0 10px" id="side-user-name">—</div>
@@ -1346,7 +1537,7 @@ body{
   </nav>
   <div class="main">
     <div class="app-topbar">
-      <div class="brand"><div class="brand-mark">ش</div><div class="brand-text">SHIFRA</div></div>
+      <div class="brand shifra-brand"><div class="brand-mark shifra-mark"><span>SH</span><small>شفرة</small></div><div class="shifra-wordmark"><div class="brand-text">SHIFRA</div><div class="brand-sub">OPERATING SYSTEM</div></div></div>
       <button class="user-menu-btn" id="user-menu-btn">؟</button>
     </div>
     <div class="page-head">
