@@ -3341,7 +3341,7 @@ function customerOpenProject(id){
   setTimeout(()=>RENDERERS.projects(document.getElementById('content')),0);
 }
 
-function choiceButtons(items,selected,name){return (items||[]).map(x=>'<button type="button" class="onboard-choice '+(selected||[]).includes(x)?'selected':'')+'" data-onboard-group="'+esc(name)+'" data-onboard-value="'+esc(x)+'">'+esc(x)+'</button>').join('');}
+function choiceButtons(items,selected,name){return (items||[]).map(x=>'<button type="button" class="onboard-choice '+((selected||[]).includes(x)?'selected':'')+'" data-onboard-group="'+esc(name)+'" data-onboard-value="'+esc(x)+'">'+esc(x)+'</button>').join('');}
 function onboardingOpen(profile){
   const role=profile.role, d=profile.data||{}, opts=profile.options||{};
   const multi=(label,items,selected,name)=>'<div><div class="field"><label>'+esc(label)+'</label></div><div class="onboard-choice-grid" data-group="'+esc(name)+'">'+choiceButtons(items,selected,name)+'</div></div>';
