@@ -1539,8 +1539,8 @@ body::before{
 @media(max-width:760px){.ai-service-hero{padding:21px}.ai-service-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ai-service-title{font-size:31px}}
 @media(max-width:460px){.ai-service-grid{grid-template-columns:1fr}}
 </style>
-<style id="shifra-chat-large-white-composer-v1">
-/* Large full workspace for direct chat */
+<style id="shifra-chat-composer-v2">
+/* Keep the conversation workspace large; keep the message composer compact and dark. */
 @media (min-width:820px){
   .content:has(#direct-enterprise-shell){
     max-width:none!important;
@@ -1565,128 +1565,104 @@ body::before{
 .chat-active-view>.owner-chat-body{
   flex:1!important;
   min-height:0!important;
+  padding:20px 26px!important;
+  gap:10px!important;
   font-family:var(--arabic-font)!important;
-  font-size:15px!important;
-  line-height:1.8!important;
-  padding:24px 30px!important;
-  gap:12px!important;
-  scrollbar-color:#667384 #0b1017;
+  font-size:14px!important;
+  line-height:1.75!important;
 }
 .chat-active-view .owner-msg{
-  max-width:min(76%,760px)!important;
-  padding:13px 17px!important;
-  border-radius:16px!important;
+  max-width:min(76%,700px)!important;
+  padding:10px 13px!important;
+  border-radius:13px!important;
   font-family:var(--arabic-font)!important;
-  font-size:15px!important;
-  line-height:1.85!important;
-  letter-spacing:0!important;
+  font-size:14px!important;
+  line-height:1.75!important;
 }
 .chat-active-view .owner-msg .chat-time,
 .chat-active-view .chat-send-status{
   font-family:var(--arabic-font)!important;
-  font-size:10px!important;
+  font-size:9.5px!important;
 }
 .chat-input-area{
-  padding:14px 18px 15px!important;
-  background:
-    linear-gradient(180deg,#edf1f4 0%,#e3e7eb 100%)!important;
-  border-top:1px solid #b8c1ca!important;
-  box-shadow:0 -12px 28px rgba(0,0,0,.16);
+  padding:9px 12px 10px!important;
+  background:rgba(7,10,15,.98)!important;
+  border-top:1px solid rgba(255,255,255,.065)!important;
+  box-shadow:none!important;
 }
 .chat-input-area .chat-draft-note{
-  color:#596674!important;
+  color:#728096!important;
   font-family:var(--arabic-font)!important;
-  font-size:10px!important;
-  padding:0 4px 7px!important;
+  font-size:9px!important;
+  padding:0 6px 5px!important;
 }
 .chat-input-row{
-  gap:12px!important;
-  align-items:stretch!important;
-  padding:10px!important;
-  background:#d9dee3!important;
-  border:1px solid #aeb7c0!important;
-  border-radius:16px!important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.95),
-    inset 0 -1px 0 rgba(80,90,100,.08),
-    0 8px 20px rgba(30,40,50,.12)!important;
+  gap:8px!important;
+  align-items:flex-end!important;
+  padding:0!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
 }
 .chat-input-row textarea{
-  min-height:78px!important;
-  max-height:190px!important;
+  min-height:54px!important;
+  max-height:130px!important;
   resize:vertical!important;
   flex:1!important;
-  background:#fff!important;
-  color:#17202a!important;
-  border:1px solid #aeb8c2!important;
-  border-radius:12px!important;
-  padding:14px 16px!important;
+  background:#111722!important;
+  color:#edf2f7!important;
+  border:1px solid rgba(255,255,255,.09)!important;
+  border-radius:11px!important;
+  padding:11px 13px!important;
   font-family:var(--arabic-font)!important;
-  font-size:16px!important;
+  font-size:14px!important;
   font-weight:600!important;
-  line-height:1.85!important;
-  letter-spacing:0!important;
-  caret-color:#111827!important;
+  line-height:1.7!important;
+  caret-color:#fff!important;
   outline:none!important;
-  box-shadow:
-    inset 0 2px 6px rgba(15,23,42,.07),
-    0 1px 0 rgba(255,255,255,.95)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025)!important;
 }
 .chat-input-row textarea::placeholder{
-  color:#7a8794!important;
+  color:#6f7c8d!important;
   opacity:1!important;
   font-family:var(--arabic-font)!important;
   font-weight:500!important;
 }
 .chat-input-row textarea:focus{
-  border-color:#7d8996!important;
-  box-shadow:
-    0 0 0 3px rgba(91,103,115,.15),
-    inset 0 2px 6px rgba(15,23,42,.08)!important;
+  border-color:rgba(124,92,255,.55)!important;
+  box-shadow:0 0 0 3px rgba(124,92,255,.10)!important;
 }
 .chat-input-row .btn{
-  flex:0 0 112px!important;
-  width:112px!important;
-  min-height:78px!important;
-  align-self:stretch!important;
-  border:1px solid #9ca7b1!important;
-  border-radius:12px!important;
-  background:linear-gradient(180deg,#ffffff 0%,#e7ebee 100%)!important;
-  color:#18232d!important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.95),
-    0 4px 10px rgba(32,43,55,.10)!important;
+  flex:0 0 88px!important;
+  width:88px!important;
+  min-height:54px!important;
+  border:1px solid rgba(255,255,255,.09)!important;
+  border-radius:11px!important;
+  background:linear-gradient(145deg,#1c2330,#151b25)!important;
+  color:#edf2f7!important;
+  box-shadow:none!important;
   font-family:var(--arabic-font)!important;
-  font-size:14px!important;
+  font-size:13px!important;
   font-weight:800!important;
 }
 .chat-input-row .btn:hover{
   transform:translateY(-1px);
-  border-color:#7f8b97!important;
-  background:linear-gradient(180deg,#ffffff 0%,#dfe5e9 100%)!important;
+  border-color:rgba(139,92,246,.35)!important;
+  background:linear-gradient(145deg,#232b39,#171e2a)!important;
 }
 .chat-input-row .btn:active{
   transform:translateY(0);
-  box-shadow:inset 0 2px 5px rgba(30,40,50,.12)!important;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.18)!important;
 }
 .chat-input-foot{
-  margin-top:7px!important;
-  padding:0 5px!important;
-  color:#596674!important;
+  margin-top:5px!important;
+  padding:0 6px!important;
+  color:#58667a!important;
   font-family:var(--arabic-font)!important;
-  font-size:10px!important;
+  font-size:8.5px!important;
 }
-.chat-active-view .chat-window-head,
-.chat-active-view .chat-search,
-.chat-active-view .chat-tools-summary{
-  font-family:var(--arabic-font)!important;
-}
-.chat-active-view .chat-window-name{
-  font-size:17px!important;
-}
-.chat-active-view .chat-window-meta{
-  font-size:10.5px!important;
-}
+.chat-active-view .chat-window-name{font-size:16px!important}
+.chat-active-view .chat-window-meta{font-size:10px!important}
 @media(max-width:819px){
   .content:has(#direct-enterprise-shell){
     width:100%!important;
@@ -1697,30 +1673,23 @@ body::before{
     min-height:calc(100vh - 190px)!important;
     height:calc(100vh - 190px)!important;
   }
-  .chat-active-view>.owner-chat-body{
-    padding:16px 12px!important;
-  }
+  .chat-active-view>.owner-chat-body{padding:14px 11px!important}
   .chat-active-view .owner-msg{
     max-width:90%!important;
-    font-size:15px!important;
-    padding:12px 14px!important;
+    font-size:14px!important;
+    padding:10px 12px!important;
   }
-  .chat-input-area{
-    padding:10px!important;
-  }
-  .chat-input-row{
-    padding:8px!important;
-    gap:8px!important;
-  }
+  .chat-input-area{padding:8px!important}
+  .chat-input-row{padding:0!important;gap:7px!important}
   .chat-input-row textarea{
-    min-height:70px!important;
-    max-height:170px!important;
-    font-size:15.5px!important;
+    min-height:52px!important;
+    max-height:120px!important;
+    font-size:14px!important;
   }
   .chat-input-row .btn{
-    flex-basis:84px!important;
-    width:84px!important;
-    min-height:70px!important;
+    flex-basis:76px!important;
+    width:76px!important;
+    min-height:52px!important;
   }
 }
 </style></head>
@@ -1802,8 +1771,10 @@ body::before{
    who (spec #69 "ONE BACKEND, SAME BUSINESS LOGIC"), so the nav
    and available actions adapt to req.user.role rather than
    shipping three separate apps with duplicated plumbing.
-   Session token lives in memory only (not localStorage).
+   Session token is persisted locally so returning users stay signed in.
    ============================================================ */
+const SESSION_TOKEN_KEY = 'shifra_session_token';
+const SESSION_API_KEY = 'shifra_session_api_base';
 const state = { token:null, user:null, profile:null, apiBase:'http://localhost:4000/api', view:null };
 
 // Smart default: if this page itself isn't running on localhost (i.e. it's
@@ -1814,9 +1785,11 @@ const state = { token:null, user:null, profile:null, apiBase:'http://localhost:4
 (function setSmartApiDefault(){
   const isLocal = ['localhost','127.0.0.1'].includes(location.hostname) || location.protocol === 'file:';
   const guess = isLocal ? 'http://localhost:4000/api' : 'https://api-production-2964.up.railway.app/api';
-  state.apiBase = guess;
-  document.getElementById('login-apibase').value = guess;
-  document.getElementById('signup-apibase').value = guess;
+  let savedApi = '';
+  try { savedApi = localStorage.getItem(SESSION_API_KEY) || ''; } catch(e) {}
+  state.apiBase = savedApi || guess;
+  document.getElementById('login-apibase').value = state.apiBase;
+  document.getElementById('signup-apibase').value = state.apiBase;
 })();
 
 function toast(msg, kind){
@@ -1903,6 +1876,10 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     const password = document.getElementById('login-password').value;
     const { token } = await api('/auth/login', {method:'POST', body:{identifier, password}});
     state.token = token;
+    try {
+      localStorage.setItem(SESSION_TOKEN_KEY, token);
+      localStorage.setItem(SESSION_API_KEY, state.apiBase);
+    } catch(e) {}
     await loadMeAndEnter();
   } catch(err){ authError(err.message); }
   finally { btn.disabled = false; btn.textContent = orig; }
@@ -1928,6 +1905,10 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
     }
     const { token } = await api('/auth/signup', {method:'POST', body});
     state.token = token;
+    try {
+      localStorage.setItem(SESSION_TOKEN_KEY, token);
+      localStorage.setItem(SESSION_API_KEY, state.apiBase);
+    } catch(e) {}
     await loadMeAndEnter();
     toast('أهلًا بيك في SHIFRA', 'ok');
   } catch(err){ authError(err.message); }
@@ -1951,7 +1932,11 @@ async function loadMeAndEnter(){
   enterApp();
 }
 
+function clearSavedSession(){
+  try { localStorage.removeItem(SESSION_TOKEN_KEY); } catch(e) {}
+}
 function doLogout(){
+  clearSavedSession();
   state.token = null; state.user = null; state.profile = null;
   document.getElementById('app-shell').classList.remove('active');
   document.getElementById('auth-screen').style.display = 'flex';
@@ -3762,5 +3747,24 @@ function wireProjectDetailActions(el, project, id){
   }));
 }
 </script>
-</body>
+<script>
+/* ---------------- Persistent session restore ---------------- */
+(async function restoreSavedSession(){
+  let savedToken='';
+  try { savedToken = localStorage.getItem(SESSION_TOKEN_KEY) || ''; } catch(e) {}
+  if(!savedToken) return;
+  state.token = savedToken;
+  document.getElementById('auth-screen').style.display = 'none';
+  try {
+    await loadMeAndEnter();
+  } catch(err) {
+    clearSavedSession();
+    state.token = null;
+    state.user = null;
+    state.profile = null;
+    document.getElementById('app-shell').classList.remove('active');
+    document.getElementById('auth-screen').style.display = 'flex';
+  }
+})();
+</script></body>
 </html>
