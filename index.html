@@ -1281,6 +1281,146 @@ async function renderOwnerProjectConversation(host,id){
   }catch(err){panel.innerHTML='<div class="empty-state">'+esc(err.message)+'</div>';}
 };
 
+/* ================= MARKETER OS ================= */
+function marketerCsv(filename, rows){
+  if(!rows||!rows.length){toast('مفيش بيانات للتصدير','err');return;}
+  const keys=Object.keys(rows[0]);
+  const lines=[keys.join(','),...rows.map(r=>keys.map(k=>'"'+String(r[k]??'').replace(/"/g,'""')+'"').join(','))];
+  const blob=new Blob(['\uFEFF'+lines.join('\n')],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),500);
+}
+function mkOp(icon,title,value,action,sub){
+  return '<button class="mk-tool" data-mk-action="'+action+'"><div class="ic">'+icon+'</div><div class="tt">'+esc(title)+'</div><div class="ss">'+esc(value||sub||'')+(value&&sub?'<br>'+esc(sub):'')+'</div></button>';
+}
+function mkWa(phone,text){
+  const d=String(phone||'').replace(/\D/g,'');
+  if(!d)return ''; const n=d.startsWith('0')?'20'+d.slice(1):d;
+  return '<a class="mk-wa" target="_blank" rel="noopener" href="https://wa.me/'+n+'?text='+encodeURIComponent(text||'')+'">WhatsApp</a>';
+}
+async function marketerSafe(path,fallback){try{return await api(path);}catch(e){return fallback;}}
+
+RENDERERS.marketerHome = async (el) => {
+  const [mr,orr,cr,pr,conv,er,rr,nr,wr,dr] = await Promise.all([
+    api('/marketers/me'),api('/opportunities'),api('/customers'),api('/projects'),api('/conversations'),
+    api('/me/earnings'),api('/ratings/me'),api('/notifications'),marketerSafe('/weekly-challenges/current',null),
+    marketerSafe('/direct-conversations',{conversations:[]})
+  ]);
+  const marketer=mr.marketer, opportunities=orr.opportunities||[], customers=cr.customers||[], projects=pr.projects||[], conversations=conv.conversations||[], earnings=er, rating=rr.summary||{average:0,count:0}, notifications=nr.notifications||[];
+  const terminal=['DELIVERED','CANCELLED','REJECTED','REFUNDED','ELIGIBLE_FOR_SETTLEMENT'];
+  const active=projects.filter(p=>!terminal.includes(p.status));
+  const overdue=active.filter(p=>p.deadline&&new Date(p.deadline)<new Date());
+  const next48=active.filter(p=>p.deadline&&new Date(p.deadline)>=new Date()&&new Date(p.deadline)<=new Date(Date.now()+48*3600*1000));
+  const pricing=projects.filter(p=>['DETAILS_COLLECTED','PRICE_NEGOTIATION','PRICE_ACCEPTED'].includes(p.status));
+  const waitingPayment=projects.filter(p=>['PRICE_LOCKED','PAYMENT_PENDING'].includes(p.status));
+  const production=projects.filter(p=>['EDITOR_ASSIGNED','IN_PRODUCTION','PREVIEW_READY','REVISION_REQUESTED'].includes(p.status));
+  const delivered=projects.filter(p=>p.status==='DELIVERED');
+  const quiet=conversations.filter(x=>!x.latest_message).length;
+  const unread=notifications.filter(n=>!n.is_read).length;
+  const withoutProject=customers.filter(c=>!projects.some(p=>p.customer_id===c.id&&!terminal.includes(p.status)));
+  const direct=(dr.conversations||[]).length;
+  const tools=[
+    ['🎯','فرص جديدة',String(opportunities.length),'opportunities','استلام عملاء جدد'],
+    ['👥','قاعدة العملاء',String(customers.length),'customers','كل العملاء الحاليين'],
+    ['📦','المشاريع النشطة',String(active.length),'projects','إدارة الشغل الحالي'],
+    ['🚨','المشاريع المتأخرة',String(overdue.length),'marketer-followup','تصعيد ومتابعة عاجلة'],
+    ['⏰','موعد خلال 48 ساعة',String(next48.length),'marketer-followup','قائمة المواعيد القريبة'],
+    ['💬','المحادثات',String(conversations.length),'conversations','تواصل داخل المشروع'],
+    ['🔔','إشعارات غير مقروءة',String(unread),'notifications','التنبيهات'],
+    ['🧾','مشاريع تحتاج تسعير',String(pricing.length),'projects','حرّك التسعير'],
+    ['💳','بانتظار الدفع',String(waitingPayment.length),'projects','تابع الدفع'],
+    ['🎬','قيد التنفيذ',String(production.length),'projects','راقب الإنتاج'],
+    ['✅','تم التسليم',String(delivered.length),'projects','المشاريع المكتملة'],
+    ['⭐','متوسط التقييم',rating.average.toFixed(2),'ratings',rating.count+' تقييم'],
+    ['💰','إجمالي الأرباح',money(earnings.totalMinor)+' EGP','earnings','كل الأرباح'],
+    ['💸','تم صرفه',money(earnings.paidMinor)+' EGP','earnings','المبالغ المدفوعة'],
+    ['⏳','قيد الصرف',money(earnings.pendingMinor)+' EGP','earnings','مبالغ منتظرة'],
+    ['📭','بدون رسالة',String(quiet),'marketer-followup','محادثات محتاجة بداية'],
+    ['🧭','عملاء بلا مشروع',String(withoutProject.length),'marketer-followup','فرص متابعة وبيع'],
+    ['📨','مراسلات مباشرة',String(direct),'direct','المحادثات المباشرة المتاحة'],
+    ['📊','تحليلات الأداء','فتح اللوحة','marketer-analytics','ضغط الشغل ومصادر الدخل'],
+    ['📣','كود الدعوة',marketer.referral_code||'—','copy-referral','مشاركة كودك'],
+    ['📤','تصدير العملاء','CSV','export-customers','نسخة من بيانات العملاء المتاحة'],
+    ['📤','تصدير المشاريع','CSV','export-projects','ملف تشغيل للمشاريع'],
+    ['📤','تصدير الأرباح','CSV','export-earnings','ملف الأرباح'],
+    ['🧠','التحدي الأسبوعي',wr&&wr.challenge?wr.challenge.title:'لا يوجد','weekly','مؤشرات الفريق'],
+    ['⚿','الأمان والحساب','فتح الحساب','marketer-profile','بيانات الحساب وكلمة المرور']
+  ];
+  const topProjects=projects.slice().sort((a,b)=>new Date(b.updated_at)-new Date(a.updated_at)).slice(0,5);
+  const topCustomers=customers.slice().sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,5);
+  el.innerHTML=
+    '<div class="mk-kpis">'+
+      '<div class="mk-kpi"><div class="lab">فرص جاهزة</div><div class="val">'+opportunities.length+'</div><div class="sub">جاهزة للـClaim</div></div>'+
+      '<div class="mk-kpi"><div class="lab">عملاء</div><div class="val">'+customers.length+'</div><div class="sub">ملكية حالية</div></div>'+
+      '<div class="mk-kpi"><div class="lab">نشط</div><div class="val">'+active.length+'</div><div class="sub">'+overdue.length+' متأخر</div></div>'+
+      '<div class="mk-kpi"><div class="lab">صافي مستحقك</div><div class="val">'+money(earnings.pendingMinor)+' EGP</div><div class="sub">بانتظار الصرف</div></div>'+
+    '</div>'+
+    '<div class="card" style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><div style="font-size:20px;font-weight:800">مركز تشغيل '+esc(marketer.full_name||state.user.fullName)+' ⚡</div><div style="font-size:11px;color:#687588;margin-top:4px">كل أدوات المسوّق في مكان واحد.</div></div><span class="badge badge-purple">MARKETER OS</span></div><div class="btn-row" style="margin-top:12px;flex-wrap:wrap"><button class="btn btn-primary btn-sm" id="mk-ref-copy">نسخ كود الدعوة</button><button class="btn btn-ghost btn-sm" data-mk-jump="opportunities">استلام عميل</button><button class="btn btn-ghost btn-sm" data-mk-jump="marketer-followup">ابدأ المتابعة</button><button class="btn btn-ghost btn-sm" data-mk-jump="marketer-analytics">التحليلات</button></div></div>'+
+    '<div class="section-title">لوحة الـ25 أداة</div><div class="mk-tools">'+tools.map(t=>mkOp(t[0],t[1],t[2],t[3],t[4])).join('')+'</div>'+
+    '<div class="mk-split">'+
+      '<div class="card"><div class="owner-section-head"><div class="title">آخر المشاريع</div><button class="btn btn-ghost btn-sm" data-mk-jump="projects">كل المشاريع</button></div><div class="mk-list">'+(topProjects.map(p=>'<div class="mk-list-row"><div><b>'+esc(p.order_number)+'</b><div style="font-size:10.5px;color:#687588">'+esc(p.customer_name||'')+'</div></div><div>'+badge(p.status)+'</div></div>').join('')||'<div class="empty-state" style="padding:22px">مفيش مشاريع.</div>')+'</div></div>'+
+      '<div class="card"><div class="owner-section-head"><div class="title">عملاء محتاجين متابعة</div><button class="btn btn-ghost btn-sm" data-mk-jump="marketer-followup">فتح الكل</button></div><div class="mk-list">'+(topCustomers.map(c=>'<div class="mk-list-row"><div style="display:flex;gap:9px;align-items:center"><span class="mk-avatar">'+esc(String(c.full_name||'?').slice(0,1))+'</span><div><b>'+esc(c.full_name)+'</b><div style="font-size:10.5px;color:#687588">'+esc(c.phone||c.email||'')+'</div></div></div><div>'+mkWa(c.phone,'بخصوص طلبك مع شفرة')+'</div></div>').join('')||'<div class="empty-state" style="padding:22px">مفيش عملاء.</div>')+'</div></div>'+
+    '</div>'+
+    '<div class="card" style="margin-top:14px"><div class="owner-section-head"><div class="title">حالة الـPipeline</div><button class="btn btn-ghost btn-sm" data-mk-jump="marketer-analytics">تفاصيل</button></div><div class="mk-tags">'+
+      [['تحتاج تسعير',pricing.length],['بانتظار الدفع',waitingPayment.length],['قيد التنفيذ',production.length],['تم التسليم',delivered.length],['متأخر',overdue.length],['بدون رسالة',quiet]].map(x=>'<span class="mk-tag">'+esc(x[0])+' · '+x[1]+'</span>').join('')+
+    '</div></div>';
+  el.querySelector('#mk-ref-copy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(marketer.referral_code||'');toast('اتنسخ كود الدعوة','ok');}catch(e){modal('<h3>كود الدعوة</h3><div class="mono" style="font-size:20px">'+esc(marketer.referral_code||'—')+'</div>');}});
+  el.querySelectorAll('[data-mk-jump]').forEach(b=>b.addEventListener('click',()=>goView(b.dataset.mkJump)));
+  el.querySelectorAll('[data-mk-action]').forEach(b=>b.addEventListener('click',async()=>{
+    const a=b.dataset.mkAction;
+    if(['opportunities','customers','projects','conversations','marketer-followup','marketer-analytics','earnings','ratings','direct','marketer-profile'].includes(a)) return goView(a);
+    if(a==='notifications'){document.getElementById('bell-btn').click();return;}
+    if(a==='copy-referral'){document.getElementById('mk-ref-copy').click();return;}
+    if(a==='weekly'){const r=await marketerSafe('/weekly-challenges/current',null);modal('<h3>التحدي الأسبوعي</h3><div style="font-weight:800">'+esc(r&&r.challenge?r.challenge.title:'مفيش تحدي حالي')+'</div><div style="margin-top:7px;color:#687588">'+esc(r&&r.challenge?r.challenge.description||'':'')+'</div>');return;}
+    if(a==='export-customers'){marketerCsv('shifra-marketer-customers.csv',customers);return;}
+    if(a==='export-projects'){marketerCsv('shifra-marketer-projects.csv',projects);return;}
+    if(a==='export-earnings'){marketerCsv('shifra-marketer-earnings.csv',earnings.earnings||[]);return;}
+  }));
+};
+
+RENDERERS['marketer-followup'] = async (el) => {
+  const [cr,pr,conv]=await Promise.all([api('/customers'),api('/projects'),api('/conversations')]); const customers=cr.customers||[],projects=pr.projects||[],conversations=conv.conversations||[];
+  const terminal=['DELIVERED','CANCELLED','REJECTED','REFUNDED','ELIGIBLE_FOR_SETTLEMENT'];
+  const needs=customers.map(c=>{const my=projects.filter(p=>p.customer_id===c.id);const active=my.filter(p=>!terminal.includes(p.status));const latest=conversations.find(x=>x.customer_name===c.full_name);return {...c,active:active.length,projects:my.length,latest};}).filter(c=>c.active===0||!c.latest?.latest_message);
+  el.innerHTML='<div class="card" style="margin-bottom:14px"><b>قائمة المتابعة الذكية</b><div style="font-size:11px;color:#687588;margin-top:4px">القائمة مبنية من العملاء اللي مش عندهم مشروع نشط أو مفيش حركة محادثة ظاهرة.</div></div>'+
+  '<div class="mk-kpis"><div class="mk-kpi"><div class="lab">يحتاج متابعة</div><div class="val">'+needs.length+'</div></div><div class="mk-kpi"><div class="lab">بدون مشروع نشط</div><div class="val">'+needs.filter(x=>x.active===0).length+'</div></div><div class="mk-kpi"><div class="lab">مشروع قريب</div><div class="val">'+projects.filter(p=>p.deadline&&new Date(p.deadline)<=new Date(Date.now()+48*3600*1000)&&!terminal.includes(p.status)).length+'</div></div><div class="mk-kpi"><div class="lab">إجمالي العملاء</div><div class="val">'+customers.length+'</div></div></div>'+
+  '<div class="mk-list">'+(needs.map(c=>'<div class="card"><div class="mk-list-row"><div style="display:flex;gap:9px;align-items:center"><span class="mk-avatar">'+esc(String(c.full_name||'?').slice(0,1))+'</span><div><b>'+esc(c.full_name)+'</b><div style="font-size:10.5px;color:#687588">'+esc(c.phone||c.email||'')+'</div></div></div><div>'+mkWa(c.phone,'أهلاً '+(c.full_name||'')+'، حابب أتابع معاك طلبك من شفرة؟')+'</div></div><div class="mk-tags" style="margin-top:8px"><span class="mk-tag">مشاريع '+c.projects+'</span><span class="mk-tag">نشطة '+c.active+'</span><span class="mk-tag">'+(c.acquisition_source==='EXTERNAL'?'خارجي':'داخلي')+'</span></div></div>').join('')||'<div class="empty-state">مفيش عملاء محتاجين متابعة حسب البيانات الحالية.</div>')+'</div>';
+};
+
+RENDERERS['marketer-analytics'] = async (el) => {
+  const [pr,er,rr,cr,orr]=await Promise.all([api('/projects'),api('/me/earnings'),api('/ratings/me'),api('/conversations'),api('/opportunities')]);
+  const projects=pr.projects||[],earnings=er.earnings||[],ratings=rr.ratings||[],conversations=cr.conversations||[],opportunities=orr.opportunities||[];
+  const statuses={};projects.forEach(p=>statuses[p.status]=(statuses[p.status]||0)+1); const max=Math.max(1,...Object.values(statuses));
+  const earningsByProject=earnings.reduce((m,e)=>(m[e.order_number]=(m[e.order_number]||0)+Number(e.amount_minor||0),m),{});
+  const topEarnings=Object.entries(earningsByProject).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const activity=projects.filter(p=>new Date(p.updated_at)>=new Date(Date.now()-7*24*3600*1000)).length;
+  el.innerHTML='<div class="mk-kpis">'+
+    '<div class="mk-kpi"><div class="lab">نشاط آخر 7 أيام</div><div class="val">'+activity+'</div></div>'+
+    '<div class="mk-kpi"><div class="lab">أعلى مشروع ربحاً</div><div class="val" style="font-size:16px">'+(topEarnings[0]?money(topEarnings[0][1]):'0.00')+'</div></div>'+
+    '<div class="mk-kpi"><div class="lab">فرص مفتوحة</div><div class="val">'+opportunities.length+'</div></div>'+
+    '<div class="mk-kpi"><div class="lab">التقييم</div><div class="val">'+Number(rr.summary?.average||0).toFixed(2)+'</div><div class="sub">'+Number(rr.summary?.count||0)+' تقييم</div></div>'+
+  '</div>'+
+  '<div class="mk-split"><div class="card"><div class="owner-section-head"><div class="title">توزيع المشاريع</div></div>'+Object.entries(statuses).sort((a,b)=>b[1]-a[1]).map(x=>'<div style="margin:9px 0"><div style="display:flex;justify-content:space-between;font-size:11px"><span>'+esc(x[0])+'</span><span>'+x[1]+'</span></div><div class="mk-progress"><i style="width:'+Math.round(x[1]/max*100)+'%"></i></div></div>').join('')+'</div>'+
+  '<div class="card"><div class="owner-section-head"><div class="title">الأرباح حسب المشروع</div></div>'+topEarnings.map(x=>'<div class="mk-list-row"><span>'+esc(x[0])+'</span><b class="mono">'+money(x[1])+' EGP</b></div>').join('')+'</div></div>'+
+  '<div class="card" style="margin-top:14px"><div class="owner-section-head"><div class="title">آخر التقييمات</div><button class="btn btn-ghost btn-sm" data-go-ratings>فتح التقييمات</button></div>'+((ratings||[]).slice(0,6).map(r=>'<div class="mk-list-row"><div><b>'+esc(r.customer_name)+'</b><div style="font-size:10px;color:#687588">'+esc(r.order_number||'')+'</div></div><div style="color:var(--amber)">'+('★'.repeat(r.stars||0))+'</div></div>').join('')||'<div class="empty-state" style="padding:22px">مفيش تقييمات لسه.</div>')+'</div>';
+  el.querySelector('[data-go-ratings]')?.addEventListener('click',()=>goView('ratings'));
+};
+
+RENDERERS.ratings = async (el) => {
+  if(state.user.role!=='MARKETER'){el.innerHTML='<div class="empty-state">التقييمات متاحة للمسوّق.</div>';return;}
+  const r=await api('/ratings/me'); const sum=r.summary||{average:0,count:0}; const stars=n=>'★'.repeat(Math.round(n))+'☆'.repeat(5-Math.round(n));
+  el.innerHTML='<div class="card" style="margin-bottom:15px;text-align:center"><div style="font-size:11px;color:#687588">متوسط تقييمك</div><div style="font-size:36px;font-family:var(--mono);font-weight:800">'+Number(sum.average||0).toFixed(2)+'</div><div style="color:var(--amber);font-size:23px">'+stars(sum.average||0)+'</div><div style="font-size:11px;color:#687588">'+sum.count+' تقييم</div></div><div class="mk-list">'+((r.ratings||[]).map(x=>'<div class="card"><div class="mk-list-row"><b>'+esc(x.customer_name)+'</b><span style="color:var(--amber)">'+stars(x.stars)+'</span></div><div style="font-size:10.5px;color:#687588;margin-top:5px">'+esc(x.order_number||'')+' · '+fmtDate(x.created_at)+'</div><div style="margin-top:7px;color:#a1acba;font-size:12px">'+esc(x.comment||'من غير تعليق')+'</div></div>').join('')||'<div class="empty-state">لسه مفيش تقييمات.</div>')+'</div>';
+};
+
+RENDERERS['marketer-profile'] = async (el) => {
+  const r=await api('/marketers/me'); const m=r.marketer;
+  el.innerHTML='<div class="card" style="margin-bottom:14px"><div class="section-title" style="margin-top:0">بيانات المسوّق</div><div class="kv"><span class="k">الاسم</span><span class="v">'+esc(m.full_name)+'</span></div><div class="kv"><span class="k">البريد</span><span class="v mono">'+esc(m.email||'—')+'</span></div><div class="kv"><span class="k">الهاتف</span><span class="v mono">'+esc(m.phone||'—')+'</span></div><div class="kv"><span class="k">كود الدعوة</span><span class="v mono">'+esc(m.referral_code)+'</span></div></div>'+
+  '<div class="card"><div class="section-title" style="margin-top:0">الأمان</div><div style="font-size:12px;color:#687588;margin-bottom:10px">غيّر كلمة المرور من غير ما تخرج من الحساب.</div><button class="btn btn-primary" id="mk-change-pw">تغيير كلمة المرور</button></div>';
+  el.querySelector('#mk-change-pw').addEventListener('click',()=>{
+    modal('<h3>تغيير كلمة المرور</h3><div class="field"><label>كلمة المرور الحالية</label><input id="mk-cp-current" type="password" class="ltr"></div><div class="field"><label>كلمة المرور الجديدة</label><input id="mk-cp-new" type="password" class="ltr"></div><div class="field"><label>تأكيد الجديدة</label><input id="mk-cp-confirm" type="password" class="ltr"></div><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" id="mk-cp-save">حفظ</button></div>');
+    document.getElementById('mk-cp-save').addEventListener('click',async e=>{const a=document.getElementById('mk-cp-current').value,b=document.getElementById('mk-cp-new').value,c=document.getElementById('mk-cp-confirm').value;if(b.length<8){toast('الجديدة لازم 8 أحرف على الأقل','err');return;}if(b!==c){toast('التأكيد غير مطابق','err');return;}e.target.disabled=true;try{await api('/auth/change-password',{method:'POST',body:{currentPassword:a,newPassword:b}});closeModal();toast('تم تغيير كلمة المرور','ok');}catch(err){toast(err.message,'err');e.target.disabled=false;}});
+  });
+};
+
 /* ================= PROJECTS (shared list, role-adaptive) ================= */
 RENDERERS.projects = async (el) => {
   if (el.dataset.detail) return renderProjectDetail(el, el.dataset.detail);
