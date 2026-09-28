@@ -1866,18 +1866,7 @@ body::before{
    ============================================================ */
 const SESSION_TOKEN_KEY = 'shifra_session_token';
 const SESSION_API_KEY = 'shifra_session_api_base';
-const SHIFRA_SESSION_KEY = 'shifra_session_token_v1';
-const SHIFRA_API_KEY = 'shifra_api_base_v1';
 const state = { token:null, user:null, profile:null, apiBase:'http://localhost:4000/api', view:null };
-
-function persistSession(token){
-  state.token = token || null;
-  if (token) localStorage.setItem(SHIFRA_SESSION_KEY, token);
-  else localStorage.removeItem(SHIFRA_SESSION_KEY);
-}
-function clearPersistedSession(){
-  localStorage.removeItem(SHIFRA_SESSION_KEY);
-}
 
 
 // Smart default: if this page itself isn't running on localhost (i.e. it's
@@ -1973,7 +1962,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   const btn = document.getElementById('login-submit');
   document.getElementById('auth-error').style.display = 'none';
   state.apiBase = document.getElementById('login-apibase').value.trim().replace(/\/$/,'');
-  localStorage.setItem(SHIFRA_API_KEY, state.apiBase);
+  localStorage.setItem(SESSION_API_KEY, state.apiBase);
   btn.disabled = true; const orig = btn.textContent; btn.innerHTML = '<span class="spinner"></span>';
   try {
     const identifier = document.getElementById('login-identifier').value.trim();
