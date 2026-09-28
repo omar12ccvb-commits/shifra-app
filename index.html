@@ -1185,6 +1185,110 @@ body{
     overflow:hidden!important;
   }
 }
+</style><style id="shifra-chat-enterprise-v5">
+:root{
+  --chat-violet:#8b5cf6;--chat-blue:#38bdf8;--chat-cyan:#22d3ee;
+  --chat-green:#34d399;--chat-amber:#f59e0b;--chat-coral:#fb7185;
+  --chat-pink:#e879f9;--chat-indigo:#6366f1;--chat-slate:#94a3b8;
+}
+.chat-enterprise-shell{
+  width:100%;min-height:700px;display:grid;grid-template-columns:300px minmax(0,1fr);
+  gap:0;border:1px solid rgba(255,255,255,.08);border-radius:22px;overflow:hidden;
+  background:
+    radial-gradient(700px 360px at 15% 0%,rgba(56,189,248,.07),transparent 65%),
+    radial-gradient(650px 360px at 85% 0%,rgba(139,92,246,.08),transparent 65%),
+    linear-gradient(180deg,#0c1018 0%,#080b11 100%);
+  box-shadow:0 30px 90px -55px rgba(0,0,0,.95);
+}
+.chat-people{
+  min-width:0;background:rgba(8,11,17,.84);border-inline-end:1px solid rgba(255,255,255,.07);
+  display:flex;flex-direction:column;
+}
+.chat-people-head{padding:16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.chat-people-title{font-weight:850;font-size:16px}
+.chat-people-sub{font-size:10.5px;color:#738198;margin-top:3px}
+.chat-people-search{margin-top:11px}
+.chat-people-search input{height:42px;border-radius:12px!important;background:#111722!important}
+.chat-people-list{flex:1;overflow:auto}
+.chat-person{
+  width:100%;display:flex;align-items:center;gap:10px;padding:13px 14px;border:0;border-bottom:1px solid rgba(255,255,255,.04);
+  background:transparent;color:#eef2f7;text-align:start;cursor:pointer;transition:background .16s,transform .16s;
+}
+.chat-person:hover{background:rgba(255,255,255,.025);transform:translateX(-2px)}
+.chat-person.active{background:linear-gradient(90deg,rgba(139,92,246,.17),rgba(56,189,248,.05));box-shadow:inset -3px 0 0 var(--chat-violet)}
+.chat-avatar{
+  flex:0 0 42px;width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-weight:900;
+  background:linear-gradient(145deg,rgba(139,92,246,.26),rgba(56,189,248,.16));
+  border:1px solid rgba(255,255,255,.08);color:#fff;
+}
+.chat-person:nth-child(3n) .chat-avatar{background:linear-gradient(145deg,rgba(34,211,238,.20),rgba(52,211,153,.12))}
+.chat-person:nth-child(3n+1) .chat-avatar{background:linear-gradient(145deg,rgba(251,113,133,.18),rgba(232,121,249,.12))}
+.chat-person:nth-child(3n+2) .chat-avatar{background:linear-gradient(145deg,rgba(245,158,11,.20),rgba(99,102,241,.12))}
+.chat-person-main{min-width:0;flex:1}
+.chat-person-name{font-size:12.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-person-meta{font-size:9.5px;color:#6f7d91;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-person-side{display:grid;gap:5px;justify-items:end}
+.chat-role-chip{padding:3px 7px;border-radius:999px;font-size:8.5px;font-weight:800}
+.chat-role-chip.marketer{background:rgba(56,189,248,.12);color:#8edcff;border:1px solid rgba(56,189,248,.18)}
+.chat-role-chip.editor{background:rgba(139,92,246,.13);color:#d5c5ff;border:1px solid rgba(139,92,246,.18)}
+.chat-role-chip.customer{background:rgba(52,211,153,.12);color:#92efc3;border:1px solid rgba(52,211,153,.18)}
+.chat-role-chip.owner{background:rgba(245,158,11,.12);color:#ffd58b;border:1px solid rgba(245,158,11,.18)}
+.chat-window{
+  min-width:0;display:flex;flex-direction:column;min-height:700px;position:relative;
+  background:
+    radial-gradient(600px 300px at 50% 0%,rgba(99,102,241,.08),transparent 68%),
+    #090d14;
+}
+.chat-window-empty{flex:1;display:grid;place-items:center;padding:30px}
+.chat-empty-card{
+  width:min(420px,90%);text-align:center;padding:34px 24px;border-radius:22px;
+  border:1px dashed rgba(255,255,255,.10);background:rgba(255,255,255,.018);
+}
+.chat-empty-icon{width:58px;height:58px;margin:0 auto 12px;border-radius:18px;display:grid;place-items:center;font-size:24px;
+  background:linear-gradient(145deg,rgba(139,92,246,.20),rgba(34,211,238,.12));border:1px solid rgba(255,255,255,.08)}
+.chat-window-head{
+  padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.065);display:flex;align-items:center;gap:10px;
+  background:rgba(9,12,18,.90);backdrop-filter:blur(14px);
+}
+.chat-back{display:none;width:34px;height:34px;border-radius:10px;border:1px solid rgba(255,255,255,.07);background:#121722;color:#dbe3ef}
+.chat-window-title{min-width:0;flex:1}.chat-window-name{font-weight:850;font-size:15px}.chat-window-meta{font-size:9.5px;color:#718097;margin-top:2px}
+.chat-window-actions{display:flex;gap:7px;align-items:center}
+.chat-color-line{height:2px;background:linear-gradient(90deg,var(--chat-violet),var(--chat-blue),var(--chat-green),var(--chat-amber),var(--chat-coral),var(--chat-pink))}
+.chat-tools-launch{
+  border-color:rgba(56,189,248,.20)!important;background:linear-gradient(145deg,rgba(56,189,248,.10),rgba(139,92,246,.10))!important;color:#dcecff!important;
+}
+.chat-tools-modal-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.chat-tools-modal-item:nth-child(4n+1){border-color:rgba(139,92,246,.20);background:linear-gradient(145deg,rgba(139,92,246,.07),rgba(255,255,255,.02))}
+.chat-tools-modal-item:nth-child(4n+2){border-color:rgba(56,189,248,.20);background:linear-gradient(145deg,rgba(56,189,248,.07),rgba(255,255,255,.02))}
+.chat-tools-modal-item:nth-child(4n+3){border-color:rgba(52,211,153,.18);background:linear-gradient(145deg,rgba(52,211,153,.06),rgba(255,255,255,.02))}
+.chat-tools-modal-item:nth-child(4n){border-color:rgba(245,158,11,.18);background:linear-gradient(145deg,rgba(245,158,11,.06),rgba(255,255,255,.02))}
+.chat-send-pending{opacity:.62;filter:saturate(.75)}
+.chat-send-ok{box-shadow:0 8px 24px -18px rgba(52,211,153,.65)}
+.chat-send-failed{border-color:rgba(251,113,133,.30)!important}
+.chat-send-status{font-size:9px;color:#7a8799;margin-top:4px}
+.chat-input-area{padding:10px 12px 12px;border-top:1px solid rgba(255,255,255,.065);background:rgba(7,10,15,.96)}
+.chat-input-row{display:flex;gap:9px;align-items:flex-end}
+.chat-input-row textarea{min-height:54px;max-height:140px;resize:vertical;flex:1}
+.chat-input-row .btn{flex:0 0 94px;width:94px;min-height:54px}
+.chat-input-foot{display:flex;justify-content:space-between;gap:8px;margin-top:5px;color:#5f6d80;font-size:9px}
+.chat-color-strip{height:3px;background:linear-gradient(90deg,#8b5cf6 0%,#38bdf8 22%,#22d3ee 40%,#34d399 58%,#f59e0b 74%,#fb7185 88%,#e879f9 100%)}
+@media(max-width:819px){
+  .chat-enterprise-shell{display:block;min-height:calc(100vh - 220px);border-radius:18px}
+  .chat-people{min-height:calc(100vh - 220px);border:0}
+  .chat-window{display:none;min-height:calc(100vh - 220px)}
+  .chat-enterprise-shell.chat-open .chat-people{display:none}
+  .chat-enterprise-shell.chat-open .chat-window{display:flex}
+  .chat-back{display:block}
+  .chat-window-head{padding:11px 12px}
+  .chat-window-name{font-size:14px}
+  .chat-tools-modal-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:520px){
+  .chat-tools-modal-grid{grid-template-columns:1fr}
+  .chat-input-row{align-items:stretch}
+  .chat-input-row textarea{min-height:56px}
+  .chat-input-row .btn{flex-basis:74px;width:74px}
+}
 </style></head>
 <body>
 
@@ -1907,102 +2011,125 @@ function directChatSavePrefs(otherId,prefs){try{localStorage.setItem(directChatS
 function waPhoneDigits(phone){return String(phone||'').replace(/\D/g,'');}
 function waHref(phone,text=''){const d=waPhoneDigits(phone);return d?'https://wa.me/'+d+'?text='+encodeURIComponent(text):'';}
 function waButton(phone,text=''){return phone?'<a class="wa-btn" target="_blank" rel="noopener" href="'+waHref(phone,text)+'">🟢 واتساب</a>':'<span class="wa-btn disabled">واتساب غير مضاف</span>';}
+function chatInitial(name){const s=String(name||'?').trim();return esc((s[0]||'?').toUpperCase());}
+function chatRoleClass(role){return role==='MARKETER'?'marketer':role==='EDITOR'?'editor':role==='CUSTOMER'?'customer':'owner';}
 function ownerDirectContactMarkup(c){
   const wa=c.whatsapp_phone?'<span class="wa-mini" data-direct-wa="'+esc(c.whatsapp_phone)+'" title="فتح واتساب">🟢 WA</span>':'';
-  return '<button class="owner-contact" data-direct-user="'+c.id+'"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div style="min-width:0"><b style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(c.full_name)+'</b><div style="font-size:10px;color:#687488;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+ownerRoleAr(c.role)+' · '+esc(c.status)+(c.latest_message?' · '+esc(String(c.latest_message).slice(0,42)):'')+'</div></div>'+wa+'</div></button>';
+  return '<button class="chat-person" data-direct-user="'+c.id+'"><div class="chat-avatar">'+chatInitial(c.full_name)+'</div><div class="chat-person-main"><div class="chat-person-name">'+esc(c.full_name)+'</div><div class="chat-person-meta">'+esc(c.email||c.phone||'بدون بيانات')+(c.latest_message?' · '+esc(String(c.latest_message).slice(0,42)):'')+'</div></div><div class="chat-person-side"><span class="chat-role-chip '+chatRoleClass(c.role)+'">'+ownerRoleAr(c.role)+'</span>'+(c.unread_count?'<span class="badge badge-red">'+c.unread_count+'</span>':'')+wa+'</div></button>';
 }
-function directChatToolsList(){
-  return [
-    ['chat-search','🔎','بحث الرسائل'],['chat-pin','📌','تثبيت المحادثة'],['chat-mute','🔕','كتم المحادثة'],['chat-density','▤','كثافة العرض'],
-    ['chat-time','◷','إظهار التوقيت'],['chat-draft','📝','المسودة'],['chat-emoji','😊','إيموجي'],['chat-quote-last','↩','اقتباس آخر رسالة'],
-    ['chat-copy-last','⧉','نسخ آخر رسالة'],['chat-templates','☰','قوالب سريعة'],['chat-export','⇩','تصدير المحادثة'],['chat-refresh','↻','تحديث'],
-    ['chat-bottom','↓','آخر الرسائل'],['chat-notes','🗒','ملاحظات المحادثة'],['chat-contact','👤','بطاقة الاتصال'],['chat-whatsapp','🟢','فتح واتساب'],
-    ['chat-important','★','تمييز مهم'],['chat-read','✓','تأكيد القراءة'],['chat-enter','↵','Enter للإرسال'],['chat-clear-draft','⌫','مسح المسودة']
-  ];
-}
-function directChatToolButton(){
-  return '<button type="button" class="chat-tools-launch" id="chat-tools-open">⚙ أدوات المحادثة <span style="opacity:.65">20</span></button>';
-}
+function directChatToolsList(){return [
+ ['chat-search','🔎','بحث الرسائل'],['chat-pin','📌','تثبيت المحادثة'],['chat-mute','🔕','كتم المحادثة'],['chat-density','▤','كثافة العرض'],
+ ['chat-time','◷','إظهار التوقيت'],['chat-draft','📝','المسودة'],['chat-emoji','😊','إيموجي'],['chat-quote-last','↩','اقتباس آخر رسالة'],
+ ['chat-copy-last','⧉','نسخ آخر رسالة'],['chat-templates','☰','قوالب سريعة'],['chat-export','⇩','تصدير المحادثة'],['chat-refresh','↻','تحديث'],
+ ['chat-bottom','↓','آخر الرسائل'],['chat-notes','🗒','ملاحظات المحادثة'],['chat-contact','👤','بطاقة الاتصال'],['chat-whatsapp','🟢','فتح واتساب'],
+ ['chat-important','★','تمييز مهم'],['chat-read','✓','تأكيد القراءة'],['chat-enter','↵','Enter للإرسال'],['chat-clear-draft','⌫','مسح المسودة']
+];}
+function directChatToolButton(){return '<button type="button" class="chat-tools-launch" id="chat-tools-open">⚙ الأدوات <span style="opacity:.7">20</span></button>';}
 function directMessageHtml(m,prefs){
   const mine=Number(m.sender_id)===Number(state.user.id);
-  return '<div class="owner-msg '+(mine?'mine':'theirs')+'" data-msg-text="'+esc(String(m.body||'').toLowerCase())+'" data-msg-id="'+m.id+'">'+
+  return '<div class="owner-msg '+(mine?'mine':'theirs')+'" data-msg-text="'+esc(String(m.body||'').toLowerCase())+'" data-msg-id="'+esc(m.id)+'">'+
     '<div class="chat-time">'+esc(m.sender_name)+' · '+fmtDate(m.created_at)+'</div>'+
-    '<div style="white-space:pre-wrap">'+esc(m.body)+'</div>'+
-    '<div class="chat-actions"><button type="button" data-msg-copy="'+m.id+'">نسخ</button><button type="button" data-msg-quote="'+m.id+'">اقتباس</button></div>'+
+    '<div style="white-space:pre-wrap;overflow-wrap:anywhere">'+esc(m.body)+'</div>'+
+    '<div class="chat-actions"><button type="button" data-msg-copy="'+esc(m.id)+'">نسخ</button><button type="button" data-msg-quote="'+esc(m.id)+'">اقتباس</button></div>'+
   '</div>';
+}
+function groupChatTools(tools){
+  const groups=[
+    ['تفاعل وتنظيم',['chat-search','chat-pin','chat-mute','chat-important','chat-read','chat-bottom']],
+    ['الكتابة السريعة',['chat-draft','chat-emoji','chat-quote-last','chat-copy-last','chat-templates','chat-clear-draft']],
+    ['إدارة المحادثة',['chat-density','chat-time','chat-enter','chat-notes','chat-export','chat-refresh']],
+    ['الاتصال',['chat-contact','chat-whatsapp']]
+  ];
+  return groups.map(g=>'<div style="margin-top:10px"><div style="font-size:10px;color:#78869a;margin:0 0 7px;font-weight:800">'+g[0]+'</div><div class="chat-tools-modal-grid">'+g[1].map(id=>{const x=tools.find(t=>t[0]===id);return x?'<button type="button" class="chat-tools-modal-item" data-chat-tool="'+x[0]+'"><span class="ic">'+x[1]+'</span><span>'+esc(x[2])+'</span></button>':''}).join('')+'</div></div>').join('');
 }
 function openDirectChatTools(ctx){
   const {panel,userId,target,messages,prefs,input,body,draftKey,draftNote,intro,button,host}=ctx;
   const tools=directChatToolsList();
-  modal('<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h3 style="margin:0">أدوات المحادثة</h3><span class="badge badge-purple">20</span></div>'+
-    '<div style="font-size:11px;color:#738096;margin:5px 0 12px">الأدوات التشغيلية هنا منفصلة عن مساحة الرسائل عشان المحادثة تفضل نظيفة.</div>'+
-    '<div class="chat-tools-modal-grid">'+tools.map(x=>'<button type="button" class="chat-tools-modal-item '+((x[0]==='chat-pin'&&prefs.pinned)||(x[0]==='chat-mute'&&prefs.muted)||(x[0]==='chat-density'&&prefs.compact)||(x[0]==='chat-time'&&prefs.showTime!==false)||(x[0]==='chat-important'&&prefs.important)||(x[0]==='chat-enter'&&prefs.enterSend!==false)?'active':'')+'" data-chat-tool="'+x[0]+'"><span class="ic">'+x[1]+'</span><span>'+esc(x[2])+'</span></button>').join('')+'</div>'+
-    '<div class="modal-actions"><button class="btn btn-ghost btn-block" onclick="closeModal()">إغلاق</button></div>');
+  modal('<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h3 style="margin:0">أدوات المحادثة</h3><span class="badge badge-purple">20 أدوات</span></div><div style="font-size:11px;color:#738096;margin:5px 0 3px">كل الأدوات منظمة حسب الوظيفة ومش بتزاحم مساحة الكلام.</div>'+groupChatTools(tools)+'<div class="modal-actions"><button class="btn btn-ghost btn-block" onclick="closeModal()">إغلاق</button></div>');
   document.querySelectorAll('#modal-inner [data-chat-tool]').forEach(btn=>btn.addEventListener('click',async()=>{
     const action=btn.dataset.chatTool;
     if(action==='chat-search'){closeModal();const box=panel.querySelector('#chat-search-box');box.classList.add('active');panel.querySelector('#chat-search-input').focus();return;}
     if(['chat-pin','chat-mute','chat-density','chat-time','chat-important','chat-enter'].includes(action)){
       const key={'chat-pin':'pinned','chat-mute':'muted','chat-density':'compact','chat-time':'showTime','chat-important':'important','chat-enter':'enterSend'}[action];
       prefs[key]=action==='chat-time'?prefs[key]===false:!prefs[key];
-      directChatSavePrefs(userId,prefs);
-      closeModal();await renderDirectChat(host,userId,button);toast(action==='chat-mute'?(prefs.muted?'المحادثة مكتومة':'تم إلغاء الكتم'):'اتحفظ الإعداد','ok');return;
+      directChatSavePrefs(userId,prefs);closeModal();await renderDirectChat(host,userId,button);return;
     }
-    if(action==='chat-draft'){closeModal();input.focus();input.dispatchEvent(new Event('input'));toast('المسودة محفوظة تلقائيًا','ok');return;}
+    if(action==='chat-draft'){closeModal();input.focus();input.dispatchEvent(new Event('input'));toast('المسودة محفوظة','ok');return;}
     if(action==='chat-clear-draft'){input.value='';prefs[draftKey]='';directChatSavePrefs(userId,prefs);draftNote.textContent='';closeModal();return;}
     if(action==='chat-emoji'){modal('<h3>إيموجي</h3><div style="display:flex;gap:8px;flex-wrap:wrap">'+['😀','👍','❤️','🔥','✅','🎬','💰','📌','👏','🙂'].map(e=>'<button class="btn btn-ghost" data-chat-emoji="'+e+'" style="font-size:22px;min-width:48px">'+e+'</button>').join('')+'</div><div class="modal-actions"><button class="btn btn-ghost btn-block" onclick="closeModal()">إغلاق</button></div>');document.querySelectorAll('[data-chat-emoji]').forEach(b=>b.onclick=()=>{input.value+=b.dataset.chatEmoji;input.dispatchEvent(new Event('input'));input.focus();closeModal();});return;}
     if(action==='chat-quote-last'){const m=messages[messages.length-1];closeModal();if(m){input.value='> '+m.sender_name+': '+m.body+'\n\n';input.dispatchEvent(new Event('input'));input.focus();}return;}
     if(action==='chat-copy-last'){const m=messages[messages.length-1];if(!m){toast('مفيش رسالة','err');return;}try{await navigator.clipboard.writeText(m.body);toast('اتنسخت آخر رسالة','ok');}catch(e){toast('النسخ غير متاح','err');}return;}
-    if(action==='chat-templates'){const rows=['أهلاً، تم استلام رسالتك وهنراجعها مع الفريق.','تم استلام المواد، وجاري المتابعة.','المعاينة جاهزة للمراجعة، ابعت ملاحظاتك في نفس المسار.','تم اعتماد الخطوة الحالية، نبدأ الخطوة التالية.','بعد تأكيد الدفع هنكمل التسليم النهائي.'];modal('<h3>قوالب سريعة</h3>'+rows.map((x,i)=>'<div class="card" style="margin-bottom:7px"><div style="font-size:11.5px">'+esc(x)+'</div><button class="btn btn-ghost btn-sm" data-quick-template="'+i+'" style="margin-top:7px">استخدام</button></div>').join('')+'<div class="modal-actions"><button class="btn btn-ghost btn-block" onclick="closeModal()">إغلاق</button></div>');document.querySelectorAll('[data-quick-template]').forEach(b=>b.onclick=()=>{input.value=rows[Number(b.dataset.quickTemplate)];input.dispatchEvent(new Event('input'));input.focus();closeModal();});return;}
+    if(action==='chat-templates'){const rows=['أهلاً، تم استلام رسالتك.','تم استلام المواد وجاري المتابعة.','المعاينة جاهزة للمراجعة.','تم اعتماد الخطوة الحالية ونبدأ التالية.','بعد تأكيد الدفع نكمل التسليم النهائي.'];modal('<h3>قوالب سريعة</h3>'+rows.map((x,i)=>'<div class="card" style="margin-bottom:7px"><div style="font-size:11.5px">'+esc(x)+'</div><button class="btn btn-ghost btn-sm" data-quick-template="'+i+'">استخدام</button></div>').join('')+'<div class="modal-actions"><button class="btn btn-ghost btn-block" onclick="closeModal()">إغلاق</button></div>');document.querySelectorAll('[data-quick-template]').forEach(b=>b.onclick=()=>{input.value=rows[Number(b.dataset.quickTemplate)];input.dispatchEvent(new Event('input'));input.focus();closeModal();});return;}
     if(action==='chat-export'){const text=messages.map(m=>'['+fmtDate(m.created_at)+'] '+m.sender_name+': '+m.body).join('\n\n');const blob=new Blob([text],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='shifra-chat-'+userId+'.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),500);toast('اتصدرت المحادثة','ok');return;}
     if(action==='chat-refresh'){closeModal();await renderDirectChat(host,userId,button);return;}
     if(action==='chat-bottom'){closeModal();body.scrollTop=body.scrollHeight;return;}
     if(action==='chat-notes'){const key='notes_'+userId;modal('<h3>ملاحظات المحادثة</h3><textarea id="chat-notes-area" style="min-height:170px">'+esc(prefs[key]||'')+'</textarea><div class="modal-actions"><button class="btn btn-primary" id="chat-notes-save">حفظ</button><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');document.getElementById('chat-notes-save').onclick=()=>{prefs[key]=document.getElementById('chat-notes-area').value;directChatSavePrefs(userId,prefs);closeModal();toast('اتحفظت الملاحظات','ok');};return;}
     if(action==='chat-contact'){modal('<h3>بطاقة الاتصال</h3><div class="chat-contact-card"><div class="chat-contact-row"><span>الاسم</span><b>'+esc(target.full_name)+'</b></div><div class="chat-contact-row"><span>الدور</span><b>'+esc(ownerRoleAr(target.role))+'</b></div><div class="chat-contact-row"><span>البريد</span><b>'+esc(target.email||'—')+'</b></div><div class="chat-contact-row"><span>الهاتف</span><b class="mono">'+esc(target.phone||'—')+'</b></div><div class="chat-contact-row"><span>واتساب</span><b class="mono">'+esc(target.whatsapp_phone||'—')+'</b></div></div><div class="modal-actions">'+(target.whatsapp_phone?waButton(target.whatsapp_phone,intro):'')+'<button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');return;}
     if(action==='chat-whatsapp'){if(target.whatsapp_phone){closeModal();window.open(waHref(target.whatsapp_phone,intro),'_blank','noopener');}else toast('الحساب لم يضف رقم واتساب','err');return;}
-    if(action==='chat-read'){closeModal();await renderDirectChat(host,userId,button);toast('تم فتح المحادثة وتأكيد القراءة','ok');return;}
+    if(action==='chat-read'){closeModal();await renderDirectChat(host,userId,button);toast('تم تحديث القراءة','ok');return;}
   }));
 }
+function appendOptimisticMessage(bodyWrap,msg,mine=true){
+  const temp='temp-'+Date.now()+'-'+Math.random().toString(36).slice(2);
+  const html='<div class="owner-msg '+(mine?'mine':'theirs')+' chat-send-pending" data-msg-id="'+temp+'"><div class="chat-time">'+esc(state.user.fullName)+' · الآن</div><div style="white-space:pre-wrap;overflow-wrap:anywhere">'+esc(msg)+'</div><div class="chat-send-status">جارٍ الإرسال...</div></div>';
+  bodyWrap.insertAdjacentHTML('beforeend',html);bodyWrap.scrollTop=bodyWrap.scrollHeight;return temp;
+}
 async function renderDirectChat(host,userId,button){
-  host.querySelectorAll('.owner-contact').forEach(b=>b.classList.remove('active'));if(button)button.classList.add('active');
+  host.querySelectorAll('.chat-person').forEach(b=>b.classList.remove('active'));if(button)button.classList.add('active');
+  const shell=host.querySelector('#direct-enterprise-shell');if(!shell)return;
+  shell.classList.add('chat-open');
   const panel=host.querySelector('#direct-panel');if(!panel)return;
-  panel.innerHTML='<div class="empty-state">جارِ تحميل المحادثة...</div>';
+  panel.innerHTML='<div class="chat-window-empty"><div class="spinner"></div></div>';
   try{
     const r=await api('/direct-conversations/'+userId+'/messages');const target=r.target;const messages=r.messages||[];
     const prefs=directChatLoadPrefs(userId);const draftKey='draft_'+userId;const draft=prefs[draftKey]||'';const intro='أهلاً '+(target.full_name||'')+'، معاك من شفرة.';
-    panel.innerHTML=
-      '<div class="owner-chat-head"><div class="chat-header-main"><div class="chat-header-info"><div class="chat-header-name">'+esc(target.full_name)+'</div><div class="chat-header-meta">'+ownerRoleAr(target.role)+' · '+esc(target.email||target.phone||'')+(prefs.pinned?' · مثبت':'')+(prefs.muted?' · مكتومة':'')+'</div></div><div class="chat-header-actions">'+directChatToolButton()+waButton(target.whatsapp_phone,intro)+'</div></div></div>'+
-      '<div class="chat-tools-summary">المحادثة نظيفة. اضغط «أدوات المحادثة» لفتح الأدوات بدون تشويش مساحة الرسائل.</div>'+
-      '<div class="chat-search" id="chat-search-box"><input id="chat-search-input" placeholder="ابحث داخل الرسائل..."></div>'+
-      '<div class="owner-chat-body '+(prefs.compact?'compact':'')+'" id="direct-body">'+(messages.length?messages.map(m=>directMessageHtml(m,prefs)).join(''):'<div class="empty-state" style="padding:40px 20px">لسه مفيش رسائل.</div>')+'</div>'+
-      '<div class="chat-draft-note" id="chat-draft-note">'+(draft?'مسودة محفوظة تلقائيًا':'')+'</div>'+
-      '<div class="chat-compose-caption">Enter للإرسال · Shift+Enter لسطر جديد</div>'+
-      '<form class="owner-chat-compose" id="direct-compose"><textarea id="direct-text" maxlength="2000" placeholder="اكتب رسالتك هنا...">'+esc(draft)+'</textarea><button class="btn btn-primary" type="submit">إرسال</button></form>';
-    const body=panel.querySelector('#direct-body'),input=panel.querySelector('#direct-text'),draftNote=panel.querySelector('#chat-draft-note');
+    panel.innerHTML='<div class="chat-window"><div class="chat-color-line"></div><div class="chat-window-head"><button class="chat-back" id="chat-back">‹</button><div class="chat-avatar" style="width:38px;height:38px;flex-basis:38px">'+chatInitial(target.full_name)+'</div><div class="chat-window-info"><div class="chat-window-name">'+esc(target.full_name)+'</div><div class="chat-window-meta">'+esc(ownerRoleAr(target.role))+' · '+esc(target.email||target.phone||'')+'</div></div><div class="chat-window-actions">'+directChatToolButton()+waButton(target.whatsapp_phone,intro)+'</div></div><div class="chat-tools-summary">مساحة عمل نظيفة · الأدوات داخل لوحة منفصلة</div><div class="chat-search" id="chat-search-box"><input id="chat-search-input" placeholder="ابحث داخل الرسائل..."></div><div class="owner-chat-body '+(prefs.compact?'compact':'')+'" id="direct-body">'+(messages.length?messages.map(m=>directMessageHtml(m,prefs)).join(''):'<div class="empty-state" style="padding:50px 20px">لسه مفيش رسائل</div>')+'</div><div class="chat-input-area"><div class="chat-draft-note" id="chat-draft-note">'+(draft?'مسودة محفوظة تلقائيًا':'')+'</div><form id="direct-compose"><div class="chat-input-row"><textarea id="direct-text" maxlength="2000" placeholder="اكتب رسالتك هنا...">'+esc(draft)+'</textarea><button class="btn btn-primary" type="submit">إرسال</button></div><div class="chat-input-foot"><span>Enter للإرسال · Shift+Enter لسطر جديد</span><span id="chat-count">'+draft.length+'/2000</span></div></form></div></div>';
+    const windowEl=panel.querySelector('.chat-window'),body=panel.querySelector('#direct-body'),input=panel.querySelector('#direct-text'),draftNote=panel.querySelector('#chat-draft-note');
     body.scrollTop=body.scrollHeight;
     let draftTimer=null;
-    input.addEventListener('input',()=>{const val=input.value;prefs[draftKey]=val;clearTimeout(draftTimer);draftTimer=setTimeout(()=>{directChatSavePrefs(userId,prefs);if(draftNote)draftNote.textContent=val?'مسودة محفوظة تلقائيًا':'';},200);});
-    const sendText=async()=>{const text=input.value.trim();if(!text)return;const send=panel.querySelector('#direct-compose button[type=submit]');send.disabled=true;try{await api('/direct-conversations/'+userId+'/messages',{method:'POST',body:{body:text}});prefs[draftKey]='';directChatSavePrefs(userId,prefs);await renderDirectChat(host,userId,button);toast('اترسلت الرسالة','ok');}catch(err){toast(err.message,'err');send.disabled=false;}};
-    panel.querySelector('#direct-compose').addEventListener('submit',async e=>{e.preventDefault();await sendText();});
+    input.addEventListener('input',()=>{const val=input.value;prefs[draftKey]=val;panel.querySelector('#chat-count').textContent=val.length+'/2000';clearTimeout(draftTimer);draftTimer=setTimeout(()=>{directChatSavePrefs(userId,prefs);if(draftNote)draftNote.textContent=val?'مسودة محفوظة تلقائيًا':'';},250);});
+    const sendText=async()=>{
+      const text=input.value.trim();if(!text)return;
+      const send=panel.querySelector('#direct-compose button[type=submit]');send.disabled=true;
+      const tempId=appendOptimisticMessage(body,text,true);input.value='';input.dispatchEvent(new Event('input'));
+      try{
+        const resp=await api('/direct-conversations/'+userId+'/messages',{method:'POST',body:{body:text}});
+        const bubble=body.querySelector('[data-msg-id="'+tempId+'"]');
+        if(bubble){bubble.classList.remove('chat-send-pending');bubble.classList.add('chat-send-ok');bubble.querySelector('.chat-time').textContent=state.user.fullName+' · '+fmtDate(resp.message.created_at);bubble.querySelector('.chat-send-status').textContent='✓ تم الإرسال';bubble.dataset.msgId=resp.message.id;}
+        prefs[draftKey]='';directChatSavePrefs(userId,prefs);toast('تم إرسال الرسالة','ok');
+      }catch(err){
+        const bubble=body.querySelector('[data-msg-id="'+tempId+'"]');
+        if(bubble){bubble.classList.remove('chat-send-pending');bubble.classList.add('chat-send-failed');const s=bubble.querySelector('.chat-send-status');s.textContent='فشل الإرسال — اضغط إرسال مرة أخرى';}
+        toast(err.message,'err');input.value=text;input.dispatchEvent(new Event('input'));
+      }finally{send.disabled=false;input.focus();}
+    };
+    panel.querySelector('#direct-compose').addEventListener('submit',e=>{e.preventDefault();sendText();});
     input.addEventListener('keydown',e=>{if(e.key==='Enter'&&prefs.enterSend!==false&&!e.shiftKey){e.preventDefault();sendText();}});
     panel.querySelector('#chat-tools-open').addEventListener('click',()=>openDirectChatTools({panel,userId,target,messages,prefs,input,body,draftKey,draftNote,intro,button,host}));
+    panel.querySelector('#chat-back').addEventListener('click',()=>{shell.classList.remove('chat-open');panel.innerHTML='<div class="chat-window-empty"><div class="chat-empty-card"><div class="chat-empty-icon">💬</div><b>اختار شخص من القائمة</b><div style="font-size:10.5px;color:#718097;margin-top:4px">المحادثة هتفتح هنا بشكل كامل.</div></div></div>';});
     panel.querySelectorAll('[data-msg-copy]').forEach(b=>b.addEventListener('click',async()=>{const m=messages.find(x=>String(x.id)===String(b.dataset.msgCopy));if(!m)return;try{await navigator.clipboard.writeText(m.body);toast('اتنسخت الرسالة','ok');}catch(e){toast('النسخ غير متاح','err');}}));
     panel.querySelectorAll('[data-msg-quote]').forEach(b=>b.addEventListener('click',()=>{const m=messages.find(x=>String(x.id)===String(b.dataset.msgQuote));if(!m)return;input.value='> '+m.sender_name+': '+m.body+'\n\n';input.focus();input.dispatchEvent(new Event('input'));}));
     const searchInput=panel.querySelector('#chat-search-input');if(searchInput)searchInput.addEventListener('input',()=>{const q=searchInput.value.toLowerCase().trim();panel.querySelectorAll('[data-msg-text]').forEach(m=>m.classList.toggle('chat-hidden',q&&!m.dataset.msgText.includes(q)));});
-  }catch(err){panel.innerHTML='<div class="empty-state">'+esc(err.message)+'</div>';}
+  }catch(err){panel.innerHTML='<div class="chat-window-empty"><div class="chat-empty-card"><div class="chat-empty-icon">⚠</div><b>تعذر تحميل المحادثة</b><div style="font-size:10.5px;color:#718097;margin-top:5px">'+esc(err.message)+'</div></div></div>';}
+}
+function directListMarkup(conversations){
+  return conversations.length?conversations.map(ownerDirectContactMarkup).join(''):'<div class="empty-state" style="padding:60px 20px"><div style="font-size:30px;margin-bottom:8px">💬</div>مفيش حسابات متاحة حاليًا</div>';
+}
+function attachDirectContactEvents(el){
+  const shell=el.querySelector('#direct-enterprise-shell');
+  const search=el.querySelector('#direct-search');if(search)search.addEventListener('input',()=>{const q=search.value.toLowerCase().trim();el.querySelectorAll('.chat-person').forEach(b=>b.style.display=b.textContent.toLowerCase().includes(q)?'flex':'none');});
+  el.querySelectorAll('[data-direct-user]').forEach(b=>b.addEventListener('click',e=>{const wa=e.target.closest('[data-direct-wa]');if(wa){e.preventDefault();e.stopPropagation();window.open(waHref(wa.dataset.directWa),'_blank','noopener');return;}renderDirectChat(el,b.dataset.directUser,b);}));
 }
 RENDERERS['owner-direct'] = async (el) => {
   const r=await api('/direct-conversations');const conversations=r.conversations||[];
-  el.innerHTML='<div class="owner-chat-shell"><div class="owner-contact-list"><div style="padding:10px;border-bottom:1px solid rgba(255,255,255,.05)"><input id="direct-search" placeholder="ابحث عن أي حساب..." style="width:100%"></div><div id="direct-contacts">'+(conversations.map(ownerDirectContactMarkup).join('')||'<div class="empty-state" style="padding:30px">مفيش حسابات.</div>')+'</div></div><div class="owner-chat" id="direct-panel"><div class="empty-state" style="margin:auto">اختار أي حساب وابدأ الكلام.</div></div></div>';
-  const search=el.querySelector('#direct-search');search.addEventListener('input',()=>{const q=search.value.toLowerCase().trim();el.querySelectorAll('.owner-contact').forEach(b=>b.style.display=b.textContent.toLowerCase().includes(q)?'block':'none');});
-  el.querySelectorAll('[data-direct-user]').forEach(b=>b.addEventListener('click',e=>{const wa=e.target.closest('[data-direct-wa]');if(wa){e.preventDefault();e.stopPropagation();window.open(waHref(wa.dataset.directWa),'_blank','noopener');return;}renderDirectChat(el,b.dataset.directUser,b);}));
+  el.innerHTML='<div class="card" style="margin-bottom:14px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px"><div><b style="font-size:19px">مراسلات الشركة</b><div style="font-size:11px;color:#738198;margin-top:4px">اختر شخص من القائمة، والمحادثة هتفتح في مساحة كاملة.</div></div><span class="badge badge-purple">مباشر</span></div></div><div id="direct-enterprise-shell" class="chat-enterprise-shell"><section class="chat-people"><div class="chat-people-head"><div class="chat-people-title">الأشخاص</div><div class="chat-people-sub">المتصلين بالحسابات النشطة</div><div class="chat-people-search"><input id="direct-search" placeholder="ابحث بالاسم أو الدور..."></div></div><div class="chat-people-list">'+directListMarkup(conversations)+'</div></section><section class="chat-window" id="direct-panel"><div class="chat-color-strip"></div><div class="chat-window-empty"><div class="chat-empty-card"><div class="chat-empty-icon">💬</div><b>اختار شخص من القائمة</b><div style="font-size:10.5px;color:#718097;margin-top:4px">بعد الاختيار هتفتح المحادثة بحجم كامل.</div></div></div></section></div>';
+  attachDirectContactEvents(el);
 };
 RENDERERS['direct'] = async (el) => {
   const [r,w]=await Promise.all([api('/direct-conversations'),api('/me/whatsapp')]);const conversations=r.conversations||[],current=w.whatsappPhone||'';
-  el.innerHTML='<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start"><div><b style="font-size:16px">الرسائل المباشرة</b><div style="font-size:11px;color:#687488;margin-top:4px">المراسلات اليومية هنا. أدوات المحادثة منفصلة عشان الشاشة تفضل نظيفة.</div></div><span class="badge badge-purple">محادثات</span></div><div class="card" style="margin-top:10px;background:rgba(37,211,102,.035);border-color:rgba(37,211,102,.12)"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><b style="color:#8be0b8">واتساب</b><div style="font-size:10.5px;color:#728096;margin-top:2px">أضف رقمك مرة واحدة عشان زر 🟢 WA يظهر للناس.</div></div><span class="badge badge-green">اختياري</span></div><div class="field" style="margin-top:9px;margin-bottom:8px"><input id="my-whatsapp" class="ltr" placeholder="+20 10xxxxxxxx" value="'+esc(current)+'"></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn btn-sm" style="background:#25d366;color:#06140b;font-weight:800" id="save-whatsapp">حفظ رقم واتساب</button>'+(current?waButton(current,'أهلاً، بتواصل معاك من شفرة.'):'' )+'</div></div></div>'+
-    '<div class="owner-chat-shell"><div class="owner-contact-list"><div style="padding:10px;border-bottom:1px solid rgba(255,255,255,.05)"><input id="direct-search" placeholder="ابحث عن أي حساب..." style="width:100%"></div>'+(conversations.map(ownerDirectContactMarkup).join('')||'<div class="empty-state" style="padding:30px">لسه مفيش محادثات.</div>')+'</div><div class="owner-chat" id="direct-panel"><div class="empty-state" style="margin:auto">اختار محادثة.</div></div></div>';
+  el.innerHTML='<div class="card" style="margin-bottom:14px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px"><div><b style="font-size:19px">الرسائل</b><div style="font-size:11px;color:#738198;margin-top:4px">اختار الشخص أولًا، وبعدها المحادثة هتاخد مساحة الشاشة.</div></div><span class="badge badge-purple">مراسلات</span></div><div class="card" style="margin-top:10px;background:linear-gradient(135deg,rgba(34,211,238,.055),rgba(52,211,153,.035));border-color:rgba(34,211,238,.14)"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><b style="color:#7de9f4">واتساب</b><div style="font-size:10.5px;color:#728096;margin-top:2px">أضف رقمك مرة واحدة عشان زر واتساب يظهر لباقي الحسابات.</div></div><span class="badge badge-green">اختياري</span></div><div class="field" style="margin-top:9px;margin-bottom:8px"><input id="my-whatsapp" class="ltr" placeholder="+20 10xxxxxxxx" value="'+esc(current)+'"></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn btn-sm" style="background:linear-gradient(135deg,#22c55e,#22d3ee);color:#04110b;font-weight:850" id="save-whatsapp">حفظ واتساب</button>'+(current?waButton(current,'أهلاً، بتواصل معاك من شفرة.'):'' )+'</div></div></div><div class="card" style="padding:0;overflow:hidden"><div id="direct-enterprise-shell" class="chat-enterprise-shell" style="border:0;border-radius:0"><section class="chat-people"><div class="chat-people-head"><div class="chat-people-title">اختيار الشخص</div><div class="chat-people-sub">كل الحسابات النشطة متاحة حسب صلاحيات حسابك</div><div class="chat-people-search"><input id="direct-search" placeholder="ابحث بالاسم أو الدور..."></div></div><div class="chat-people-list">'+directListMarkup(conversations)+'</div></section><section class="chat-window" id="direct-panel"><div class="chat-color-strip"></div><div class="chat-window-empty"><div class="chat-empty-card"><div class="chat-empty-icon">💬</div><b>اختار شخص من القائمة</b><div style="font-size:10.5px;color:#718097;margin-top:4px">المحادثة هتفتح هنا بشكل كامل.</div></div></section></div></div>';
   el.querySelector('#save-whatsapp').addEventListener('click',async()=>{const btn=el.querySelector('#save-whatsapp');btn.disabled=true;try{const x=await api('/me/whatsapp',{method:'PATCH',body:{whatsappPhone:el.querySelector('#my-whatsapp').value.trim()}});toast('اتحفظ رقم واتساب','ok');if(x.whatsappUrl)window.open(x.whatsappUrl,'_blank','noopener');await RENDERERS.direct(el);}catch(err){toast(err.message,'err');btn.disabled=false;}});
-  const search=el.querySelector('#direct-search');search.addEventListener('input',()=>{const q=search.value.toLowerCase().trim();el.querySelectorAll('.owner-contact').forEach(b=>b.style.display=b.textContent.toLowerCase().includes(q)?'block':'none');});
-  el.querySelectorAll('[data-direct-user]').forEach(b=>b.addEventListener('click',e=>{const wa=e.target.closest('[data-direct-wa]');if(wa){e.preventDefault();e.stopPropagation();window.open(waHref(wa.dataset.directWa),'_blank','noopener');return;}renderDirectChat(el,b.dataset.directUser,b);}));
+  attachDirectContactEvents(el);
 };
 
 /* ================= PROJECT CONVERSATIONS ================= */
