@@ -784,7 +784,21 @@ body::before{
   .customer-hero h2{font-size:18px}
 }
 </style>
-</head>
+<style id="shifra-editor-os">
+.editor-hero{padding:20px;border:1px solid rgba(120,150,190,.16);border-radius:22px;background:linear-gradient(135deg,rgba(90,115,170,.15),rgba(16,21,31,.72));margin-bottom:14px}
+.editor-hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.editor-hero h2{margin:0;font-size:21px}.editor-hero p{margin:7px 0 0;color:var(--text-dim);font-size:12px;line-height:1.7}
+.editor-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:15px}
+.editor-kpi{padding:13px;border-radius:16px;border:1px solid rgba(120,150,190,.12);background:rgba(8,12,19,.28)}
+.editor-kpi .k{font-size:10px;color:var(--text-faint)}.editor-kpi .v{font-size:21px;font-weight:800;margin-top:3px}.editor-kpi .s{font-size:10px;color:var(--text-dim);margin-top:3px}
+.editor-feature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.editor-feature{border:1px solid rgba(120,150,190,.12);background:rgba(10,14,22,.5);border-radius:17px;padding:13px;text-align:right;cursor:pointer;min-height:104px;display:flex;flex-direction:column;justify-content:space-between}
+.editor-feature .top{display:flex;align-items:center;justify-content:space-between}.editor-feature .ic{font-size:19px}.editor-feature .title{font-weight:750;font-size:12.5px}.editor-feature .desc{font-size:10.5px;line-height:1.6;color:var(--text-dim);margin-top:7px}
+.editor-section-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:14px 0 9px}.editor-section-head .title{font-weight:800;font-size:13px}
+.editor-mini-list{display:grid;gap:8px}.editor-mini{padding:10px 11px;border-radius:14px;border:1px solid rgba(120,150,190,.10);background:rgba(8,12,18,.32)}
+.editor-mini .row{display:flex;justify-content:space-between;gap:8px;align-items:center}.editor-progress{height:7px;border-radius:999px;background:rgba(255,255,255,.05);overflow:hidden;margin-top:7px}.editor-progress i{display:block;height:100%;background:linear-gradient(90deg,#6b8cff,#9b7cff);border-radius:inherit}
+@media(max-width:760px){.editor-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.editor-feature-grid{grid-template-columns:1fr}.editor-hero{padding:16px}}
+</style></head>
 <body>
 
 <div id="auth-screen">
@@ -1045,7 +1059,13 @@ const NAV_BY_ROLE = {
     {id:'earnings', label:'أرباحي', icon:'%'}, {id:'ratings', label:'تقييماتي', icon:'★'}, {id:'direct', label:'رسائل', icon:'💬'},
     {id:'marketer-profile', label:'حسابي', icon:'⚿'}
   ],
-  EDITOR:   [ {id:'projects', label:'مهامي', icon:'▦'}, {id:'earnings', label:'أرباحي', icon:'%'}, {id:'direct', label:'رسائل', icon:'💬'} ],
+  EDITOR: [
+    {id:'editorHome', label:'مركز المونتير', icon:'◆'},
+    {id:'editorTools', label:'أدوات المونتير', icon:'✦'},
+    {id:'projects', label:'مهامي', icon:'▦'},
+    {id:'earnings', label:'أرباحي', icon:'%'},
+    {id:'direct', label:'رسائل', icon:'💬'}
+  ],
   OWNER: [
     {id:'owner-home', label:'مركز القيادة', icon:'◆'},
     {id:'owner-direct', label:'مراسلات مباشرة', icon:'💬'},
@@ -1071,6 +1091,8 @@ const VIEW_META = {
              EDITOR:{title:'مهامي', sub:'الشغل المُسند ليك'} },
   earnings:{title:'أرباحي', sub:'المستحق والمدفوع'},
   direct:{title:'الرسائل', sub:'محادثات مباشرة داخل شفرة'},
+  editorHome:{title:'مركز تشغيل المونتير', sub:'كل المهام، المواعيد، التعديلات، التسليمات والأرباح في شاشة واحدة'},
+  editorTools:{title:'أدوات المونتير', sub:'20 إضافة تشغيلية لإدارة الإنتاج والجودة والوقت'},
   marketerHome:{title:'مركز تشغيل المسوّق', sub:'كل العملاء والفرص والمشاريع والأرباح في شاشة واحدة'},
   'marketer-tools':{title:'أدوات المسوّق', sub:'20 إضافة تشغيلية للاكتشاف والمتابعة والتحليل والإغلاق'},
   'marketer-followup':{title:'مركز المتابعة', sub:'مين محتاج رسالة أو متابعة أو خطوة إغلاق'},
@@ -1600,6 +1622,134 @@ RENDERERS['marketer-profile'] = async (el) => {
     document.getElementById('mk-cp-save').addEventListener('click',async e=>{const a=document.getElementById('mk-cp-current').value,b=document.getElementById('mk-cp-new').value,c=document.getElementById('mk-cp-confirm').value;if(b.length<8){toast('الجديدة لازم 8 أحرف على الأقل','err');return;}if(b!==c){toast('التأكيد غير مطابق','err');return;}e.target.disabled=true;try{await api('/auth/change-password',{method:'POST',body:{currentPassword:a,newPassword:b}});closeModal();toast('تم تغيير كلمة المرور','ok');}catch(err){toast(err.message,'err');e.target.disabled=false;}});
   });
 };
+
+
+/* ================= EDITOR OS ================= */
+function editorDayKey(d=new Date()){return d.toLocaleDateString('en-CA',{timeZone:'Africa/Cairo'});}
+function editorStore(key,fallback){try{const raw=localStorage.getItem('shifra_editor_'+key);return raw===null?fallback:JSON.parse(raw);}catch(e){return fallback;}}
+function editorSave(key,value){try{localStorage.setItem('shifra_editor_'+key,JSON.stringify(value));}catch(e){}}
+function editorFeature(icon,title,desc,action){return '<button class="editor-feature" data-editor-action="'+action+'"><div><div class="top"><span class="ic">'+icon+'</span></div><div class="title">'+esc(title)+'</div><div class="desc">'+esc(desc)+'</div></div><div style="font-size:10px;color:var(--text-faint)">فتح →</div></button>';}
+function editorTerminal(p){return ['DELIVERED','CANCELLED','REJECTED','REFUNDED','ELIGIBLE_FOR_SETTLEMENT'].includes(p.status);}
+function editorOpenProject(id){document.getElementById('content').dataset.detail=id;goView('projects');setTimeout(()=>RENDERERS.projects(document.getElementById('content')),0);}
+
+RENDERERS.editorHome = async (el) => {
+  const [pr,er,nr,dr] = await Promise.all([
+    api('/projects'),api('/me/earnings'),editorSafe('/notifications',{notifications:[]}),editorSafe('/direct-conversations',{conversations:[]})
+  ]);
+  const projects=pr.projects||[], earnings=er, notifications=nr.notifications||[], direct=dr.conversations||[];
+  const assigned=projects.filter(p=>!editorTerminal(p));
+  const production=projects.filter(p=>['EDITOR_ASSIGNED','IN_PRODUCTION','REVISION_REQUESTED'].includes(p.status));
+  const revisions=projects.filter(p=>p.status==='REVISION_REQUESTED');
+  const previews=projects.filter(p=>p.status==='PREVIEW_READY');
+  const delivery=projects.filter(p=>p.status==='READY_FOR_DELIVERY');
+  const overdue=assigned.filter(p=>p.deadline&&new Date(p.deadline)<new Date());
+  const due48=assigned.filter(p=>p.deadline&&new Date(p.deadline)>=new Date()&&new Date(p.deadline)<=new Date(Date.now()+48*3600*1000));
+  const unread=notifications.filter(n=>!n.is_read).length;
+  const latest=projects.slice().sort((a,b)=>new Date(b.updated_at)-new Date(a.updated_at))[0]||null;
+  const streak=Number(editorStore('streak',0))||0;
+  const tools=[
+    ['◉','طابور اليوم','رتّب مهامك حسب الموعد والحالة','today-queue'],
+    ['⏰','رادار المواعيد','المتأخر والقريب من التسليم','deadline-radar'],
+    ['↻','صندوق التعديلات','كل المشاريع التي تحتاج تنفيذ تعديل','revision-inbox'],
+    ['🎬','طابور الإنتاج','المشاريع داخل التنفيذ الآن','production-queue'],
+    ['▶','المعاينات الجاهزة','مشاريع جاهزة لإرسال/متابعة المعاينة','preview-queue'],
+    ['✓','طابور التسليم','المشاريع الجاهزة للتسليم','delivery-queue'],
+    ['🧠','صحة المشاريع','مؤشر سريع لسلامة مسار المشروع','project-health'],
+    ['💰','متابع الأرباح','المدفوع والمعلق في أرباحك','earnings'],
+    ['🔔','الإشعارات','المستجدات التي تحتاج انتباهك','notifications'],
+    ['💬','المحادثات','رسائل الفريق والحسابات','direct'],
+    ['☑','Checklist اليوم','قائمة تشغيل قبل إنهاء اليوم','daily-check'],
+    ['⏱','مؤقت التركيز','جلسة عمل محلية للتركيز','focus-timer'],
+    ['📋','دليل الحالات','ماذا يعني كل status في المشروع','status-guide'],
+    ['📝','ملاحظات العمل','دفتر خاص للمونتير على الجهاز','notes'],
+    ['📑','قالب التسليم','نص جاهز لفحص قبل التسليم','delivery-template'],
+    ['⚡','اختصار آخر مشروع','افتح آخر مشروع عدّلت عليه','resume'],
+    ['📈','تقرير الإنتاج','مؤشرات آخر 7 و30 يومًا','activity-report'],
+    ['📤','تصدير المهام','CSV لمهامك الحالية','export'],
+    ['🗂','اختيار الأولوية','ثبّت مشروعًا مهمًا أعلى القائمة محليًا','priority'],
+    ['⚿','بيانات الحساب','افتح بيانات الأمان والحساب','profile']
+  ];
+  const cards=tools.map(x=>editorFeature(x[0],x[1],x[2],x[3])).join('');
+  el.innerHTML='<div class="editor-hero"><div class="editor-hero-top"><div><h2>مركز تشغيل '+esc(state.user.fullName)+' 🎬</h2><p>لوحة مونتير عملية لمتابعة الإنتاج والتعديلات والمواعيد والتسليمات والأرباح من مكان واحد.</p></div><span class="badge badge-purple">EDITOR OS</span></div><div class="editor-kpis"><div class="editor-kpi"><div class="k">مهام نشطة</div><div class="v">'+assigned.length+'</div><div class="s">'+overdue.length+' متأخر · '+due48.length+' قريب</div></div><div class="editor-kpi"><div class="k">قيد التنفيذ</div><div class="v">'+production.length+'</div><div class="s">'+revisions.length+' تعديل مطلوب</div></div><div class="editor-kpi"><div class="k">للتسليم</div><div class="v">'+delivery.length+'</div><div class="s">'+previews.length+' معاينة جاهزة</div></div><div class="editor-kpi"><div class="k">أرباح معلقة</div><div class="v">'+money(earnings.pendingMinor||0)+' EGP</div><div class="s">'+unread+' إشعار غير مقروء</div></div></div></div>'+
+    '<div class="editor-section-head"><div class="title">20 إضافة للمونتير — موجودة دائمًا</div><span class="badge badge-gray">'+streak+' تركيز مسجل</span></div><div class="editor-feature-grid">'+cards+'</div>'+
+    '<div class="editor-section-head"><div class="title">آخر مشروع</div><button class="btn btn-ghost btn-sm" data-editor-action="resume">فتح</button></div>'+
+    '<div class="card">'+(latest?'<div class="editor-mini"><div class="row"><b>'+esc(latest.order_number)+'</b>'+badge(latest.status)+'</div><div style="font-size:10.5px;color:var(--text-dim);margin-top:5px">'+esc(latest.customer_name||'')+'</div></div>':'<div class="empty-state">مفيش مشاريع.</div>')+'</div>';
+  el.querySelectorAll('[data-editor-action]').forEach(b=>b.addEventListener('click',()=>editorAction(b.dataset.editorAction,{host:el,projects,earnings,notifications,direct})));
+};
+
+RENDERERS.editorTools = async (el) => {
+  const {projects=[]}=await api('/projects');
+  const tools=[
+    ['◉','طابور اليوم','today-queue'],['⏰','رادار المواعيد','deadline-radar'],['↻','صندوق التعديلات','revision-inbox'],['🎬','طابور الإنتاج','production-queue'],['▶','المعاينات الجاهزة','preview-queue'],['✓','طابور التسليم','delivery-queue'],['🧠','صحة المشاريع','project-health'],['💰','متابع الأرباح','earnings'],['🔔','الإشعارات','notifications'],['💬','المحادثات','direct'],['☑','Checklist اليوم','daily-check'],['⏱','مؤقت التركيز','focus-timer'],['📋','دليل الحالات','status-guide'],['📝','ملاحظات العمل','notes'],['📑','قالب التسليم','delivery-template'],['⚡','آخر مشروع','resume'],['📈','تقرير الإنتاج','activity-report'],['📤','تصدير المهام','export'],['🗂','الأولوية','priority'],['⚿','بيانات الحساب','profile']
+  ];
+  el.innerHTML='<div class="card" style="margin-bottom:12px"><b>20 أداة تشغيلية للمونتير</b><div style="font-size:11px;color:var(--text-dim);margin-top:5px">الأدوات دي موجودة بشكل ثابت في مركز المونتير، وبعضها يحفظ تفضيلاتك على الجهاز.</div></div><div class="editor-feature-grid">'+tools.map(x=>editorFeature(x[0],x[1],'فتح الميزة مباشرة',x[2])).join('')+'</div>';
+  el.querySelectorAll('[data-editor-action]').forEach(b=>b.addEventListener('click',()=>editorAction(b.dataset.editorAction,{host:el,projects})));
+};
+
+function editorSafe(path,fallback){try{return api(path);}catch(e){return Promise.resolve(fallback);}}
+function editorAction(action,ctx){
+  const {host,projects=[],earnings}=ctx; const active=projects.filter(p=>!editorTerminal(p));
+  if(action==='today-queue'||action==='deadline-radar'){
+    const rows=active.filter(p=>p.deadline).sort((a,b)=>new Date(a.deadline)-new Date(b.deadline)).slice(0,20);
+    modal('<h3>'+ (action==='today-queue'?'طابور اليوم':'رادار المواعيد') +'</h3>'+(rows.length?rows.map(p=>'<button class="editor-mini" data-editor-open="'+p.id+'" style="width:100%;text-align:right;margin-bottom:7px"><div class="row"><b>'+esc(p.order_number)+'</b><span class="badge '+(new Date(p.deadline)<new Date()?'badge-red':'badge-gray')+'">'+fmtDay(p.deadline)+'</span></div><div style="font-size:10.5px;color:#687588;margin-top:4px">'+esc(p.customer_name||'')+' · '+esc(STATUS_LABEL_AR[p.status]||p.status)+'</div></button>').join(''):'<div class="empty-state">مفيش مهام بموعد.</div>')+'<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');
+    document.querySelectorAll('[data-editor-open]').forEach(b=>b.onclick=()=>{closeModal();editorOpenProject(b.dataset.editorOpen);});return;
+  }
+  if(action==='revision-inbox'||action==='production-queue'||action==='preview-queue'||action==='delivery-queue'){
+    const map={ 'revision-inbox':'REVISION_REQUESTED','production-queue':'IN_PRODUCTION','preview-queue':'PREVIEW_READY','delivery-queue':'READY_FOR_DELIVERY' };
+    const rows=projects.filter(p=>p.status===map[action]);
+    modal('<h3>'+({ 'revision-inbox':'صندوق التعديلات','production-queue':'طابور الإنتاج','preview-queue':'المعاينات الجاهزة','delivery-queue':'طابور التسليم'}[action])+'</h3>'+(rows.length?rows.map(p=>'<button class="editor-mini" data-editor-open="'+p.id+'" style="width:100%;text-align:right;margin-bottom:7px"><div class="row"><b>'+esc(p.order_number)+'</b>'+badge(p.status)+'</div><div style="font-size:10.5px;color:#687588;margin-top:4px">'+esc(p.customer_name||'')+'</div></button>').join(''):'<div class="empty-state">مفيش مشاريع في القائمة دي.</div>')+'<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');
+    document.querySelectorAll('[data-editor-open]').forEach(b=>b.onclick=()=>{closeModal();editorOpenProject(b.dataset.editorOpen);});return;
+  }
+  if(action==='project-health'){
+    const rows=active.slice(0,20).map(p=>({p,score:p.status==='IN_PRODUCTION'?70:p.status==='REVISION_REQUESTED'?45:p.status==='PREVIEW_READY'?85:p.status==='READY_FOR_DELIVERY'?95:p.status==='EDITOR_ASSIGNED'?55:35}));
+    modal('<h3>صحة المشاريع</h3>'+rows.map(x=>'<div class="editor-mini" style="margin-bottom:7px"><div class="row"><b>'+esc(x.p.order_number)+'</b><span>'+x.score+'%</span></div><div class="editor-progress"><i style="width:'+x.score+'%"></i></div></div>').join('')||'<div class="empty-state">مفيش مشاريع.</div>');
+    return;
+  }
+  if(action==='earnings'){goView('earnings');return;}
+  if(action==='notifications'){document.getElementById('bell-btn').click();return;}
+  if(action==='direct'){goView('direct');return;}
+  if(action==='profile'){modal('<h3>حساب المونتير</h3><div style="font-size:12px;line-height:1.9;color:#aab4c3">بيانات الحساب والأمان موجودة من خلال القائمة الجانبية وحساب الجلسة الحالي.</div><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">تمام</button></div>');return;}
+  if(action==='daily-check'){
+    const key=editorDayKey(),done=editorStore('check-'+key,[]);
+    const tasks=['راجع الـdeadline الأقرب','افتح التعديلات المطلوبة','راجع المعاينات الجاهزة','راجع طابور التسليم','افتح الرسائل'];
+    modal('<h3>Checklist اليوم</h3>'+tasks.map((t,i)=>'<label style="display:flex;gap:9px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05)"><input type="checkbox" data-ed-check="'+i+'" '+(done.includes(i)?'checked':'')+'><span>'+esc(t)+'</span></label>').join('')+'<div class="modal-actions"><button class="btn btn-primary" id="ed-check-save">حفظ</button></div>');
+    document.getElementById('ed-check-save').onclick=()=>{const out=[...document.querySelectorAll('[data-ed-check]:checked')].map(x=>Number(x.dataset.edCheck));editorSave('check-'+key,out);closeModal();toast('اتحفظت القائمة','ok');};return;
+  }
+  if(action==='focus-timer'){
+    let left=25*60,timer=null;
+    const draw=()=>{const el2=document.getElementById('ed-timer');if(el2)el2.textContent=Math.floor(left/60)+':'+String(left%60).padStart(2,'0');};
+    modal('<h3>مؤقت التركيز</h3><div id="ed-timer" style="font:800 42px var(--mono);text-align:center;padding:18px">25:00</div><div class="btn-row"><button class="btn btn-primary" id="ed-timer-start">ابدأ</button><button class="btn btn-ghost" id="ed-timer-reset">إعادة</button></div>');
+    document.getElementById('ed-timer-start').onclick=()=>{if(timer)return;timer=setInterval(()=>{left--;draw();if(left<=0){clearInterval(timer);timer=null;toast('خلصت جلسة التركيز','ok');}},1000);};document.getElementById('ed-timer-reset').onclick=()=>{left=25*60;draw();};return;
+  }
+  if(action==='status-guide'){
+    const rows=[['EDITOR_ASSIGNED','المهمة اتسندت لك'],['IN_PRODUCTION','ابدأ/كمل التنفيذ'],['PREVIEW_READY','المعاينة جاهزة'],['REVISION_REQUESTED','في تعديل مطلوب'],['FINAL_APPROVED','العميل وافق نهائيًا'],['READY_FOR_DELIVERY','المشروع جاهز للتسليم']];
+    modal('<h3>دليل الحالات</h3>'+rows.map(x=>'<div class="editor-mini" style="margin-bottom:7px"><b>'+x[0]+'</b><div style="font-size:11px;color:#687588;margin-top:3px">'+x[1]+'</div></div>').join(''));return;
+  }
+  if(action==='notes'){
+    modal('<h3>ملاحظات العمل</h3><textarea id="ed-notes" style="min-height:180px">'+esc(editorStore('notes',''))+'</textarea><div class="modal-actions"><button class="btn btn-primary" id="ed-notes-save">حفظ</button></div>');
+    document.getElementById('ed-notes-save').onclick=()=>{editorSave('notes',document.getElementById('ed-notes').value);closeModal();toast('اتحفظت الملاحظات','ok');};return;
+  }
+  if(action==='delivery-template'){
+    const text='فحص التسليم قبل الإرسال:\n1) الفيديو النهائي\n2) الصوت والمزامنة\n3) الكتابة والعناوين\n4) المقاس والـFPS\n5) عدم وجود أخطاء واضحة\n6) التأكد من النسخة النهائية';
+    modal('<h3>قالب التسليم</h3><textarea id="ed-delivery-text" style="min-height:170px">'+esc(text)+'</textarea><div class="modal-actions"><button class="btn btn-primary" id="ed-delivery-copy">نسخ القالب</button></div>');
+    document.getElementById('ed-delivery-copy').onclick=async()=>{try{await navigator.clipboard.writeText(text);toast('اتنسخ القالب','ok');}catch(e){toast('انسخ النص يدويًا','err');}};return;
+  }
+  if(action==='resume'){
+    const id=Number(editorStore('last-project-id',active[0]?.id));
+    const p=projects.find(x=>Number(x.id)===id)||active[0];
+    if(!p){toast('مفيش مشروع','err');return;}editorSave('last-project-id',p.id);editorOpenProject(p.id);return;
+  }
+  if(action==='activity-report'){
+    const now=Date.now(),a7=projects.filter(p=>now-new Date(p.updated_at).getTime()<=7*86400000).length,a30=projects.filter(p=>now-new Date(p.updated_at).getTime()<=30*86400000).length;
+    modal('<h3>تقرير الإنتاج</h3><div class="editor-kpis"><div class="editor-kpi"><div class="k">آخر 7 أيام</div><div class="v">'+a7+'</div></div><div class="editor-kpi"><div class="k">آخر 30 يومًا</div><div class="v">'+a30+'</div></div><div class="editor-kpi"><div class="k">تعديلات</div><div class="v">'+projects.filter(p=>p.status==='REVISION_REQUESTED').length+'</div></div><div class="editor-kpi"><div class="k">تسليمات</div><div class="v">'+projects.filter(p=>p.status==='DELIVERED').length+'</div></div></div><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');return;
+  }
+  if(action==='export'){
+    marketerCsv('shifra-editor-tasks.csv',projects.map(p=>({project:p.order_number,customer:p.customer_name,status:p.status,deadline:p.deadline,updated_at:p.updated_at})));return;
+  }
+  if(action==='priority'){
+    const current=Number(editorStore('priority',0)); const next=current?0:(active[0]?.id||0);editorSave('priority',next);toast(next?'اتثبتت الأولوية محليًا':'اتشالت الأولوية','ok');return;
+  }
+}
 
 /* ================= PROJECTS (shared list, role-adaptive) ================= */
 
