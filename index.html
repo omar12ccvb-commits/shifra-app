@@ -1866,6 +1866,43 @@ body::before{
   .customer-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 </style>
+
+<style id="shifra-owner-ai-v1">
+.owner-ai-shell{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}
+.owner-ai-hero{padding:20px;border-radius:22px;border:1px solid rgba(124,92,255,.18);background:radial-gradient(450px 220px at 100% 0%,rgba(56,189,248,.12),transparent 70%),linear-gradient(145deg,rgba(18,21,31,.96),rgba(9,12,18,.94));}
+.owner-ai-hero h2{font:900 27px/1.35 Cairo,var(--font);background:linear-gradient(110deg,#fff,#c9b7ff,#9eeafe);-webkit-background-clip:text;color:transparent}
+.owner-ai-hero p{font:500 11.5px/1.8 Cairo,var(--font);color:#8290a4;margin-top:5px}
+.owner-ai-status{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:7px 10px;border-radius:999px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.16);font:700 10px Cairo,var(--font);color:#79e5b6}
+.owner-ai-chat{display:flex;flex-direction:column;min-height:540px;border:1px solid rgba(255,255,255,.065);border-radius:20px;background:rgba(8,11,16,.84);overflow:hidden}
+.owner-ai-log{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:9px}
+.owner-ai-msg{max-width:86%;padding:11px 13px;border-radius:14px;border:1px solid rgba(255,255,255,.06);font:500 12.5px/1.8 Cairo,var(--font);white-space:pre-wrap}
+.owner-ai-msg.user{align-self:flex-start;background:linear-gradient(145deg,rgba(124,92,255,.18),rgba(67,56,202,.08));color:#eef2ff}
+.owner-ai-msg.ai{align-self:flex-end;background:rgba(255,255,255,.035);color:#cad5e3}
+.owner-ai-input{display:flex;gap:8px;padding:10px;border-top:1px solid rgba(255,255,255,.055);background:rgba(255,255,255,.018)}
+.owner-ai-input textarea{flex:1;min-height:76px;max-height:170px;resize:vertical;background:#111722;border:1px solid rgba(124,92,255,.22);border-radius:12px;color:#eef4ff;padding:11px;font:600 13px/1.75 Cairo,var(--font);outline:none}
+.owner-ai-input .btn{width:110px;min-height:76px}
+.owner-ai-quick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+.owner-ai-quick button{padding:11px;border-radius:12px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06);color:#eaf0f8;text-align:start;font:700 11px Cairo,var(--font)}
+.owner-ai-quick button:hover{border-color:rgba(124,92,255,.28);transform:translateY(-1px)}
+.owner-ai-side{display:grid;gap:10px;align-content:start}
+.owner-ai-side .card{padding:14px}
+.owner-ai-action{margin-top:8px;padding:10px;border-radius:12px;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.16);font:700 11px/1.7 Cairo,var(--font);color:#f6d88d}
+.routing-shell{display:grid;grid-template-columns:1fr .9fr;gap:14px}
+.routing-card{padding:18px;border-radius:20px;border:1px solid rgba(56,189,248,.14);background:linear-gradient(145deg,rgba(56,189,248,.06),rgba(124,92,255,.05),rgba(10,13,19,.94))}
+.routing-card h3{font:900 18px/1.4 Cairo,var(--font)}
+.routing-help{font:500 10.5px/1.8 Cairo,var(--font);color:#738299;margin:4px 0 13px}
+.routing-offer{padding:15px;border-radius:16px;border:1px solid rgba(124,92,255,.18);background:rgba(124,92,255,.06);margin-bottom:8px}
+.routing-avatar{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(145deg,#7c5cff,#25cfe9);font:900 16px Manrope,sans-serif;color:#fff}
+.routing-countdown{font:900 20px Manrope,sans-serif;color:#fff;direction:ltr}
+.routing-history{display:grid;gap:7px;margin-top:10px}
+.routing-history-row{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.045);font:600 10.5px Cairo,var(--font)}
+.onboard-grid{display:grid;gap:14px}
+.onboard-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.onboard-choice{padding:10px;border-radius:11px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.035);color:#dce6f2;text-align:center;font:700 10.5px Cairo,var(--font)}
+.onboard-choice.selected{border-color:rgba(124,92,255,.55);background:rgba(124,92,255,.13);color:#efe9ff}
+@media(max-width:900px){.owner-ai-shell,.routing-shell{grid-template-columns:1fr}}
+@media(max-width:520px){.owner-ai-quick{grid-template-columns:1fr}.onboard-choice-grid{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 
@@ -1949,7 +1986,7 @@ body::before{
    ============================================================ */
 const SESSION_TOKEN_KEY = 'shifra_session_token';
 const SESSION_API_KEY = 'shifra_session_api_base';
-const state = { token:null, user:null, profile:null, apiBase:'http://localhost:4000/api', view:null };
+const state = { token:null, user:null, profile:null, accountProfile:null, apiBase:'http://localhost:4000/api', view:null, smartRoutingTimer:null, notificationPollTimer:null, lastUnreadNotifications:null };
 
 
 // Smart default: if this page itself isn't running on localhost (i.e. it's
@@ -1962,6 +1999,7 @@ const state = { token:null, user:null, profile:null, apiBase:'http://localhost:4
   const guess = isLocal ? 'http://localhost:4000/api' : '/api';
   let savedApi = '';
   try { savedApi = localStorage.getItem(SESSION_API_KEY) || ''; } catch(e) {}
+  if (!isLocal && savedApi && !savedApi.startsWith('/api')) savedApi = '/api';
   state.apiBase = savedApi || guess;
   document.getElementById('login-apibase').value = state.apiBase;
   document.getElementById('signup-apibase').value = state.apiBase;
@@ -2100,13 +2138,16 @@ async function loadMeAndEnter(){
   if (state.user.role === 'OWNER' || state.user.role === 'ADMIN') {
     state.profile = null;
     enterApp();
+    if (state.user.ownerKey === 'OMAR') setTimeout(() => startNotificationPolling(), 250);
     return;
   }
   // fetch the role-specific profile (gives us referral_code / earnings context up front)
   if (state.user.role === 'MARKETER') state.profile = (await api('/marketers/me')).marketer;
   else if (state.user.role === 'EDITOR') state.profile = (await api('/editors/me')).editor;
   else if (state.user.role === 'CUSTOMER') state.profile = (await api('/customers/me')).customer;
+  try { state.accountProfile = (await api('/me/profile')).profile; } catch(e) { state.accountProfile = null; }
   enterApp();
+  setTimeout(() => { maybeOpenOnboarding(); startNotificationPolling(); }, 250);
 }
 
 function clearSavedSession(){
@@ -2114,6 +2155,7 @@ function clearSavedSession(){
 }
 function doLogout(){
   clearSavedSession();
+  if (state.notificationPollTimer) { clearInterval(state.notificationPollTimer); state.notificationPollTimer = null; }
   state.token = null; state.user = null; state.profile = null;
   document.getElementById('app-shell').classList.remove('active');
   document.getElementById('auth-screen').style.display = 'flex';
@@ -2138,7 +2180,7 @@ const NAV_BY_ROLE = {
     {id:'direct', label:'رسائل', icon:'💬'}
   ],
   MARKETER: [
-    {id:'marketerHome', label:'مركز المسوّق', icon:'◆'}, {id:'people-directory', label:'الخبراء', icon:'👥'}, {id:'workflow-guide', label:'دليل المسار', icon:'📘'},
+    {id:'marketerHome', label:'مركز المسوّق', icon:'◆'}, {id:'smart-routing', label:'اختيار AI', icon:'🧠'}, {id:'people-directory', label:'الخبراء', icon:'👥'}, {id:'workflow-guide', label:'دليل المسار', icon:'📘'},
     {id:'marketer-tools', label:'أدوات المسوّق', icon:'✦'},
     {id:'opportunities', label:'الفرص', icon:'◆'}, {id:'customers', label:'عملائي', icon:'☺'},
     {id:'projects', label:'مشاريعي', icon:'▦'}, {id:'conversations', label:'المحادثات', icon:'☷'},
@@ -2154,7 +2196,7 @@ const NAV_BY_ROLE = {
     {id:'direct', label:'رسائل', icon:'💬'}
   ],
   OWNER: [
-    {id:'owner-home', label:'مركز القيادة', icon:'◆'}, {id:'people-directory', label:'الخبراء', icon:'👥'},
+    {id:'owner-home', label:'مركز القيادة', icon:'◆'}, {id:'owner-ai', label:'Omar AI', icon:'✦'}, {id:'people-directory', label:'الخبراء', icon:'👥'},
     {id:'owner-tools', label:'أدوات المالك', icon:'✦'},
     {id:'owner-direct', label:'مراسلات مباشرة', icon:'💬'},
     {id:'owner-project-chat', label:'محادثات المشاريع', icon:'☷'},
@@ -2172,6 +2214,8 @@ const NAV_BY_ROLE = {
 const VIEW_META = {
   customerHome:{title:'مركز العميل', sub:'كل ما تحتاجه اليوم لمتابعة مشاريعك وطلب الخدمة بسرعة'},
   'people-directory':{title:'الخبراء والفريق', sub:'اعرف كل شخص متخصص في إيه وشوف إنجازاته وتقييمه وساعات عمله'},
+  'smart-routing':{title:'اختيار الخبير بالـAI', sub:'اكتب طلب العميل والذكاء يرشح خبيرًا ثم ينتقل تلقائيًا لخبير آخر بعد 5 دقائق إذا لم يرد'},
+  'owner-ai':{title:'Omar AI', sub:'مساعد تشغيل خاص بعمر لمراقبة الحسابات والأمان والمشاريع وتنفيذ أوامر الإدارة'},
   'ai-service':{title:'خدمات الذكاء الاصطناعي', sub:'خدمات AI ينفذها المالك شخصيًا من الفكرة حتى الفيديو النهائي'},
   customerTools:{title:'أدوات العميل', sub:'20 ميزة عملية — منها 10 مصممة للاستخدام اليومي'},
   opportunities:{title:'فرص جديدة', sub:'عملاء محتاجين مسوّق'},
@@ -2215,13 +2259,14 @@ function enterApp(){
 }
 const MOBILE_PRIMARY_BY_ROLE = {
   CUSTOMER:['customerHome','people-directory','projects','direct'],
-  MARKETER:['marketerHome','opportunities','projects','people-directory'],
+  MARKETER:['marketerHome','smart-routing','projects','people-directory'],
   EDITOR:['editorHome','projects','earnings','people-directory'],
-  OWNER:['owner-home','people-directory','owner-direct','owner-finance'],
+  OWNER:['owner-home','owner-ai','owner-direct','people-directory'],
   ADMIN:['direct','projects']
 };
 function renderNav(){
-  const items = NAV_BY_ROLE[state.user.role] || [];
+  let items = NAV_BY_ROLE[state.user.role] || [];
+  if (state.user.role === 'OWNER' && state.user.ownerKey !== 'OMAR') items = items.filter(n => n.id !== 'owner-ai');
   const html = items.map(n => `<button class="nav-item" data-view="${n.id}"><span class="ic">${n.icon}</span><span>${esc(n.label)}</span></button>`).join('');
   document.getElementById('nav-list-desktop').innerHTML = html;
   const primaryIds = MOBILE_PRIMARY_BY_ROLE[state.user.role] || items.slice(0,4).map(x=>x.id);
@@ -2284,6 +2329,7 @@ document.getElementById('bell-btn').addEventListener('click', async () => {
   refreshBellBadge();
 });
 async function goView(id){
+  if (state.smartRoutingTimer) { clearInterval(state.smartRoutingTimer); state.smartRoutingTimer = null; }
   state.view = id;
   document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.view===id));
   const meta = VIEW_META[id][state.user.role] || VIEW_META[id];
@@ -2308,6 +2354,67 @@ function ownerFinanceSnapshot(balances){
   return {revenue,expense,profit:revenue-expense};
 }
 
+let ownerAiPendingCommand = null;
+function ownerAiAppend(log,kind,text){
+  const d=document.createElement('div'); d.className='owner-ai-msg '+kind; d.textContent=text; log.appendChild(d); log.scrollTop=log.scrollHeight;
+}
+async function ownerAiAsk(command,confirm=false,host){
+  const input=host.querySelector('#owner-ai-input'), log=host.querySelector('#owner-ai-log');
+  if(!command) return;
+  if(!confirm){ ownerAiAppend(log,'user',command); input.value=''; }
+  try{
+    const r=await api('/owner-ai/ask',{method:'POST',body:{command,confirm}});
+    ownerAiAppend(log,'ai',r.answer||'تمت قراءة البيانات.');
+    const actionBox=host.querySelector('#owner-ai-action');
+    if(r.needsConfirmation){
+      ownerAiPendingCommand=command;
+      actionBox.innerHTML='<div class="owner-ai-action">⚠ '+esc(r.answer||'يوجد إجراء يحتاج تأكيدًا.')+'<button class="btn btn-primary btn-sm" id="owner-ai-confirm" style="margin-top:8px;width:100%">تنفيذ الإجراء</button></div>';
+      host.querySelector('#owner-ai-confirm').addEventListener('click',async()=>{actionBox.innerHTML='';await ownerAiAsk(command,true,host);});
+    }else{ actionBox.innerHTML=''; }
+  }catch(e){ownerAiAppend(log,'ai','حصل خطأ: '+e.message);}
+}
+RENDERERS['owner-ai'] = async (el) => {
+  const s=await api('/owner-ai/status').catch(()=>({enabled:false,model:'gpt-5.6-sol'}));
+  el.innerHTML=
+    '<div class="owner-ai-shell">'+
+      '<div class="owner-ai-chat">'+
+        '<div class="owner-ai-log" id="owner-ai-log"><div class="owner-ai-msg ai">أنا Omar AI. أنا موجود داخل حساب عمر فقط. أقدر أفحص الحسابات، الحضور الظاهر، اكتمال الملفات، الأمان، المشاريع، المدفوعات، وأجهز لك إجراءات إدارية بعد تأكيدك.</div></div>'+
+        '<div id="owner-ai-action"></div>'+
+        '<div class="owner-ai-input"><textarea id="owner-ai-input" placeholder="اكتب مثلًا: شوفلي الأمان / مين مش داخل / فلان خليه مراقبة / رجع فلان من الحظر / غير فلان لمسوق"></textarea><button class="btn btn-primary" id="owner-ai-send">إرسال</button></div>'+
+      '</div>'+
+      '<div class="owner-ai-side">'+
+        '<div class="owner-ai-hero"><h2>Omar AI ✦</h2><p>مساعد تشغيل خاص بعمر. يقرأ بيانات SHIFRA الحقيقية ويحوّل طلبك إلى تقرير أو إجراء واضح.</p><span class="owner-ai-status">● '+(s.enabled?'AI متصل · '+esc(s.model):'وضع التشغيل المحلي · يعمل بدون مفتاح خارجي')+'</span></div>'+
+        '<div class="card"><b>أوامر سريعة</b><div class="owner-ai-quick">'+
+          ['فحص الأمان','مين مش فاتح الموقع؟','مين لسه ناقصه بيانات؟','ملخص كل الحسابات','اعرض حالة المشاريع'].map(x=>'<button type="button" data-owner-ai-quick="'+esc(x)+'">'+esc(x)+'</button>').join('')+
+        '</div></div>'+
+        '<div class="card"><b>الأفعال المحمية</b><div style="font:500 10.5px/1.8 Cairo,var(--font);color:#728096;margin-top:6px">الحظر، فك الحظر، تغيير الدور، والتحذير لا تتنفذ تلقائيًا؛ Omar AI يطلب تأكيدك أولًا.</div></div>'+
+      '</div>'+
+    '</div>';
+  const send=()=>ownerAiAsk(el.querySelector('#owner-ai-input').value.trim(),false,el);
+  el.querySelector('#owner-ai-send').addEventListener('click',send);
+  el.querySelector('#owner-ai-input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});
+  el.querySelectorAll('[data-owner-ai-quick]').forEach(b=>b.addEventListener('click',()=>{el.querySelector('#owner-ai-input').value=b.dataset.ownerAiQuick;send();}));
+};
+
+async function renderRoutingState(host,requestId){
+  const r=await api('/smart-routing/requests/'+requestId);
+  const req=r.request; const offers=r.offers||[]; const current=offers.find(x=>x.id===req.current_offer_id);
+  const now=Date.now();
+  let countdown='—';
+  if(current&&current.status==='PENDING'){const ms=Math.max(0,new Date(current.expires_at).getTime()-now);const m=Math.floor(ms/60000),s=Math.floor(ms/1000)%60;countdown=m+':'+String(s).padStart(2,'0');}
+  host.querySelector('#routing-live').innerHTML = current ?
+    '<div class="routing-offer"><div style="display:flex;align-items:center;gap:10px"><div class="routing-avatar">'+esc(String(current.editor_name||'?').slice(0,1))+'</div><div style="flex:1"><b style="font:900 14px Cairo,var(--font)">'+esc(current.editor_name)+'</b><div style="font:600 10px Cairo,var(--font);color:#78879a">'+esc(current.specialty||'متخصص مونتاج')+'</div></div><div class="routing-countdown">'+esc(countdown)+'</div></div><div class="team-card-expertise" style="margin-top:10px">خبير مقترح بالـAI · ترتيب العرض #'+current.sequence_no+' · تقييم النظام: '+(current.score||'—')+'</div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-primary btn-sm" data-routing-contact="'+current.editor_user_id+'">💬 تواصل</button></div></div>' :
+    '<div class="empty-state" style="padding:30px">'+(req.status==='ASSIGNED'?'تم اختيار الخبير بنجاح.':'النظام يبحث عن الخبير التالي...')+'</div>';
+  host.querySelector('#routing-history').innerHTML=offers.map(o=>'<div class="routing-history-row"><span>'+esc(o.editor_name)+'</span><span>'+esc(o.status)+'</span></div>').join('')||'<div style="color:#687588;font:500 10px Cairo,var(--font)">لسه مفيش عروض.</div>';
+  host.querySelectorAll('[data-routing-contact]').forEach(b=>b.addEventListener('click',()=>openDirectoryContact(b.dataset.routingContact)));
+}
+RENDERERS['smart-routing'] = async (el) => {
+  const [{customers=[]},cat]=await Promise.all([api('/customers'),api('/services/catalog')]);
+  el.innerHTML='<div class="routing-shell"><div class="routing-card"><h3>🧠 AI يختار لك الخبير</h3><div class="routing-help">اكتب متطلبات العميل. النظام يقارن الخبرات والحمل الحالي والتوافر. أول خبير له 5 دقائق، وبعدها ينتقل تلقائيًا للي بعده.</div><div class="field"><label>العميل</label><select id="routing-customer">'+customers.map(x=>'<option value="'+x.id+'">'+esc(x.full_name)+'</option>').join('')+'</select></div><div class="field"><label>اسم الطلب</label><input id="routing-title" placeholder="مثال: 10 ريلز لعقارات"></div><div class="field"><label>نوع الخدمة</label><select id="routing-service">'+(cat.serviceTypes||[]).map(x=>'<option value="'+x.code+'">'+esc(x.name_ar||x.name_en)+'</option>').join('')+'</select></div><div class="field"><label>نوع المحتوى</label><select id="routing-content">'+(cat.contentTypes||[]).map(x=>'<option value="'+x.code+'">'+esc(x.name_ar||x.name_en)+'</option>').join('')+'</select></div><div class="field"><label>مستوى المونتاج</label><select id="routing-level">'+(cat.editingLevels||[]).map(x=>'<option value="'+x.code+'">'+esc(x.name_ar||x.name_en)+'</option>').join('')+'</select></div><div class="field"><label>تفاصيل العميل</label><textarea id="routing-requirements" rows="5" placeholder="اكتب كل المطلوب..."></textarea></div><button class="btn btn-primary btn-block" id="routing-start">تشغيل اختيار AI</button></div><div class="routing-card"><h3>العرض الحالي</h3><div id="routing-live"><div class="empty-state" style="padding:30px">شغّل AI عشان يظهر أول خبير هنا.</div></div><div class="section-title" style="margin-top:14px">مسار الاختيارات</div><div class="routing-history" id="routing-history"></div></div></div>';
+  el.querySelector('#routing-start').addEventListener('click',async()=>{
+    const btn=el.querySelector('#routing-start');btn.disabled=true;
+    try{const body={customerId:Number(el.querySelector('#routing-customer').value),title:el.querySelector('#routing-title').value.trim(),serviceTypeCode:el.querySelector('#routing-service').value,contentTypeCode:el.querySelector('#routing-content').value,editingLevelCode:el.querySelector('#routing-level').value,requirements:el.querySelector('#routing-requirements').value.trim()};const r=await api('/smart-routing/requests',{method:'POST',body});el.dataset.routingId=r.request.id;await renderRoutingState(el,r.request.id);state.smartRoutingTimer=setInterval(()=>renderRoutingState(el,r.request.id).catch(()=>{}),10000);}catch(e){toast(e.message,'err');}finally{btn.disabled=false;}});
+};
 RENDERERS['owner-home'] = async (el) => {
   const [ar,pr,payr,por,cr,lr,aur,convr] = await Promise.all([
     ownerSafe('/accounts',{accounts:[]}), ownerSafe('/projects',{projects:[]}), ownerSafe('/payments',{payments:[]}),
@@ -3234,6 +3341,35 @@ function customerOpenProject(id){
   setTimeout(()=>RENDERERS.projects(document.getElementById('content')),0);
 }
 
+function choiceButtons(items,selected,name){return (items||[]).map(x=>'<button type="button" class="onboard-choice '+(selected||[]).includes(x)?'selected':'')+'" data-onboard-group="'+esc(name)+'" data-onboard-value="'+esc(x)+'">'+esc(x)+'</button>').join('');}
+function onboardingOpen(profile){
+  const role=profile.role, d=profile.data||{}, opts=profile.options||{};
+  const multi=(label,items,selected,name)=>'<div><div class="field"><label>'+esc(label)+'</label></div><div class="onboard-choice-grid" data-group="'+esc(name)+'">'+choiceButtons(items,selected,name)+'</div></div>';
+  let html='<h3>إعداد حسابك مع مساعد SHIFRA ✦</h3><div class="onboard-grid"><div class="field"><label>السن</label><input id="onboard-age" type="number" min="13" max="100" value="'+esc(profile.age||'')+'" placeholder="مثال: 25"></div><div class="field"><label>ساعات العمل اليومية</label><input id="onboard-hours" type="number" min="1" max="24" value="'+esc(profile.workHoursPerDay||'')+'" placeholder="مثال: 8"></div>';
+  if(role==='EDITOR') html+=multi('أنت خبير في إيه؟',opts.expertise,d.expertise,'expertise')+multi('ستايل شغلك',opts.styles,d.styles,'styles')+multi('البرامج',opts.software,d.software,'software')+multi('التخصصات',opts.specialties,d.specialties,'specialties')+'<div class="field"><label>نبذة عن خبرتك</label><textarea id="onboard-bio" rows="3">'+esc(d.bio||'')+'</textarea></div>';
+  if(role==='MARKETER') html+=multi('خبرتك الأساسية',opts.specialties,d.specialties,'specialties')+multi('أماكن جلب العملاء',opts.channels,d.channels,'channels')+multi('نوع العملاء اللي بتتعامل معاهم',opts.clientTypes,d.clientTypes,'clientTypes')+multi('طريقة التواصل',opts.communication,d.communication,'communication')+'<div class="field"><label>نبذة عن خبرتك</label><textarea id="onboard-bio" rows="3">'+esc(d.bio||'')+'</textarea></div>';
+  if(role==='CUSTOMER') html+='<div class="field"><label>نوع نشاطك</label><select id="onboard-business"><option value="">اختر</option>'+(opts.businessTypes||[]).map(x=>'<option '+(d.businessType===x?'selected':'')+' value="'+esc(x)+'">'+esc(x)+'</option>').join('')+'</select></div>'+multi('هدفك الأساسي',opts.goals,d.goals,'goals')+multi('تحب نتواصل معاك إزاي؟',opts.preferredContact,d.preferredContact,'preferredContact')+'<div class="field"><label>نبذة عن احتياجك</label><textarea id="onboard-bio" rows="3">'+esc(d.bio||'')+'</textarea></div>';
+  html+='</div><div class="modal-actions"><button class="btn btn-ghost" id="onboard-skip">أكمل بعدين</button><button class="btn btn-primary" id="onboard-save">حفظ الملف</button></div>';
+  modal(html);
+  document.querySelectorAll('[data-onboard-group]').forEach(b=>b.addEventListener('click',()=>b.classList.toggle('selected')));
+  document.getElementById('onboard-skip').addEventListener('click',closeModal);
+  document.getElementById('onboard-save').addEventListener('click',async()=>{
+    const data={};document.querySelectorAll('[data-group]').forEach(g=>{const n=g.dataset.group;data[n]=Array.from(g.querySelectorAll('.onboard-choice.selected')).map(x=>x.dataset.onboardValue);});
+    if(role==='CUSTOMER'){data.businessType=document.getElementById('onboard-business').value;} const bio=document.getElementById('onboard-bio');if(bio)data.bio=bio.value.trim();
+    const body={age:document.getElementById('onboard-age').value||null,workHoursPerDay:document.getElementById('onboard-hours').value||null,data};
+    try{await api('/me/profile',{method:'PATCH',body});state.accountProfile={...profile,age:body.age,workHoursPerDay:body.workHoursPerDay,data,complete:true};closeModal();toast('اتحفظ ملفك — AI والمطابقة هيستخدموا البيانات دي','ok');}catch(e){toast(e.message,'err');}
+  });
+}
+async function maybeOpenOnboarding(){
+  if(!state.accountProfile||state.accountProfile.complete||!['CUSTOMER','MARKETER','EDITOR'].includes(state.user?.role)) return;
+  onboardingOpen(state.accountProfile);
+}
+function startNotificationPolling(){
+  if(state.notificationPollTimer) clearInterval(state.notificationPollTimer);
+  state.notificationPollTimer=setInterval(async()=>{
+    try{const r=await api('/notifications');const unread=(r.notifications||[]).filter(n=>!n.is_read);if(state.lastUnreadNotifications!==null&&unread.length>state.lastUnreadNotifications){const latest=unread[0];toast('🔔 '+(latest?.title||'عندك إشعار جديد'),'ok');}state.lastUnreadNotifications=unread.length;refreshBellBadge();}catch(e){}
+  },20000);
+}
 async function openOwnerPersonalChat(){
   try{
     const r=await api('/direct-conversations');
