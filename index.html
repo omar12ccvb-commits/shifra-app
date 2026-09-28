@@ -3341,7 +3341,6 @@ RENDERERS['people-directory'] = async (el) => {
   el.querySelector('#directory-ai-app')?.addEventListener('click',()=>goView('ai-service'));
   el.querySelector('#directory-ai-chat')?.addEventListener('click',()=>window.open('https://wa.me/'+whatsapp+'?text='+encodeURIComponent(waText),'_blank','noopener'));
   el.querySelector('#directory-wa-open')?.addEventListener('click',()=>window.open('https://wa.me/'+whatsapp+'?text='+encodeURIComponent(waText),'_blank','noopener'));
-  el.querySelector('#directory-ai-chat')?.addEventListener('click',()=>window.open('https://wa.me/'+whatsapp+'?text='+encodeURIComponent(waText),'_blank','noopener'));
   el.querySelectorAll('[data-open-contact]').forEach(b=>b.addEventListener('click',()=>openDirectoryContact(b.dataset.openContact)));
   el.querySelectorAll('[data-edit-hours]').forEach(b=>b.addEventListener('click',editDirectoryWorkHours));
 };
