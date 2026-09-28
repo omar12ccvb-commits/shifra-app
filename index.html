@@ -1692,7 +1692,98 @@ body::before{
     min-height:52px!important;
   }
 }
-</style></head>
+</style>
+<style id="shifra-chat-composer-final-v2">
+/* Keep the conversation itself large; make only the composer compact and colored. */
+.chat-enterprise-shell{
+  min-height:calc(100vh - 160px)!important;
+  height:calc(100vh - 160px)!important;
+}
+.chat-input-area{
+  padding:9px 12px 10px!important;
+  background:rgba(7,10,15,.97)!important;
+  border-top:1px solid rgba(255,255,255,.065)!important;
+  box-shadow:none!important;
+}
+.chat-input-row{
+  gap:8px!important;
+  align-items:flex-end!important;
+  padding:0!important;
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+}
+.chat-input-row textarea{
+  min-height:54px!important;
+  max-height:120px!important;
+  resize:vertical!important;
+  background:#111722!important;
+  color:#eef4ff!important;
+  border:1px solid rgba(56,189,248,.24)!important;
+  border-radius:13px!important;
+  padding:11px 13px!important;
+  font-family:var(--arabic-font)!important;
+  font-size:14px!important;
+  font-weight:600!important;
+  line-height:1.65!important;
+  caret-color:#7c5cff!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.03)!important;
+}
+.chat-input-row textarea::placeholder{
+  color:#728096!important;
+  font-family:var(--arabic-font)!important;
+  font-size:13px!important;
+}
+.chat-input-row textarea:focus{
+  border-color:rgba(124,92,255,.58)!important;
+  box-shadow:0 0 0 3px rgba(124,92,255,.10)!important;
+}
+.chat-input-row .btn{
+  flex:0 0 92px!important;
+  width:92px!important;
+  min-height:54px!important;
+  align-self:stretch!important;
+  border:1px solid rgba(124,92,255,.38)!important;
+  border-radius:13px!important;
+  background:linear-gradient(145deg,#6d4df6,#4f46e5 58%,#1e9ed1)!important;
+  color:#fff!important;
+  box-shadow:0 12px 28px -20px rgba(56,189,248,.8)!important;
+  font-family:var(--arabic-font)!important;
+  font-size:13px!important;
+  font-weight:800!important;
+}
+.chat-input-row .btn:hover{
+  filter:brightness(1.08);
+  transform:translateY(-1px);
+}
+.chat-input-foot{
+  margin-top:4px!important;
+  padding:0 3px!important;
+  color:#5f6d80!important;
+  font-family:var(--arabic-font)!important;
+  font-size:9px!important;
+}
+@media(max-width:819px){
+  .chat-enterprise-shell{
+    min-height:calc(100vh - 190px)!important;
+    height:calc(100vh - 190px)!important;
+  }
+  .chat-input-area{padding:8px 8px 9px!important}
+  .chat-input-row{gap:7px!important}
+  .chat-input-row textarea{
+    min-height:52px!important;
+    max-height:110px!important;
+    font-size:14px!important;
+  }
+  .chat-input-row .btn{
+    flex-basis:74px!important;
+    width:74px!important;
+    min-height:52px!important;
+  }
+}
+</style>
+</head>
 <body>
 
 <div id="auth-screen">
@@ -1775,7 +1866,19 @@ body::before{
    ============================================================ */
 const SESSION_TOKEN_KEY = 'shifra_session_token';
 const SESSION_API_KEY = 'shifra_session_api_base';
+const SHIFRA_SESSION_KEY = 'shifra_session_token_v1';
+const SHIFRA_API_KEY = 'shifra_api_base_v1';
 const state = { token:null, user:null, profile:null, apiBase:'http://localhost:4000/api', view:null };
+
+function persistSession(token){
+  state.token = token || null;
+  if (token) localStorage.setItem(SHIFRA_SESSION_KEY, token);
+  else localStorage.removeItem(SHIFRA_SESSION_KEY);
+}
+function clearPersistedSession(){
+  localStorage.removeItem(SHIFRA_SESSION_KEY);
+}
+
 
 // Smart default: if this page itself isn't running on localhost (i.e. it's
 // deployed behind the real domain), assume the API lives at /api on that same
@@ -1870,6 +1973,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   const btn = document.getElementById('login-submit');
   document.getElementById('auth-error').style.display = 'none';
   state.apiBase = document.getElementById('login-apibase').value.trim().replace(/\/$/,'');
+  localStorage.setItem(SHIFRA_API_KEY, state.apiBase);
   btn.disabled = true; const orig = btn.textContent; btn.innerHTML = '<span class="spinner"></span>';
   try {
     const identifier = document.getElementById('login-identifier').value.trim();
@@ -1890,6 +1994,7 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
   const btn = document.getElementById('signup-submit');
   document.getElementById('auth-error').style.display = 'none';
   state.apiBase = document.getElementById('signup-apibase').value.trim().replace(/\/$/,'');
+  localStorage.setItem(SHIFRA_API_KEY, state.apiBase);
   btn.disabled = true; const orig = btn.textContent; btn.innerHTML = '<span class="spinner"></span>';
   try {
     const body = {
@@ -3768,3 +3873,9 @@ function wireProjectDetailActions(el, project, id){
 })();
 </script></body>
 </html>
+
+<script>
+window.addEventListener('load', () => {
+  restoreSavedSession();
+});
+</script>
