@@ -1514,6 +1514,30 @@ body::before{
  .video-release-actions{flex-direction:column}
  .video-release-actions .btn{min-width:0;flex:auto;width:100%}
 }
+</style><style id="shifra-ai-service-v1">
+.ai-service-hero{
+  position:relative;overflow:hidden;padding:28px;border-radius:26px;
+  border:1px solid rgba(124,92,255,.22);
+  background:
+   radial-gradient(620px 260px at 5% 0%,rgba(56,189,248,.16),transparent 62%),
+   radial-gradient(620px 280px at 95% 0%,rgba(124,92,255,.20),transparent 64%),
+   radial-gradient(500px 220px at 55% 100%,rgba(52,211,153,.08),transparent 65%),
+   linear-gradient(145deg,#0b1018,#101222 55%,#0a1015);
+  box-shadow:0 30px 80px -55px rgba(80,70,255,.8);
+}
+.ai-service-hero:after{content:"AI";position:absolute;right:-18px;top:-42px;font:900 180px/1 Manrope,sans-serif;letter-spacing:-16px;color:rgba(255,255,255,.025);pointer-events:none}
+.ai-service-eyebrow{font:700 10px/1.2 'IBM Plex Mono',monospace;letter-spacing:2.5px;color:#70e5ff;text-transform:uppercase}
+.ai-service-title{font-family:'Cairo',sans-serif;font-size:clamp(30px,5vw,54px);font-weight:900;line-height:1.15;margin:10px 0 8px;background:linear-gradient(100deg,#fff,#c8c2ff 48%,#8deeff);-webkit-background-clip:text;background-clip:text;color:transparent;max-width:760px}
+.ai-service-copy{font-family:'Cairo',sans-serif;font-size:14px;line-height:2;color:#9eabbc;max-width:720px}
+.ai-owner-badge{display:inline-flex;align-items:center;gap:8px;margin-top:18px;padding:9px 13px;border:1px solid rgba(52,211,153,.18);background:rgba(52,211,153,.07);border-radius:999px;color:#b9f5dc;font:700 11px 'Cairo',sans-serif}
+.ai-service-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin-top:14px}
+.ai-service-card{position:relative;text-align:start;padding:17px;border-radius:18px;border:1px solid rgba(255,255,255,.065);background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(255,255,255,.012));transition:.25s ease;overflow:hidden}
+.ai-service-card:hover{transform:translateY(-3px);border-color:rgba(124,92,255,.25);box-shadow:0 22px 45px -35px rgba(124,92,255,.9)}
+.ai-service-icon{font-size:25px;margin-bottom:9px}.ai-service-card b{font:800 14px 'Cairo',sans-serif}.ai-service-card span{display:block;color:#718096;font:500 10.5px/1.7 'Cairo',sans-serif;margin-top:4px}
+.ai-talk-owner{width:100%;margin-top:18px!important;height:54px!important;border-radius:16px!important;font:800 14px 'Cairo',sans-serif!important;background:linear-gradient(105deg,#6548f5,#7c5cff 45%,#25cfe9)!important;box-shadow:0 20px 45px -28px rgba(49,215,255,.85)!important}
+.ai-service-note{margin-top:12px;color:#64748b;font:500 10px/1.8 'Cairo',sans-serif}
+@media(max-width:760px){.ai-service-hero{padding:21px}.ai-service-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ai-service-title{font-size:31px}}
+@media(max-width:460px){.ai-service-grid{grid-template-columns:1fr}}
 </style></head>
 <body>
 
@@ -1761,7 +1785,7 @@ document.getElementById('user-menu-btn').addEventListener('click', () => {
 /* ---------------- Role-adaptive nav + router ---------------- */
 const NAV_BY_ROLE = {
   CUSTOMER: [
-    {id:'customerHome', label:'مركز العميل', icon:'◆'},
+    {id:'customerHome', label:'مركز العميل', icon:'◆'}, {id:'ai-service', label:'خدمات AI', icon:'✦'},
     {id:'customerTools', label:'الأدوات', icon:'✦'},
     {id:'projects', label:'مشاريعي', icon:'▦'},
     {id:'direct', label:'رسائل', icon:'💬'}
@@ -1800,6 +1824,7 @@ const NAV_BY_ROLE = {
 };
 const VIEW_META = {
   customerHome:{title:'مركز العميل', sub:'كل ما تحتاجه اليوم لمتابعة مشاريعك وتشغيل طلباتك بسرعة'},
+  'ai-service':{title:'خدمات الذكاء الاصطناعي', sub:'خدمات AI ينفذها المالك شخصيًا من الفكرة حتى الفيديو النهائي'},
   customerTools:{title:'أدوات العميل', sub:'20 ميزة عملية — منها 10 مصممة للاستخدام اليومي'},
   opportunities:{title:'فرص جديدة', sub:'عملاء محتاجين مسوّق'},
   customers:{title:'عملائي', sub:'العملاء اللي بتتابعهم'},
@@ -2861,6 +2886,43 @@ function customerOpenProject(id){
   setTimeout(()=>RENDERERS.projects(document.getElementById('content')),0);
 }
 
+async function openOwnerPersonalChat(){
+  try{
+    const r=await api('/direct-conversations');
+    const list=r.conversations||[];
+    const owner=list.find(x=>x.role==='OWNER' && /يوسف|youssef/i.test(x.full_name||'')) ||
+      list.find(x=>x.role==='OWNER' && /عمر|omar/i.test(x.full_name||'')) ||
+      list.find(x=>x.role==='OWNER');
+    if(!owner) throw new Error('حساب المالك غير متاح حاليًا');
+    goView('direct');
+    setTimeout(()=>{
+      const root=document.getElementById('content');
+      const btn=root?.querySelector('[data-direct-user="'+owner.id+'"]');
+      if(btn) renderDirectChat(root,owner.id,btn);
+      else toast('حساب المالك غير متاح حاليًا','err');
+    },180);
+  }catch(e){toast(e.message,'err');}
+}
+RENDERERS['ai-service'] = async (el) => {
+  el.innerHTML=
+   '<section class="ai-service-hero">'+
+    '<div class="ai-service-eyebrow">SHIFRA · AI CREATIVE STUDIO</div>'+
+    '<h1 class="ai-service-title">خلي الذكاء الاصطناعي يصنع فكرتك.</h1>'+
+    '<div class="ai-service-copy">خدمة خاصة داخل شفرة لتنفيذ الصور والفيديوهات والمحتوى الإعلاني بالذكاء الاصطناعي. مش خدمة آلية وخلاص — أنت بتتكلم مباشرة مع المالك، وهو يتفق معاك على الفكرة والسعر وينفذ الشغل بنفسه.</div>'+
+    '<div class="ai-owner-badge">✦ تنفيذ مباشر · عمر يوسف · المالك</div>'+
+    '<div class="ai-service-grid">'+
+      '<div class="ai-service-card"><div class="ai-service-icon">🎬</div><b>فيديو بالذكاء الاصطناعي</b><span>فيديوهات إعلانية وسينمائية ومحتوى قصير حسب فكرتك.</span></div>'+
+      '<div class="ai-service-card"><div class="ai-service-icon">◈</div><b>صور AI</b><span>صور إعلانية، منتجات، مشاهد وVisuals مخصصة.</span></div>'+
+      '<div class="ai-service-card"><div class="ai-service-icon">✦</div><b>إعلانات ومحتوى</b><span>أفكار وإعلانات ومحتوى مناسب للسوشيال ميديا.</span></div>'+
+      '<div class="ai-service-card"><div class="ai-service-icon">◉</div><b>صوت وVoice AI</b><span>تعليق صوتي ومعالجة صوتية مناسبة للمشروع.</span></div>'+
+      '<div class="ai-service-card"><div class="ai-service-icon">Aa</div><b>ترجمة وترجمة فيديو</b><span>ترجمة وSubtitles وتنسيق المحتوى للجمهور المستهدف.</span></div>'+
+      '<div class="ai-service-card"><div class="ai-service-icon">⚡</div><b>حل مخصص بالـAI</b><span>لو عندك فكرة مختلفة، احكِها للمالك وهو يحدد معاك أفضل تنفيذ.</span></div>'+
+    '</div>'+
+    '<button class="btn btn-primary ai-talk-owner" id="ai-talk-owner">💬 تحدث مع عمر يوسف — المالك</button>'+
+    '<div class="ai-service-note">السعر والمدة يتم الاتفاق عليهما مباشرة مع المالك داخل المحادثة قبل بدء التنفيذ.</div>'+
+   '</section>';
+  el.querySelector('#ai-talk-owner').addEventListener('click',openOwnerPersonalChat);
+};
 RENDERERS.customerHome = async (el) => {
   const [pr,nr,dr,cat] = await Promise.all([
     api('/projects'),
@@ -2918,8 +2980,7 @@ RENDERERS.customerHome = async (el) => {
         '<div class="customer-kpi"><div class="k">إشعارات جديدة</div><div class="v">'+unread+'</div><div class="s">'+direct.length+' محادثة مباشرة</div></div>'+
         '<div class="customer-kpi"><div class="k">سلسلة حضور</div><div class="v">'+streak+' يوم</div><div class="s">آخر زيارة: اليوم</div></div>'+
       '</div>'+
-    '</div>'+
-    '<div class="customer-section-head"><div class="title">10 ميزات للاستخدام اليومي</div><span class="badge badge-gray">'+dailyDone.length+' مكتملة اليوم</span></div>'+
+    '<div data-ai-service-promo class="card" style="margin:14px 0;padding:0;overflow:hidden;border-color:rgba(124,92,255,.2);background:linear-gradient(120deg,rgba(124,92,255,.11),rgba(56,189,248,.06),rgba(52,211,153,.05))">'+'<div style="padding:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">'+'<div><div style="font:800 10px/1 'IBM Plex Mono',monospace;color:#70e5ff;letter-spacing:2px">SHIFRA AI STUDIO</div><div style="font:900 24px/1.3 Cairo,sans-serif;margin-top:7px">صور · فيديو · محتوى بالذكاء الاصطناعي</div><div style="font:500 11px/1.7 Cairo,sans-serif;color:#7e8da3;margin-top:3px">تنفيذ مباشر مع عمر يوسف، المالك شخصيًا.</div></div>'+'<button class="btn btn-primary" data-ai-service-open style="min-width:190px">✦ اكتشف خدمة AI</button></div></div>'+'<div class="customer-section-head"><div class="title">10 ميزات للاستخدام اليومي</div><span class="badge badge-gray">'+dailyDone.length+' مكتملة اليوم</span></div>'+
     '<div class="customer-feature-grid">'+dailyCards+'</div>'+
     '<div class="customer-section-head"><div class="title">10 أدوات قوية للحساب</div><button class="btn btn-ghost btn-sm" data-customer-jump="customerTools">عرض الأدوات</button></div>'+
     '<div class="customer-feature-grid">'+strong+'</div>'+
@@ -2930,6 +2991,7 @@ RENDERERS.customerHome = async (el) => {
       '<div class="card"><div class="customer-section-head" style="margin-top:0"><div class="title">فكرة اليوم</div><button class="btn btn-ghost btn-sm" data-customer-action="daily-idea">تغيير</button></div><div style="font-size:12px;line-height:1.8;color:var(--text-dim)" id="customer-idea-text">'+esc(idea)+'</div></div>'+
     '</div>';
 
+  el.querySelector('[data-ai-service-open]')?.addEventListener('click',()=>goView('ai-service'));
   el.querySelectorAll('[data-customer-jump]').forEach(b=>b.addEventListener('click',()=>goView(b.dataset.customerJump)));
   el.querySelectorAll('[data-customer-action]').forEach(b=>b.addEventListener('click',()=>customerHandleAction(b.dataset.customerAction,el,projects,notifications,cat)));
 };
