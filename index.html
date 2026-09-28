@@ -2126,7 +2126,7 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
   const btn = document.getElementById('signup-submit');
   document.getElementById('auth-error').style.display = 'none';
   state.apiBase = document.getElementById('signup-apibase').value.trim().replace(/\/$/,'');
-  localStorage.setItem(SHIFRA_API_KEY, state.apiBase);
+  localStorage.setItem(SESSION_API_KEY, state.apiBase);
   btn.disabled = true; const orig = btn.textContent; btn.innerHTML = '<span class="spinner"></span>';
   try {
     const body = {
