@@ -798,6 +798,29 @@ body::before{
 .editor-mini-list{display:grid;gap:8px}.editor-mini{padding:10px 11px;border-radius:14px;border:1px solid rgba(120,150,190,.10);background:rgba(8,12,18,.32)}
 .editor-mini .row{display:flex;justify-content:space-between;gap:8px;align-items:center}.editor-progress{height:7px;border-radius:999px;background:rgba(255,255,255,.05);overflow:hidden;margin-top:7px}.editor-progress i{display:block;height:100%;background:linear-gradient(90deg,#6b8cff,#9b7cff);border-radius:inherit}
 @media(max-width:760px){.editor-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.editor-feature-grid{grid-template-columns:1fr}.editor-hero{padding:16px}}
+</style><style id="shifra-whatsapp-chat-v1">
+.wa-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:#25d366;color:#06140b!important;border:0;border-radius:9px;padding:8px 12px;font-size:11.5px;font-weight:800;text-decoration:none;box-shadow:0 10px 22px -16px rgba(37,211,102,.95)}
+.wa-btn:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.wa-btn.disabled{background:rgba(255,255,255,.06);color:#6f7784!important;box-shadow:none;cursor:not-allowed}
+.chat-tools{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;border-top:1px solid rgba(255,255,255,.045);border-bottom:1px solid rgba(255,255,255,.045);background:rgba(8,11,16,.55)}
+.chat-tool{border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.035);color:#b8c2d0;border-radius:8px;padding:7px 9px;font-size:10.5px}
+.chat-tool:hover{border-color:rgba(167,139,250,.28);color:#eee}
+.chat-tool.active{background:rgba(139,92,246,.13);color:#d8cbff;border-color:rgba(167,139,250,.30)}
+.chat-tool.green{border-color:rgba(37,211,102,.22);color:#87e9ac}
+.chat-search{display:none;padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.045)}
+.chat-search.active{display:block}
+.chat-search input{width:100%;font-size:11.5px}
+.owner-msg.chat-hidden{display:none!important}
+.owner-msg .chat-actions{display:flex;gap:5px;margin-top:6px;opacity:.78}
+.owner-msg .chat-actions button{font-size:9px;padding:4px 6px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.025);color:#8f9aaa;border-radius:6px}
+.owner-msg .chat-time{font-size:10px;color:#677387;margin-bottom:3px}
+.owner-msg.no-time .chat-time{display:none}
+.owner-chat-body.compact .owner-msg{padding:6px 8px;border-radius:9px}
+.chat-draft-note{font-size:9.5px;color:#728096;padding:0 10px 6px}
+.chat-contact-card{display:grid;gap:7px}
+.chat-contact-row{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px}
+.chat-contact-row:last-child{border-bottom:0}
+@media(max-width:600px){.chat-tools{gap:5px}.chat-tool{padding:7px 8px;font-size:10px}}
 </style></head>
 <body>
 
@@ -1051,7 +1074,7 @@ const NAV_BY_ROLE = {
     {id:'direct', label:'رسائل', icon:'💬'}
   ],
   MARKETER: [
-    {id:'marketerHome', label:'مركز المسوّق', icon:'◆'},
+    {id:'marketerHome', label:'مركز المسوّق', icon:'◆'}, {id:'workflow-guide', label:'دليل المسار', icon:'📘'},
     {id:'marketer-tools', label:'أدوات المسوّق', icon:'✦'},
     {id:'opportunities', label:'الفرص', icon:'◆'}, {id:'customers', label:'عملائي', icon:'☺'},
     {id:'projects', label:'مشاريعي', icon:'▦'}, {id:'conversations', label:'المحادثات', icon:'☷'},
@@ -1060,7 +1083,7 @@ const NAV_BY_ROLE = {
     {id:'marketer-profile', label:'حسابي', icon:'⚿'}
   ],
   EDITOR: [
-    {id:'editorHome', label:'مركز المونتير', icon:'◆'},
+    {id:'editorHome', label:'مركز المونتير', icon:'◆'}, {id:'workflow-guide', label:'دليل المسار', icon:'📘'},
     {id:'editorTools', label:'أدوات المونتير', icon:'✦'},
     {id:'projects', label:'مهامي', icon:'▦'},
     {id:'earnings', label:'أرباحي', icon:'%'},
@@ -1092,6 +1115,7 @@ const VIEW_META = {
              EDITOR:{title:'مهامي', sub:'الشغل المُسند ليك'} },
   earnings:{title:'أرباحي', sub:'المستحق والمدفوع'},
   direct:{title:'الرسائل', sub:'محادثات مباشرة داخل شفرة'},
+  'workflow-guide':{title:'دليل مسار المشروع', sub:'من أول استلام الطلب لحد التسليم النهائي — وتعامل واتساب مع الصور والفيديو'},
   editorHome:{title:'مركز تشغيل المونتير', sub:'كل المهام، المواعيد، التعديلات، التسليمات والأرباح في شاشة واحدة'},
   editorTools:{title:'أدوات المونتير', sub:'20 إضافة تشغيلية لإدارة الإنتاج والجودة والوقت'},
   marketerHome:{title:'مركز تشغيل المسوّق', sub:'كل العملاء والفرص والمشاريع والأرباح في شاشة واحدة'},
@@ -1456,18 +1480,149 @@ RENDERERS['owner-audit'] = async (el) => { const {auditLogs=[]}=await api('/audi
 RENDERERS['owner-weekly'] = async (el) => { const {challenge,leaderboard=[]}=await api('/weekly-challenges/current'); const labels={ACTIVE:'جارية',COMPLETED:'منتهية',CANCELLED:'ملغاة',DRAFT:'مسودة'}; el.innerHTML='<div class="card" style="margin-bottom:14px"><b style="font-size:17px">'+(challenge?esc(challenge.title):'مفيش تحدي أسبوعي حالي')+'</b><div style="font-size:11px;color:#687488;margin-top:4px">'+(challenge?esc(challenge.description||''):'')+'</div><div style="margin-top:10px">'+(challenge?'<span class="badge badge-purple">'+(labels[challenge.status]||challenge.status)+'</span>':'<span class="badge badge-gray">مفيش تحدي</span>')+'</div></div><div class="table-wrap"><table><thead><tr><th>الموظف</th><th>الدور</th><th>AI</th><th>النهائي</th><th>الإنتاجية</th><th>الجودة</th><th>الالتزام</th></tr></thead><tbody>'+leaderboard.map(x=>'<tr><td>'+esc(x.full_name)+'</td><td>'+ownerRoleAr(x.role)+'</td><td>'+Number(x.ai_score||0).toFixed(1)+'</td><td>'+Number(x.final_score||0).toFixed(1)+'</td><td>'+Number(x.productivity_score||0).toFixed(0)+'</td><td>'+Number(x.quality_score||0).toFixed(0)+'</td><td>'+Number(x.punctuality_score||0).toFixed(0)+'</td></tr>').join('')+'</tbody></table></div>'; };
 
 RENDERERS['owner-ops'] = RENDERERS['owner-ops'];
+RENDERERS['workflow-guide'] = async (el) => {
+  const isEditor=state.user.role==='EDITOR';
+  const title=isEditor?'دليل المونتير — من استلام الشغل للتسليم':'دليل المسوّق — من أول عميل للتسليم';
+  const steps=isEditor?[
+    ['1','استلام المشروع','افتح المشروع وتأكد من المطلوب، المقاس، المدة، الموعد، والـbrief قبل ما تبدأ.'],
+    ['2','استلام المواد','لو العميل أو المسوّق بعت صور/فيديو/Raw Footage على واتساب، اعتبر واتساب قناة تسليم خارجية وسجّل في محادثة المشروع داخل شفرة إن المواد وصلت ومين بعتها.'],
+    ['3','بدء التنفيذ','ابدأ المونتاج بالمواصفات المتفق عليها، واسأل عن أي نقطة ناقصة قبل ما تكمّل.'],
+    ['4','المعاينة المحمية','جهّز معاينة/نسخة مراجعة مناسبة للعميل. لا تعتبر المعاينة هي الملف الأصلي القابل للتسليم النهائي.'],
+    ['5','المراجعة','المسوّق يرسل المعاينة للعميل. أي ملاحظات أو صور/فيديوهات مرجعية يرسلها العميل على واتساب تُسجَّل كملخص واضح داخل المشروع قبل تنفيذ تعديل جديد.'],
+    ['6','الموافقة النهائية','لا تنتقل للتسليم النهائي بناءً على رسالة واتساب فقط؛ خلي الموافقة النهائية وحالة المشروع واضحة داخل شفرة.'],
+    ['7','الدفع النهائي','بعد الموافقة، يتم إكمال الدفع النهائي والتحقق منه بواسطة المسؤول حسب مسار شفرة.'],
+    ['8','الإصدار النهائي','بعد تأكيد الدفع فقط، يصبح تسليم الملف الأصلي للمسوّق مسموحًا حسب حالة المشروع.'],
+    ['9','التسليم','أرسل النسخة النهائية للمسوّق عبر قناة التسليم المتفق عليها، ثم سجّل داخل المشروع أن الملف الأصلي تم تسليمه.'],
+    ['10','إغلاق المهمة','راجع أي ملاحظات نهائية، ثم اترك المشروع في الحالة الصحيحة بدل الاعتماد على واتساب وحده.']
+  ]:[
+    ['1','استلام العميل','استلم الفرصة/العميل واجمع تفاصيل الطلب والمرجع والموعد والسعر المتفق عليه.'],
+    ['2','تأكيد الطلب','ثبّت تفاصيل المشروع داخل شفرة قبل بدء التنفيذ، عشان العميل والمونتير والمالك يشوفوا نفس المسار.'],
+    ['3','إرسال المواد','لو العميل أرسل صور/فيديو/Raw Footage على واتساب، استلمها منه ثم سجّل داخل محادثة المشروع ملخصًا: ماذا وصل، ومن أرسله، وما المطلوب منه.'],
+    ['4','تسليم للمونتير','أرسل الـbrief والمواد للمونتير بالطريقة المتفق عليها. لو بعت صور/فيديو على واتساب، سجّل داخل شفرة أن المواد وصلت للمونتير.'],
+    ['5','المعاينة','المونتير يجهز معاينة للمراجعة، وأنت ترسلها للعميل وتجمع التعليقات في مكان واحد.'],
+    ['6','التعديلات','أي صورة/فيديو أو مثال أو ملاحظة يرسلها العميل على واتساب تعتبر مرجعًا خارجيًا؛ انقل معناها للمحادثة داخل شفرة قبل طلب تعديل جديد.'],
+    ['7','الموافقة النهائية','ثبّت موافقة العميل على النسخة النهائية داخل مسار المشروع قبل الدخول في تسليم الملف الأصلي.'],
+    ['8','الدفع النهائي','تابع الدفع النهائي، ولا تعتبر رسائل واتساب وحدها إثباتًا نهائيًا ما لم يتم اعتماد الدفع داخل النظام.'],
+    ['9','استلام الأصلي','بعد تأكيد الدفع، استلم النسخة الأصلية من المونتير حسب حالة المشروع.'],
+    ['10','التسليم للعميل','أرسل النسخة الأصلية للعميل عبر واتساب أو قناة التسليم المتفق عليها، ثم سجّل داخل شفرة أن العميل استلمها.']
+  ];
+  el.innerHTML='<div class="card" style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><b style="font-size:18px">'+title+'</b><div style="font-size:11.5px;color:#768297;margin-top:6px">واتساب قناة خارجية للتواصل والتسليم فقط؛ شفرة تظل مكان تسجيل الحالة والموافقة والدفع والتسليم.</div></div><span class="badge badge-purple">WORKFLOW</span></div></div>'+
+    '<div style="display:grid;gap:9px">'+steps.map(s=>'<div class="card" style="padding:13px 14px"><div style="display:flex;gap:10px;align-items:flex-start"><span class="badge badge-blue">'+s[0]+'</span><div><b style="font-size:13px">'+esc(s[1])+'</b><div style="font-size:11.5px;color:#8d97a8;line-height:1.75;margin-top:4px">'+esc(s[2])+'</div></div></div></div>').join('')+'</div>'+
+    '<div class="card" style="margin-top:14px"><b>قاعدة الصور والفيديو على واتساب</b><div style="font-size:11.5px;color:#8d97a8;line-height:1.8;margin-top:6px">أي صورة أو فيديو يرسله العميل أو المسوّق أو المونتير على واتساب يظل خارج تحكم التطبيق. شفرة لا تسحب محتوى واتساب تلقائيًا؛ لذلك يتم تسجيل الاستلام والمرجع والقرار أو التسليم داخل المشروع. لا ترسل الملف الأصلي النهائي قبل اكتمال شروط التسليم في شفرة.</div></div>';
+};
+
 /* ================= DIRECT MESSAGES ================= */
+function directChatStoreKey(otherId){return 'shifra_direct_chat_'+state.user.id+'_'+otherId;}
+function directChatLoadPrefs(otherId){
+  try{return JSON.parse(localStorage.getItem(directChatStoreKey(otherId))||'{}');}catch(e){return {};}
+}
+function directChatSavePrefs(otherId,prefs){
+  try{localStorage.setItem(directChatStoreKey(otherId),JSON.stringify(prefs));}catch(e){}
+}
+function waPhoneDigits(phone){return String(phone||'').replace(/\D/g,'');}
+function waHref(phone,text=''){const d=waPhoneDigits(phone);return d?'https://wa.me/'+d+'?text='+encodeURIComponent(text):'';}
+function waButton(phone,text=''){return phone?'<a class="wa-btn" target="_blank" rel="noopener" href="'+waHref(phone,text)+'">🟢 واتساب</a>':'<span class="wa-btn disabled">واتساب غير مضاف</span>';}
 function ownerDirectContactMarkup(c){
-  return '<button class="owner-contact" data-direct-user="'+c.id+'"><div style="display:flex;justify-content:space-between;gap:8px"><b>'+esc(c.full_name)+'</b>'+(c.unread_count?'<span class="badge badge-red">'+c.unread_count+'</span>':'')+'</div><div style="font-size:10.5px;color:#687488;margin-top:3px">'+ownerRoleAr(c.role)+' · '+esc(c.status)+(c.latest_message?' · '+esc(String(c.latest_message).slice(0,55)):'')+'</div></button>';
+  return '<button class="owner-contact" data-direct-user="'+c.id+'"><div style="display:flex;justify-content:space-between;gap:8px"><b>'+esc(c.full_name)+'</b>'+(c.unread_count?'<span class="badge badge-red">'+c.unread_count+'</span>':'')+'</div><div style="font-size:10.5px;color:#687488;margin-top:3px">'+ownerRoleAr(c.role)+' · '+esc(c.status)+(c.whatsapp_phone?'<span style="color:#6ee7a3"> · واتساب ✓</span>':'')+(c.latest_message?' · '+esc(String(c.latest_message).slice(0,55)):'')+'</div></button>';
+}
+function directChatToolMarkup(){
+  const tools=[
+    ['chat-search','🔎','بحث الرسائل'],['chat-pin','📌','تثبيت المحادثة'],['chat-mute','🔕','كتم المحادثة'],['chat-density','▤','كثافة العرض'],
+    ['chat-time','◷','إظهار التوقيت'],['chat-draft','📝','المسودة'],['chat-emoji','😊','إيموجي'],['chat-quote-last','↩','اقتباس آخر رسالة'],
+    ['chat-copy-last','⧉','نسخ آخر رسالة'],['chat-templates','☰','قوالب سريعة'],['chat-export','⇩','تصدير المحادثة'],['chat-refresh','↻','تحديث'],
+    ['chat-bottom','↓','آخر الرسائل'],['chat-notes','🗒','ملاحظات المحادثة'],['chat-contact','👤','بطاقة الاتصال'],['chat-whatsapp','🟢','فتح واتساب'],
+    ['chat-important','★','تمييز مهم'],['chat-read','✓','تأكيد القراءة'],['chat-enter','↵','Enter للإرسال'],['chat-clear-draft','⌫','مسح المسودة']
+  ];
+  return '<div class="chat-tools">'+tools.map(x=>'<button type="button" class="chat-tool" data-chat-tool="'+x[0]+'" title="'+esc(x[2])+'">'+x[1]+' '+esc(x[2])+'</button>').join('')+'</div>';
+}
+function directMessageHtml(m,prefs){
+  const mine=Number(m.sender_id)===Number(state.user.id);
+  return '<div class="owner-msg '+(mine?'mine':'theirs')+(prefs.compact?' compact':'')+'" data-msg-text="'+esc(String(m.body||'').toLowerCase())+'" data-msg-id="'+m.id+'">'+
+    '<div class="chat-time">'+esc(m.sender_name)+' · '+fmtDate(m.created_at)+'</div>'+
+    '<div style="white-space:pre-wrap">'+esc(m.body)+'</div>'+
+    '<div class="chat-actions"><button type="button" data-msg-copy="'+m.id+'">نسخ</button><button type="button" data-msg-quote="'+m.id+'">اقتباس</button></div>'+
+  '</div>';
 }
 async function renderDirectChat(host,userId,button){
   host.querySelectorAll('.owner-contact').forEach(b=>b.classList.remove('active')); if(button)button.classList.add('active');
-  const panel=host.querySelector('#direct-panel'); if(!panel)return; panel.innerHTML='<div class="empty-state">جارِ تحميل المحادثة...</div>';
+  const panel=host.querySelector('#direct-panel'); if(!panel)return;
+  panel.innerHTML='<div class="empty-state">جارِ تحميل المحادثة...</div>';
   try{
     const r=await api('/direct-conversations/'+userId+'/messages'); const target=r.target; const messages=r.messages||[];
-    panel.innerHTML='<div class="owner-chat-head"><b>'+esc(target.full_name)+'</b><div style="font-size:10.5px;color:#687488;margin-top:2px">'+ownerRoleAr(target.role)+' · '+esc(target.email||target.phone||'')+'</div></div><div class="owner-chat-body" id="direct-body">'+(messages.map(m=>'<div class="owner-msg '+(Number(m.sender_id)===Number(state.user.id)?'mine':'theirs')+'"><div style="font-size:10px;color:#677387;margin-bottom:3px">'+esc(m.sender_name)+' · '+fmtDate(m.created_at)+'</div><div style="white-space:pre-wrap">'+esc(m.body)+'</div></div>').join('')||'<div class="empty-state" style="padding:25px">لسه مفيش رسائل.</div>')+'</div><form class="owner-chat-compose" id="direct-compose"><textarea id="direct-text" placeholder="اكتب رسالة..."></textarea><button class="btn btn-primary" type="submit">إرسال</button></form>';
+    let prefs=directChatLoadPrefs(userId);
+    const draftKey='draft_'+userId;
+    const draft=prefs[draftKey]||'';
+    const intro='أهلاً '+(target.full_name||'')+'، معاك من شفرة.';
+    panel.innerHTML=
+      '<div class="owner-chat-head"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><b>'+esc(target.full_name)+'</b><div style="font-size:10.5px;color:#687488;margin-top:2px">'+ownerRoleAr(target.role)+' · '+esc(target.email||target.phone||'')+(prefs.pinned?'<span class="badge badge-amber" style="margin-inline-start:6px">مثبت</span>':'')+'</div></div>'+waButton(target.whatsapp_phone,intro)+'</div></div>'+
+      directChatToolMarkup()+
+      '<div class="chat-search" id="chat-search-box"><input id="chat-search-input" placeholder="ابحث داخل الرسائل..."></div>'+
+      '<div class="owner-chat-body '+(prefs.compact?'compact':'')+'" id="direct-body">'+
+        (messages.length?messages.map(m=>directMessageHtml(m,prefs)).join(''):'<div class="empty-state" style="padding:25px">لسه مفيش رسائل.</div>')+
+      '</div>'+
+      '<div class="chat-draft-note" id="chat-draft-note">'+(draft?'مسودة محفوظة تلقائيًا':'')+'</div>'+
+      '<form class="owner-chat-compose" id="direct-compose"><textarea id="direct-text" placeholder="اكتب رسالة...">'+esc(draft)+'</textarea><button class="btn btn-primary" type="submit">إرسال</button></form>';
+
     const body=panel.querySelector('#direct-body'); body.scrollTop=body.scrollHeight;
-    panel.querySelector('#direct-compose').addEventListener('submit',async e=>{e.preventDefault();const input=panel.querySelector('#direct-text');const text=input.value.trim();if(!text)return;const send=e.target.querySelector('button');send.disabled=true;try{await api('/direct-conversations/'+userId+'/messages',{method:'POST',body:{body:text}});await renderDirectChat(host,userId,button);toast('اترسلت الرسالة','ok');}catch(err){toast(err.message,'err');send.disabled=false;}});
+    const input=panel.querySelector('#direct-text');
+    const draftNote=panel.querySelector('#chat-draft-note');
+    let draftTimer=null;
+    input.addEventListener('input',()=>{
+      const val=input.value;
+      prefs[draftKey]=val; clearTimeout(draftTimer);
+      draftTimer=setTimeout(()=>{directChatSavePrefs(userId,prefs);if(draftNote)draftNote.textContent=val?'مسودة محفوظة تلقائيًا':'',200);
+      const count=panel.querySelector('#chat-char-count'); if(count)count.textContent=val.length+'/2000';
+    });
+    const updateToolState=()=>{
+      const map={ 'chat-pin':!!prefs.pinned,'chat-mute':!!prefs.muted,'chat-density':!!prefs.compact,'chat-time':prefs.showTime!==false,'chat-important':!!prefs.important,'chat-enter':prefs.enterSend!==false };
+      Object.entries(map).forEach(([k,v])=>{const b=panel.querySelector('[data-chat-tool="'+k+'"]');if(b)b.classList.toggle('active',v);});
+      panel.querySelectorAll('.owner-msg').forEach(m=>m.classList.toggle('no-time',prefs.showTime===false));
+    };
+    const sendText=async()=>{
+      const text=input.value.trim(); if(!text)return;
+      const send=panel.querySelector('#direct-compose button[type=submit]'); send.disabled=true;
+      try{
+        await api('/direct-conversations/'+userId+'/messages',{method:'POST',body:{body:text}});
+        prefs[draftKey]=''; directChatSavePrefs(userId,prefs);
+        await renderDirectChat(host,userId,button); toast('اترسلت الرسالة','ok');
+      }catch(err){toast(err.message,'err');send.disabled=false;}
+    };
+    panel.querySelector('#direct-compose').addEventListener('submit',async e=>{e.preventDefault();await sendText();});
+    input.addEventListener('keydown',e=>{if(e.key==='Enter'&&prefs.enterSend!==false&&!e.shiftKey){e.preventDefault();sendText();}});
+
+    panel.querySelectorAll('[data-msg-copy]').forEach(b=>b.addEventListener('click',async()=>{const m=messages.find(x=>String(x.id)===String(b.dataset.msgCopy));if(!m)return;try{await navigator.clipboard.writeText(m.body);toast('اتنسخت الرسالة','ok');}catch(e){toast('النسخ غير متاح','err');}}));
+    panel.querySelectorAll('[data-msg-quote]').forEach(b=>b.addEventListener('click',()=>{const m=messages.find(x=>String(x.id)===String(b.dataset.msgQuote));if(!m)return;input.value='> '+m.sender_name+': '+m.body+'\n\n';input.focus();input.dispatchEvent(new Event('input'));}));
+    panel.querySelectorAll('[data-chat-tool]').forEach(btn=>{
+      btn.addEventListener('click',async()=>{
+        const action=btn.dataset.chatTool;
+        if(action==='chat-search'){
+          const box=panel.querySelector('#chat-search-box');box.classList.toggle('active');if(box.classList.contains('active'))panel.querySelector('#chat-search-input').focus();return;
+        }
+        if(action==='chat-pin'||action==='chat-mute'||action==='chat-density'||action==='chat-time'||action==='chat-important'||action==='chat-enter'){
+          const key={ 'chat-pin':'pinned','chat-mute':'muted','chat-density':'compact','chat-time':'showTime','chat-important':'important','chat-enter':'enterSend'}[action];
+          prefs[key]=action==='chat-time'?! (prefs[key]===false):!prefs[key];
+          if(action==='chat-enter' && prefs.enterSend===undefined)prefs.enterSend=true;
+          directChatSavePrefs(userId,prefs); updateToolState(); toast(action==='chat-mute'?(prefs.muted?'المحادثة مكتومة':'تم إلغاء الكتم'):'اتحفظ الإعداد','ok'); return;
+        }
+        if(action==='chat-draft'){input.focus();input.dispatchEvent(new Event('input'));toast('المسودة محفوظة تلقائيًا','ok');return;}
+        if(action==='chat-clear-draft'){input.value='';prefs[draftKey]='';directChatSavePrefs(userId,prefs);if(draftNote)draftNote.textContent='';return;}
+        if(action==='chat-emoji'){const emojis=['😀','👍','❤️','🔥','✅','🎬','💰','📌','👏','🙂'];modal('<h3>إيموجي</h3><div style="display:flex;gap:8px;flex-wrap:wrap">'+emojis.map(e=>'<button class="btn btn-ghost" data-chat-emoji="'+e+'" style="font-size:22px;min-width:48px">'+e+'</button>').join('')+'</div>');document.querySelectorAll('[data-chat-emoji]').forEach(b=>b.onclick=()=>{input.value+=b.dataset.chatEmoji;input.dispatchEvent(new Event('input'));input.focus();closeModal();});return;}
+        if(action==='chat-quote-last'){const m=messages[messages.length-1];if(m){input.value='> '+m.sender_name+': '+m.body+'\n\n';input.dispatchEvent(new Event('input'));input.focus();}return;}
+        if(action==='chat-copy-last'){const m=messages[messages.length-1];if(!m){toast('مفيش رسالة','err');return;}try{await navigator.clipboard.writeText(m.body);toast('اتنسخت آخر رسالة','ok');}catch(e){toast('النسخ غير متاح','err');}return;}
+        if(action==='chat-templates'){const rows=['أهلاً، تم استلام رسالتك وهنراجعها مع الفريق.','تم استلام المواد، وجاري المتابعة.','المعاينة جاهزة للمراجعة، ابعت ملاحظاتك في نفس المسار.','تم اعتماد الخطوة الحالية، نبدأ الخطوة التالية.','بعد تأكيد الدفع هنكمل التسليم النهائي.'];modal('<h3>قوالب سريعة</h3>'+rows.map((x,i)=>'<div class="card" style="margin-bottom:7px"><div style="font-size:11.5px">'+esc(x)+'</div><button class="btn btn-ghost btn-sm" data-quick-template="'+i+'" style="margin-top:7px">استخدام</button></div>').join(''));document.querySelectorAll('[data-quick-template]').forEach(b=>b.onclick=()=>{input.value=rows[Number(b.dataset.quickTemplate)];input.dispatchEvent(new Event('input'));input.focus();closeModal();});return;}
+        if(action==='chat-export'){const text=messages.map(m=>'['+fmtDate(m.created_at)+'] '+m.sender_name+': '+m.body).join('\n\n');const blob=new Blob([text],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='shifra-chat-'+userId+'.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),500);toast('اتصدرت المحادثة','ok');return;}
+        if(action==='chat-refresh'){await renderDirectChat(host,userId,button);return;}
+        if(action==='chat-bottom'){body.scrollTop=body.scrollHeight;return;}
+        if(action==='chat-notes'){const key='notes_'+userId;modal('<h3>ملاحظات المحادثة</h3><textarea id="chat-notes-area" style="min-height:170px">'+esc(prefs[key]||'')+'</textarea><div class="modal-actions"><button class="btn btn-primary" id="chat-notes-save">حفظ</button></div>');document.getElementById('chat-notes-save').onclick=()=>{prefs[key]=document.getElementById('chat-notes-area').value;directChatSavePrefs(userId,prefs);closeModal();toast('اتحفظت الملاحظات','ok');};return;}
+        if(action==='chat-contact'){modal('<h3>بطاقة الاتصال</h3><div class="chat-contact-card"><div class="chat-contact-row"><span>الاسم</span><b>'+esc(target.full_name)+'</b></div><div class="chat-contact-row"><span>الدور</span><b>'+esc(ownerRoleAr(target.role))+'</b></div><div class="chat-contact-row"><span>البريد</span><b>'+esc(target.email||'—')+'</b></div><div class="chat-contact-row"><span>الهاتف</span><b class="mono">'+esc(target.phone||'—')+'</b></div><div class="chat-contact-row"><span>واتساب</span><b class="mono">'+esc(target.whatsapp_phone||'—')+'</b></div></div><div class="modal-actions">'+(target.whatsapp_phone?waButton(target.whatsapp_phone,intro):'')+'<button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');return;}
+        if(action==='chat-whatsapp'){if(target.whatsapp_phone)window.open(waHref(target.whatsapp_phone,intro),'_blank','noopener');else toast('الحساب لم يضف رقم واتساب','err');return;}
+        if(action==='chat-read'){await renderDirectChat(host,userId,button);toast('تم فتح المحادثة وتأكيد القراءة','ok');return;}
+      });
+    });
+    const searchInput=panel.querySelector('#chat-search-input');
+    if(searchInput)searchInput.addEventListener('input',()=>{const q=searchInput.value.toLowerCase().trim();panel.querySelectorAll('[data-msg-text]').forEach(m=>m.classList.toggle('chat-hidden',q&&!m.dataset.msgText.includes(q)));});
+    const count=document.createElement('div');count.id='chat-char-count';count.style.cssText='position:absolute;inset-inline-end:90px;margin-top:42px;font-size:9px;color:#627084;pointer-events:none';count.textContent=input.value.length+'/2000';panel.appendChild(count);
+    updateToolState();
   }catch(err){panel.innerHTML='<div class="empty-state">'+esc(err.message)+'</div>';}
 }
 RENDERERS['owner-direct'] = async (el) => {
@@ -1476,10 +1631,14 @@ RENDERERS['owner-direct'] = async (el) => {
   const search=el.querySelector('#direct-search'); search.addEventListener('input',()=>{const q=search.value.toLowerCase().trim();el.querySelectorAll('.owner-contact').forEach(b=>b.style.display=b.textContent.toLowerCase().includes(q)?'block':'none');});
   el.querySelectorAll('[data-direct-user]').forEach(b=>b.addEventListener('click',()=>renderDirectChat(el,b.dataset.directUser,b)));
 };
-
 RENDERERS['direct'] = async (el) => {
-  const r=await api('/direct-conversations'); const conversations=r.conversations||[];
-  el.innerHTML='<div class="card" style="margin-bottom:12px"><b>الرسائل المباشرة</b><div style="font-size:11px;color:#687488;margin-top:4px">تقدر تبدأ محادثة مباشرة مع أي حساب نشط في شفرة.</div></div><div class="owner-chat-shell"><div class="owner-contact-list">'+(conversations.map(ownerDirectContactMarkup).join('')||'<div class="empty-state" style="padding:30px">لسه مفيش محادثات.</div>')+'</div><div class="owner-chat" id="direct-panel"><div class="empty-state" style="margin:auto">اختار محادثة.</div></div></div>';
+  const [r,w]=await Promise.all([api('/direct-conversations'),api('/me/whatsapp')]);
+  const conversations=r.conversations||[];
+  const current=w.whatsappPhone||'';
+  el.innerHTML='<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start"><div><b>الرسائل المباشرة</b><div style="font-size:11px;color:#687488;margin-top:4px">تقدر تبدأ محادثة مباشرة مع أي حساب نشط في شفرة.</div></div><span class="badge badge-purple">20 أدوات للمحادثة</span></div><div class="card" style="margin-top:10px;background:rgba(37,211,102,.045);border-color:rgba(37,211,102,.14)"><b style="color:#8be0b8">رقم واتسابك</b><div style="font-size:10.5px;color:#728096;margin-top:3px">اكتبه مرة واحدة عشان أي حساب يقدر يضغط زر واتساب الأخضر ويتكلم معاك مباشرة.</div><div class="field" style="margin-top:9px;margin-bottom:8px"><input id="my-whatsapp" class="ltr" placeholder="+20 10xxxxxxxx" value="'+esc(current)+'"></div><div style="display:flex;gap:8px"><button class="btn btn-sm" style="background:#25d366;color:#06140b;font-weight:800" id="save-whatsapp">حفظ رقم واتساب</button>'+(current?waButton(current,'أهلاً، بتواصل معاك من شفرة.'):'' )+'</div></div></div>'+
+    '<div class="owner-chat-shell"><div class="owner-contact-list"><div style="padding:12px;border-bottom:1px solid rgba(255,255,255,.05)"><input id="direct-search" placeholder="ابحث عن أي حساب..." style="width:100%"></div>'+(conversations.map(ownerDirectContactMarkup).join('')||'<div class="empty-state" style="padding:30px">لسه مفيش محادثات.</div>')+'</div><div class="owner-chat" id="direct-panel"><div class="empty-state" style="margin:auto">اختار محادثة.</div></div></div>';
+  el.querySelector('#save-whatsapp').addEventListener('click',async()=>{const btn=el.querySelector('#save-whatsapp');btn.disabled=true;try{const x=await api('/me/whatsapp',{method:'PATCH',body:{whatsappPhone:el.querySelector('#my-whatsapp').value.trim()}});toast('اتحفظ رقم واتساب','ok');if(x.whatsappUrl)window.open(x.whatsappUrl,'_blank','noopener');await RENDERERS.direct(el);}catch(err){toast(err.message,'err');btn.disabled=false;}});
+  const search=el.querySelector('#direct-search'); search.addEventListener('input',()=>{const q=search.value.toLowerCase().trim();el.querySelectorAll('.owner-contact').forEach(b=>b.style.display=b.textContent.toLowerCase().includes(q)?'block':'none');});
   el.querySelectorAll('[data-direct-user]').forEach(b=>b.addEventListener('click',()=>renderDirectChat(el,b.dataset.directUser,b)));
 };
 
