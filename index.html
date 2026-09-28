@@ -1068,6 +1068,7 @@ const NAV_BY_ROLE = {
   ],
   OWNER: [
     {id:'owner-home', label:'مركز القيادة', icon:'◆'},
+    {id:'owner-tools', label:'أدوات المالك', icon:'✦'},
     {id:'owner-direct', label:'مراسلات مباشرة', icon:'💬'},
     {id:'owner-project-chat', label:'محادثات المشاريع', icon:'☷'},
     {id:'owner-finance', label:'الأرباح والخسائر', icon:'₿'},
@@ -1100,6 +1101,7 @@ const VIEW_META = {
   ratings:{title:'تقييماتي', sub:'متوسط التقييم وآخر ملاحظات العملاء'},
   'marketer-profile':{title:'حسابي', sub:'بياناتك وكود الدعوة والأمان'},
   'owner-home':{title:'مركز قيادة المالك', sub:'الأرقام الحية، الأشخاص، المال، والاختناقات في مكان واحد'},
+  'owner-tools':{title:'أدوات المالك', sub:'20 أداة تشغيلية للتحليل والمراقبة واتخاذ الخطوة التالية'},
   'owner-direct':{title:'المراسلات المباشرة', sub:'عمر ويوسف يقدروا يفتحوا محادثة مع أي حساب نشط'},
   'owner-project-chat':{title:'محادثات المشاريع', sub:'كل محادثات العملاء والمسوقين والمحررين'},
   'owner-finance':{title:'الأرباح والخسائر', sub:'قراءة مالية من الـLedger الفعلي'},
@@ -1245,6 +1247,155 @@ RENDERERS['owner-home'] = async (el) => {
     '</div></div>';
   el.querySelectorAll('[data-owner-view]').forEach(b=>b.addEventListener('click',()=>goView(b.dataset.ownerView)));
 };
+
+
+/* ================= OWNER POWER TOOLS ================= */
+function ownerPower(icon,title,desc,action){
+  return '<button class="owner-tool" data-owner-power="'+action+'"><div class="ic">'+icon+'</div><div class="tt">'+esc(title)+'</div><div class="ss">'+esc(desc)+'</div></button>';
+}
+function ownerPowerScoreProject(p){
+  const terminal=ownerTerminal(p); if(terminal)return 100;
+  let s=55;
+  if(p.deadline){if(new Date(p.deadline)<new Date())s-=35;else if(new Date(p.deadline)<=new Date(Date.now()+48*3600*1000))s-=15;}
+  if(['PAYMENT_PENDING','PRICE_LOCKED'].includes(p.status))s-=10;
+  if(['REVISION_REQUESTED'].includes(p.status))s-=8;
+  if(['IN_PRODUCTION','PREVIEW_READY','FINAL_APPROVED','READY_FOR_DELIVERY'].includes(p.status))s+=15;
+  return Math.max(0,Math.min(100,s));
+}
+RENDERERS['owner-tools'] = async (el) => {
+  const [ar,pr,pay,po,co,ba,au,conv] = await Promise.all([
+    ownerSafe('/accounts',{accounts:[]}),ownerSafe('/projects',{projects:[]}),
+    ownerSafe('/payments',{payments:[]}),ownerSafe('/payouts',{payouts:[]}),
+    ownerSafe('/complaints',{complaints:[]}),ownerSafe('/ledger/accounts/balances',{balances:[]}),
+    ownerSafe('/audit-logs',{auditLogs:[]}),ownerSafe('/conversations',{conversations:[]})
+  ]);
+  const data={accounts:ar.accounts||[],projects:pr.projects||[],payments:pay.payments||[],payouts:po.payouts||[],complaints:co.complaints||[],balances:ba.balances||[],audit:au.auditLogs||[],conversations:conv.conversations||[]};
+  const tools=[
+    ['📊','ملخص الشركة','أهم مؤشرات الشركة في نافذة واحدة','company-summary'],
+    ['🚦','Health Monitor','مؤشر صحة المشاريع والعمليات','health-monitor'],
+    ['💸','Cash Monitor','المبالغ المعلقة والمدفوعة والمستحقة','cash-monitor'],
+    ['👥','Team Load','توزيع الأحمال على الفريق','team-load'],
+    ['⏰','Deadline Radar','أقرب وأخطر المواعيد','deadline-radar'],
+    ['💳','Payment Radar','كل مخاطر الدفع الحالية','payment-radar'],
+    ['📉','Complaint Radar','الشكاوى المفتوحة وحجمها','complaint-radar'],
+    ['🧾','Audit Search','بحث سريع في سجل العمليات','audit-search'],
+    ['💬','Conversation Radar','المشاريع التي فيها حركة محادثات','conversation-radar'],
+    ['🧠','Bottleneck Detector','أكثر حالات المشاريع ازدحامًا','bottlenecks'],
+    ['🎯','Priority Queue','أعلى 10 عناصر تحتاج انتباه','priority-queue'],
+    ['📈','30-Day Activity','حركة المشاريع خلال 30 يوم','activity-30'],
+    ['🗂','Account Segments','تقسيم الحسابات حسب الدور والحالة','account-segments'],
+    ['🛡','Risk Board','لوحة مخاطر موحدة','risk-board'],
+    ['💰','Revenue Breakdown','توزيع الإيراد حسب حسابات الـLedger','revenue-breakdown'],
+    ['🔁','Payout Monitor','حالة كل المستحقات','payout-monitor'],
+    ['🧩','Project Mix','تركيب حالات المشاريع ونسبها','project-mix'],
+    ['📋','Daily Owner Checklist','قائمة فحص المالك اليومية','owner-checklist'],
+    ['📤','Executive CSV','تصدير ملخص إداري','executive-export'],
+    ['⚙','Quick Jump','اختصارات لأهم مراكز الإدارة','quick-jump']
+  ];
+  el.innerHTML='<div class="card" style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><b style="font-size:18px">20 أداة قوية للمالك 👑</b><div style="font-size:11px;color:#687588;margin-top:5px">كل الأدوات بتشتغل على البيانات الحالية الموجودة في SHIFRA، بدون بيانات تجريبية وهمية.</div></div><span class="badge badge-purple">OWNER OS</span></div></div><div class="owner-tool-grid">'+tools.map(x=>ownerPower(x[0],x[1],x[2],x[3])).join('')+'</div>';
+  el.querySelectorAll('[data-owner-power]').forEach(b=>b.addEventListener('click',()=>ownerPowerAction(b.dataset.ownerPower,{host:el,...data})));
+};
+
+function ownerPowerAction(action,ctx){
+  const {accounts,projects,payments,payouts,complaints,balances,audit,conversations}=ctx;
+  if(action==='company-summary'){
+    const active=projects.filter(p=>!ownerTerminal(p)), fin=ownerFinanceSnapshot(balances);
+    modal('<h3>ملخص الشركة</h3><div class="owner-kpi-grid"><div class="owner-kpi"><div class="k">الإيراد</div><div class="v">'+money(fin.revenue)+'</div></div><div class="owner-kpi"><div class="k">المصروف</div><div class="v">'+money(fin.expense)+'</div></div><div class="owner-kpi"><div class="k">النشط</div><div class="v">'+active.length+'</div></div><div class="owner-kpi"><div class="k">الحسابات</div><div class="v">'+accounts.length+'</div></div></div><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');return;
+  }
+  if(action==='health-monitor'){
+    const rows=projects.filter(p=>!ownerTerminal(p)).map(p=>({p,score:ownerPowerScoreProject(p)})).sort((a,b)=>a.score-b.score).slice(0,15);
+    modal('<h3>Health Monitor</h3>'+(rows.length?rows.map(x=>'<div class="card" style="margin-bottom:7px"><div style="display:flex;justify-content:space-between"><b>'+esc(x.p.order_number)+'</b><span>'+x.score+'%</span></div><div class="owner-bar" style="margin-top:6px"><i style="width:'+x.score+'%"></i></div><div style="font-size:10.5px;color:#687588;margin-top:4px">'+esc(x.p.customer_name||'')+' · '+esc(STATUS_LABEL_AR[x.p.status]||x.p.status)+'</div></div>').join(''):'<div class="empty-state">مفيش مشاريع نشطة.</div>')+'<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');return;
+  }
+  if(action==='cash-monitor'){
+    modal('<h3>Cash Monitor</h3><div class="owner-kpi-grid"><div class="owner-kpi"><div class="k">إثباتات معلقة</div><div class="v">'+payments.filter(p=>p.status==='PROOF_SUBMITTED').length+'</div></div><div class="owner-kpi"><div class="k">مستحقات قيد الصرف</div><div class="v">'+payouts.filter(p=>['PENDING','READY','PROCESSING'].includes(p.status)).length+'</div></div><div class="owner-kpi"><div class="k">مدفوع</div><div class="v">'+payouts.filter(p=>p.status==='PAID').length+'</div></div><div class="owner-kpi"><div class="k">فاشل</div><div class="v">'+payouts.filter(p=>p.status==='FAILED').length+'</div></div></div><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');return;
+  }
+  if(action==='team-load'){
+    const rows=accounts.filter(a=>['MARKETER','EDITOR'].includes(a.role)).map(a=>({...a,load:Number(a.related_projects||0)})).sort((a,b)=>b.load-a.load);
+    modal('<h3>Team Load</h3>'+(rows.length?rows.map(a=>'<div class="owner-kv card" style="margin-bottom:7px"><div class="kv"><span class="k">'+esc(a.full_name)+' · '+ownerRoleAr(a.role)+'</span><span class="v">'+a.load+' مشروع</span></div><div style="font-size:10px;color:#687588;margin-top:4px">'+Number(a.active_sessions||0)+' جلسة نشطة</div></div>').join(''):'<div class="empty-state">مفيش فريق.</div>')+'<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');return;
+  }
+  if(action==='deadline-radar'){
+    const rows=projects.filter(p=>p.deadline&&!ownerTerminal(p)).sort((a,b)=>new Date(a.deadline)-new Date(b.deadline)).slice(0,20);
+    modal('<h3>Deadline Radar</h3>'+(rows.length?rows.map(p=>'<div class="card" style="margin-bottom:7px"><div class="kv"><span class="k">'+esc(p.order_number)+'</span><span class="v">'+fmtDay(p.deadline)+'</span></div><div style="font-size:10.5px;color:#687588">'+esc(p.customer_name||'')+' · '+badge(p.status)+'</div></div>').join(''):'<div class="empty-state">مفيش deadlines.</div>')+'<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');return;
+  }
+  if(action==='payment-radar'){
+    const rows=projects.filter(p=>['PAYMENT_PENDING','PRICE_LOCKED','PAYMENT_FAILED'].includes(p.status));
+    modal('<h3>Payment Radar</h3>'+(rows.length?rows.map(p=>'<div class="card" style="margin-bottom:7px"><div class="kv"><span class="k">'+esc(p.order_number)+'</span>'+badge(p.status)+'</div><div style="font-size:10.5px;color:#687588">'+esc(p.customer_name||'')+'</div></div>').join(''):'<div class="empty-state">مفيش مشاريع في حالات دفع حرجة.</div>')+'<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');return;
+  }
+  if(action==='complaint-radar'){
+    const rows=complaints.filter(c=>['OPEN','IN_REVIEW'].includes(c.status));
+    modal('<h3>Complaint Radar</h3>'+(rows.length?rows.map(c=>'<div class="card" style="margin-bottom:7px"><div class="kv"><span class="k">شكوى #'+esc(c.id)+'</span>'+badge(c.status)+'</div><div style="margin-top:5px;font-size:11px;color:#aeb8c7">'+esc(c.subject||c.reason||'شكوى')+'</div></div>').join(''):'<div class="empty-state">مفيش شكاوى مفتوحة.</div>')+'<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');return;
+  }
+  if(action==='audit-search'){
+    modal('<h3>Audit Search</h3><input id="owner-audit-q" placeholder="ابحث في العملية أو الكيان أو الدور..." style="width:100%;margin-bottom:9px"><div id="owner-audit-results"></div><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');
+    const input=document.getElementById('owner-audit-q'),out=document.getElementById('owner-audit-results');
+    const render=()=>{const q=input.value.toLowerCase().trim();const rows=audit.filter(x=>[x.action,x.entity_type,x.actor_role,x.reason].filter(Boolean).join(' ').toLowerCase().includes(q)).slice(0,30);out.innerHTML=rows.map(x=>'<div class="card" style="margin-bottom:6px"><b>'+esc(x.action)+'</b><div style="font-size:10px;color:#687588">'+esc(x.entity_type||'')+' · '+fmtDate(x.created_at)+'</div></div>').join('')||'<div class="empty-state">مفيش نتائج.</div>';};input.addEventListener('input',render);render();return;
+  }
+  if(action==='conversation-radar'){
+    const rows=conversations.slice().sort((a,b)=>new Date(b.latest_message_at||b.updated_at)-new Date(a.latest_message_at||a.updated_at)).slice(0,20);
+    modal('<h3>Conversation Radar</h3>'+(rows.length?rows.map(x=>'<div class="card" style="margin-bottom:7px"><div class="kv"><span class="k">'+esc(x.order_number)+'</span><span class="v">'+fmtDate(x.latest_message_at||x.updated_at)+'</span></div><div style="font-size:10.5px;color:#687588">'+esc(x.customer_name||'')+' · '+esc(x.latest_message||'لا توجد رسالة')+'</div></div>').join(''):'<div class="empty-state">مفيش محادثات.</div>')+'<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');return;
+  }
+  if(action==='bottlenecks'){
+    const counts={};projects.filter(p=>!ownerTerminal(p)).forEach(p=>counts[p.status]=(counts[p.status]||0)+1);
+    const rows=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    modal('<h3>Bottleneck Detector</h3>'+(rows.length?rows.map(x=>'<div class="kv card" style="margin-bottom:7px"><span class="k">'+esc(STATUS_LABEL_AR[x[0]]||x[0])+'</span><span class="v">'+x[1]+'</span></div>').join(''):'<div class="empty-state">مفيش بيانات.</div>')+'<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');return;
+  }
+  if(action==='priority-queue'){
+    const rows=projects.filter(p=>!ownerTerminal(p)).map(p=>({...p,score:100-ownerPowerScoreProject(p)})).sort((a,b)=>b.score-a.score).slice(0,10);
+    modal('<h3>Priority Queue</h3>'+(rows.length?rows.map(p=>'<div class="card" style="margin-bottom:7px"><div class="kv"><span class="k">'+esc(p.order_number)+'</span><span class="v">'+Math.round(p.score)+'/100</span></div><div style="font-size:10.5px;color:#687588">'+esc(p.customer_name||'')+' · '+esc(STATUS_LABEL_AR[p.status]||p.status)+'</div></div>').join(''):'<div class="empty-state">مفيش عناصر.</div>')+'<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');return;
+  }
+  if(action==='activity-30'){
+    const now=Date.now(),a7=projects.filter(p=>now-new Date(p.updated_at).getTime()<=7*86400000).length,a30=projects.filter(p=>now-new Date(p.updated_at).getTime()<=30*86400000).length;
+    modal('<h3>30-Day Activity</h3><div class="owner-kpi-grid"><div class="owner-kpi"><div class="k">7 أيام</div><div class="v">'+a7+'</div></div><div class="owner-kpi"><div class="k">30 يوم</div><div class="v">'+a30+'</div></div><div class="owner-kpi"><div class="k">محادثات</div><div class="v">'+conversations.length+'</div></div><div class="owner-kpi"><div class="k">تدقيق</div><div class="v">'+audit.length+'</div></div></div><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');return;
+  }
+  if(action==='account-segments'){
+    const roles={};accounts.forEach(a=>roles[a.role]=(roles[a.role]||0)+1);
+    const states={};accounts.forEach(a=>states[a.status]=(states[a.status]||0)+1);
+    modal('<h3>Account Segments</h3><div class="owner-split"><div class="card"><b>حسب الدور</b>'+Object.entries(roles).map(x=>'<div class="kv"><span class="k">'+ownerRoleAr(x[0])+'</span><span class="v">'+x[1]+'</span></div>').join('')+'</div><div class="card"><b>حسب الحالة</b>'+Object.entries(states).map(x=>'<div class="kv"><span class="k">'+esc(x[0])+'</span><span class="v">'+x[1]+'</span></div>').join('')+'</div></div><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');return;
+  }
+  if(action==='risk-board'){
+    const risks=[
+      ['مشاريع متأخرة',projects.filter(p=>p.deadline&&!ownerTerminal(p)&&new Date(p.deadline)<new Date()).length],
+      ['دفعات معلقة',payments.filter(p=>p.status==='PROOF_SUBMITTED').length],
+      ['شكاوى مفتوحة',complaints.filter(c=>['OPEN','IN_REVIEW'].includes(c.status)).length],
+      ['صرف معلق',payouts.filter(p=>['PENDING','READY','PROCESSING'].includes(p.status)).length]
+    ];
+    modal('<h3>Risk Board</h3>'+risks.map(r=>'<div class="owner-kpi" style="margin-bottom:8px"><div class="k">'+r[0]+'</div><div class="v">'+r[1]+'</div></div>').join('')+'<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');return;
+  }
+  if(action==='revenue-breakdown'){
+    const rows=balances.filter(b=>b.type==='REVENUE');
+    modal('<h3>Revenue Breakdown</h3>'+(rows.length?rows.map(b=>'<div class="kv card" style="margin-bottom:7px"><span class="k">'+esc(b.name||b.account_code||'Revenue')+'</span><span class="v mono">'+money(b.net_credit_minor||b.credit_minor||0)+' EGP</span></div>').join(''):'<div class="empty-state">مفيش حسابات إيراد في الـLedger.</div>')+'<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');return;
+  }
+  if(action==='payout-monitor'){goView('owner-payouts');return;}
+  if(action==='project-mix'){
+    const counts={};projects.forEach(p=>counts[p.status]=(counts[p.status]||0)+1);const total=Math.max(1,projects.length);
+    modal('<h3>Project Mix</h3>'+Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(x=>'<div style="margin:9px 0"><div class="kv"><span class="k">'+esc(STATUS_LABEL_AR[x[0]]||x[0])+'</span><span class="v">'+x[1]+' / '+total+'</span></div><div class="owner-bar"><i style="width:'+Math.round(x[1]/total*100)+'%"></i></div></div>').join('')+'<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button></div>');return;
+  }
+  if(action==='owner-checklist'){
+    const key=new Date().toISOString().slice(0,10),done=ownerStore(key,[]);
+    const tasks=['راجع الأرباح والخسائر','راجع المشاريع المتأخرة','راجع إثباتات الدفع','راجع المستحقات','راجع الشكاوى','راجع سجل التدقيق'];
+    modal('<h3>Daily Owner Checklist</h3>'+tasks.map((t,i)=>'<label style="display:flex;gap:9px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05)"><input type="checkbox" data-owner-check="'+i+'" '+(done.includes(i)?'checked':'')+'><span>'+esc(t)+'</span></label>').join('')+'<div class="modal-actions"><button class="btn btn-primary" id="owner-check-save">حفظ</button></div>');
+    document.getElementById('owner-check-save').onclick=()=>{const out=[...document.querySelectorAll('[data-owner-check]:checked')].map(x=>Number(x.dataset.ownerCheck));ownerSave(key,out);closeModal();toast('اتحفظت قائمة اليوم','ok');};return;
+  }
+  if(action==='executive-export'){
+    marketerCsv('shifra-owner-executive.csv',[
+      {metric:'revenue',value:ownerFinanceSnapshot(balances).revenue/100},
+      {metric:'expense',value:ownerFinanceSnapshot(balances).expense/100},
+      {metric:'active_projects',value:projects.filter(p=>!ownerTerminal(p)).length},
+      {metric:'overdue_projects',value:projects.filter(p=>p.deadline&&!ownerTerminal(p)&&new Date(p.deadline)<new Date()).length},
+      {metric:'complaints_open',value:complaints.filter(c=>['OPEN','IN_REVIEW'].includes(c.status)).length},
+      {metric:'payouts_pending',value:payouts.filter(p=>['PENDING','READY','PROCESSING'].includes(p.status)).length}
+    ]);return;
+  }
+  if(action==='quick-jump'){
+    modal('<h3>Quick Jump</h3><div class="owner-tool-grid">'+[
+      ['💰','المالية','owner-finance'],['👥','الفريق','owner-team'],['⚙','العمليات','owner-ops'],['💳','المدفوعات','owner-payments'],
+      ['⇄','المستحقات','owner-payouts'],['▧','التدقيق','owner-audit'],['💬','المراسلات','owner-direct'],['☷','المحادثات','owner-project-chat']
+    ].map(x=>'<button class="owner-tool" data-quick="'+x[2]+'"><div class="ic">'+x[0]+'</div><div class="tt">'+x[1]+'</div></button>').join('')+'</div>');
+    document.querySelectorAll('[data-quick]').forEach(b=>b.onclick=()=>{closeModal();goView(b.dataset.quick);});return;
+  }
+}
+function ownerStore(key,fallback){try{const raw=localStorage.getItem('shifra_owner_'+key);return raw===null?fallback:JSON.parse(raw);}catch(e){return fallback;}}
+function ownerSave(key,value){try{localStorage.setItem('shifra_owner_'+key,JSON.stringify(value));}catch(e){}}
 
 RENDERERS['owner-finance'] = async (el) => {
   const [br,er,por]=await Promise.all([api('/ledger/accounts/balances'),api('/ledger/entries'),api('/payouts')]);
