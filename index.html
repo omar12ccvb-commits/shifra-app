@@ -1484,6 +1484,36 @@ body::before{
   .app-topbar .shifra-mark span{font-size:17px}
   .app-topbar .shifra-mark small{font-size:9px}
 }
+</style><style id="shifra-video-release-ui-v1">
+.video-release-card{
+  margin:14px 0;padding:16px;border-radius:20px;
+  border:1px solid rgba(124,92,255,.18);
+  background:
+    radial-gradient(500px 180px at 15% 0%,rgba(56,189,248,.07),transparent 70%),
+    radial-gradient(500px 180px at 90% 0%,rgba(124,92,255,.09),transparent 70%),
+    linear-gradient(180deg,rgba(14,19,27,.96),rgba(8,12,18,.96));
+  box-shadow:0 24px 55px -45px rgba(0,0,0,.95);
+}
+.video-release-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.video-release-title{font-size:15px;font-weight:850}
+.video-release-sub{font-size:10.5px;color:#748299;line-height:1.7;margin-top:4px}
+.video-release-track{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin:14px 0}
+.video-release-step{padding:9px 7px;border-radius:11px;text-align:center;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02);font-size:9px;color:#647286}
+.video-release-step.active{color:#eef5ff;background:linear-gradient(145deg,rgba(124,92,255,.15),rgba(56,189,248,.07));border-color:rgba(167,139,250,.22)}
+.video-release-step.done{color:#a8efd1;border-color:rgba(52,211,153,.15);background:rgba(52,211,153,.05)}
+.video-release-info{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.video-release-mini{padding:10px 11px;border-radius:12px;border:1px solid rgba(255,255,255,.055);background:rgba(255,255,255,.018)}
+.video-release-mini .k{font-size:9px;color:#67758a}.video-release-mini .v{font-size:11.5px;font-weight:750;margin-top:3px;overflow-wrap:anywhere}
+.video-release-actions{display:flex;gap:8px;flex-wrap:wrap}
+.video-release-actions .btn{flex:1;min-width:160px}
+.video-release-note{padding:10px 11px;border-radius:11px;background:rgba(245,184,61,.06);border:1px solid rgba(245,184,61,.13);color:#d6c38c;font-size:10.5px;line-height:1.75;margin-bottom:10px}
+@media(max-width:600px){
+ .video-release-track{grid-template-columns:repeat(5,minmax(68px,1fr));overflow:auto}
+ .video-release-step{min-width:68px}
+ .video-release-info{grid-template-columns:1fr}
+ .video-release-actions{flex-direction:column}
+ .video-release-actions .btn{min-width:0;flex:auto;width:100%}
+}
 </style></head>
 <body>
 
@@ -2148,13 +2178,31 @@ RENDERERS['owner-accounts'] = async (el) => {
 };
 
 RENDERERS['owner-payments'] = async (el) => {
-  const isYoussef=state.user.ownerKey==='YOUSSEF'; const {payments=[]}=await api('/payments?status=PROOF_SUBMITTED');
-  el.innerHTML='<div class="card" style="margin-bottom:12px"><b>إثباتات الدفع المعلقة</b><div style="font-size:11px;color:#687488;margin-top:4px">'+(isYoussef?'يوسف يقدر يؤكد أو يرفض.':'عمر يشوف ويدقق، والتأكيد التشغيلي من يوسف.')+'</div></div><div class="table-wrap"><table><thead><tr><th>المشروع</th><th>العميل</th><th>المبلغ</th><th>المرجع</th><th>الإجراء</th></tr></thead><tbody>'+
-  (payments.map(p=>'<tr><td>'+esc(p.order_number)+'</td><td>'+esc(p.customer_name)+'</td><td class="mono">'+money(p.expected_amount_minor)+' EGP</td><td class="mono">'+esc(p.latest_proof_reference||'—')+'</td><td>'+(isYoussef?'<button class="btn btn-sm btn-primary" data-pok="'+p.id+'">تأكيد</button> <button class="btn btn-sm btn-danger" data-pno="'+p.id+'">رفض</button>':'<span class="badge badge-gray">مراجعة فقط</span>')+'</td></tr>').join('')||'<tr><td colspan="5"><div class="empty-state">مفيش إثباتات معلقة.</div></td></tr>')+'</tbody></table></div>';
+  const isYoussef=state.user.ownerKey==='YOUSSEF';
+  const [{payments=[]},{cases=[]}]=await Promise.all([api('/payments?status=PROOF_SUBMITTED'),api('/release-payments')]);
+  const releaseCases=cases.filter(c=>!['PAID','DELIVERED'].includes(c.status)||isYoussef);
+  el.innerHTML='<div class="card" style="margin-bottom:12px"><b>المدفوعات</b><div style="font-size:11px;color:#687588;margin-top:4px">'+(isYoussef?'يوسف يدير الدفع الأساسي والدفع النهائي للفيديو.':'مراجعة تشغيلية — تأكيد الدفع النهائي للفيديو من يوسف فقط.')+'</div></div>'+
+    '<div class="section-title">إثباتات الدفع العادية</div>'+
+    '<div class="table-wrap"><table><thead><tr><th>المشروع</th><th>العميل</th><th>المبلغ</th><th>المرجع</th><th>الإجراء</th></tr></thead><tbody>'+
+    (payments.map(p=>'<tr><td>'+esc(p.order_number)+'</td><td>'+esc(p.customer_name)+'</td><td class="mono">'+money(p.expected_amount_minor)+' EGP</td><td class="mono">'+esc(p.latest_proof_reference||'—')+'</td><td>'+(isYoussef?'<button class="btn btn-sm btn-primary" data-pok="'+p.id+'">تأكيد</button> <button class="btn btn-sm btn-danger" data-pno="'+p.id+'">رفض</button>':'<span class="badge badge-gray">مراجعة فقط</span>')+'</td></tr>').join('')||'<tr><td colspan="5"><div class="empty-state">مفيش إثباتات معلقة.</div></td></tr>')+
+    '</tbody></table></div>'+
+    '<div class="section-title">الدفع النهائي للفيديو</div>'+
+    '<div style="display:grid;gap:9px">'+(releaseCases.map(c=>{
+      const status=c.status;
+      let action='<span class="badge badge-gray">'+esc(status)+'</span>';
+      if(isYoussef && status==='NEEDS_QUOTE') action='<button class="btn btn-sm btn-primary" data-release-quote="'+c.id+'">تحديد المبلغ والطريقة</button>';
+      if(isYoussef && status==='PROOF_SUBMITTED') action='<button class="btn btn-sm btn-primary" data-release-verify="'+c.id+'">تأكيد وصول الفلوس</button>';
+      return '<div class="card" style="padding:13px"><div class="row" style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><b>'+esc(c.order_number||('Project #'+c.project_id))+'</b><div style="font-size:10px;color:#728096;margin-top:3px">'+esc(c.customer_name||'')+' · '+esc(c.marketer_name||'')+' · '+esc(c.editor_name||'')+'</div></div>'+action+'</div><div class="kv"><span class="k">المبلغ</span><span class="v mono">'+(c.amount_minor!=null?money(c.amount_minor)+' EGP':'لم يحدد بعد')+'</span></div><div class="kv"><span class="k">الطريقة</span><span class="v">'+esc(c.method||'—')+'</span></div><div class="kv"><span class="k">الحالة</span><span class="v">'+esc(status)+'</span></div>'+(c.instructions?'<div class="kv"><span class="k">التعليمات</span><span class="v">'+esc(c.instructions)+'</span></div>':'')+(c.proof_reference?'<div class="kv"><span class="k">مرجع التحويل</span><span class="v mono">'+esc(c.proof_reference)+'</span></div>':'')+'</div>';
+    }).join('')||'<div class="empty-state">مفيش حالات دفع نهائي للفيديو حاليًا.</div>')+'</div>';
+
   el.querySelectorAll('[data-pok]').forEach(b=>b.addEventListener('click',async()=>{b.disabled=true;try{await api('/payments/'+b.dataset.pok+'/verify',{method:'POST'});toast('تم تأكيد الدفع','ok');RENDERERS['owner-payments'](el);}catch(e){toast(e.message,'err');b.disabled=false;}}));
   el.querySelectorAll('[data-pno]').forEach(b=>b.addEventListener('click',()=>{modal('<h3>سبب رفض الإثبات</h3><textarea id="owner-pay-reason" placeholder="اكتب السبب..."></textarea><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button><button class="btn btn-danger" id="owner-pay-reject">رفض</button></div>');document.getElementById('owner-pay-reject').addEventListener('click',async()=>{const reason=document.getElementById('owner-pay-reason').value.trim();if(!reason){toast('اكتب السبب','err');return;}try{await api('/payments/'+b.dataset.pno+'/reject',{method:'POST',body:{reason}});closeModal();toast('تم رفض الإثبات','ok');RENDERERS['owner-payments'](el);}catch(e){toast(e.message,'err');}});}));
+  el.querySelectorAll('[data-release-quote]').forEach(b=>b.addEventListener('click',async()=>{
+    modal('<h3>تحديد الدفع النهائي</h3><div class="field"><label>المبلغ (EGP)</label><input id="release-amount" type="number" min="1" step="0.01" class="ltr"></div><div class="field"><label>طريقة الدفع</label><input id="release-method" placeholder="Vodafone Cash"></div><div class="field"><label>التعليمات</label><textarea id="release-instructions" placeholder="رقم المحفظة وتعليمات التحويل..."></textarea></div><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" id="release-quote-save">حفظ وإرسال للعميل</button></div>');
+    document.getElementById('release-quote-save').onclick=async()=>{const amount=Number(document.getElementById('release-amount').value),method=document.getElementById('release-method').value.trim(),instructions=document.getElementById('release-instructions').value.trim();if(!amount||!method){toast('اكتب المبلغ والطريقة','err');return;}try{await api('/release-payments/'+b.dataset.releaseQuote+'/quote',{method:'PATCH',body:{amountEgp:amount,method,instructions}});closeModal();toast('تم تحديد الدفع النهائي','ok');RENDERERS['owner-payments'](el);}catch(e){toast(e.message,'err');}};
+  }));
+  el.querySelectorAll('[data-release-verify]').forEach(b=>b.addEventListener('click',async()=>{b.disabled=true;try{await api('/release-payments/'+b.dataset.releaseVerify+'/verify',{method:'POST'});toast('تم تأكيد وصول الفلوس — أصبح تسليم الأصلي مسموحًا','ok');RENDERERS['owner-payments'](el);}catch(e){toast(e.message,'err');b.disabled=false;}}));
 };
-
 RENDERERS['owner-payouts'] = async (el) => {
   const {payouts=[]}=await api('/payouts'); const isYoussef=state.user.ownerKey==='YOUSSEF';
   el.innerHTML='<div class="owner-kpi-grid"><div class="owner-kpi"><div class="k">جاهز / معلق</div><div class="v">'+payouts.filter(p=>['READY','PENDING','PROCESSING'].includes(p.status)).length+'</div></div><div class="owner-kpi"><div class="k">مدفوع</div><div class="v">'+payouts.filter(p=>p.status==='PAID').length+'</div></div><div class="owner-kpi"><div class="k">فاشل</div><div class="v">'+payouts.filter(p=>p.status==='FAILED').length+'</div></div><div class="owner-kpi"><div class="k">الإجمالي</div><div class="v">'+money(payouts.reduce((n,p)=>n+Number(p.total_amount_minor||0),0))+'</div></div></div>'+
@@ -3119,16 +3167,58 @@ async function getCatalog(){
   return catalogCache;
 }
 
+function videoReleaseLabel(status){
+  return ({
+    EDITOR_SENT:'المعاينة اتبعت للمسوق',
+    MARKETER_RECEIVED:'المسوق استلم المعاينة',
+    CUSTOMER_REVIEW:'العميل بيراجع',
+    REVISION_REQUESTED:'مطلوب تعديل',
+    PAYMENT_PENDING:'في انتظار الدفع النهائي',
+    PAYMENT_CONFIRMED:'الدفع اتأكد',
+    ORIGINAL_SENT:'الأصلي اتبعت للمسوق',
+    ORIGINAL_RECEIVED:'المسوق استلم الأصلي',
+    DELIVERED:'تم تسليم الأصلي'
+  }[status]||status||'لا يوجد مسار فيديو نشط');
+}
+function videoReleaseProgress(status){
+  const order=['EDITOR_SENT','MARKETER_RECEIVED','CUSTOMER_REVIEW','PAYMENT_PENDING','PAYMENT_CONFIRMED','ORIGINAL_SENT','ORIGINAL_RECEIVED','DELIVERED'];
+  const map={EDITOR_SENT:1,MARKETER_RECEIVED:2,CUSTOMER_REVIEW:3,PAYMENT_PENDING:4,PAYMENT_CONFIRMED:5,ORIGINAL_SENT:6,ORIGINAL_RECEIVED:7,DELIVERED:8,REVISION_REQUESTED:3};
+  const n=map[status]||0;
+  return order.map((s,i)=>'<div class="video-release-step '+(i<n?'done ':'')+(i===n-1?'active':'')+'">'+esc(videoReleaseLabel(s))+'</div>').join('');
+}
+async function openYoussefDirectAfterApproval(){
+  try{
+    const r=await api('/direct-conversations');
+    const y=(r.conversations||[]).find(c=>c.role==='OWNER' && /يوسف|youssef/i.test(c.full_name||''));
+    await goView('direct');
+    if(y){
+      const content=document.getElementById('content');
+      const btn=content.querySelector('[data-direct-user="'+y.id+'"]');
+      await renderDirectChat(content,y.id,btn);
+    }
+  }catch(e){ await goView('direct'); }
+}
+async function loadVideoPreviewSafe(projectId){
+  try{return (await api('/projects/'+projectId+'/video-preview')).preview||null;}catch(e){return null;}
+}
 async function renderProjectDetail(el, id){
-  const [{project}, priceRes, paymentsRes, revisionsRes, earningsRes, catalog] = await Promise.all([
+  const [{project}, priceRes, paymentsRes, revisionsRes, earningsRes, catalog, videoPreview] = await Promise.all([
     api(`/projects/${id}`), api(`/projects/${id}/price-agreements`), api(`/projects/${id}/payments`),
-    api(`/projects/${id}/revisions`), api(`/projects/${id}/earnings`), getCatalog(),
+    api(`/projects/${id}/revisions`), api(`/projects/${id}/earnings`), getCatalog(), loadVideoPreviewSafe(id),
   ]);
   const role = state.user.role;
   const latestAgreement = priceRes.priceAgreements[0] || null; // ordered DESC by version
   const activePayment = paymentsRes.payments.find(p => ['PENDING','PROOF_SUBMITTED','PROOF_REJECTED'].includes(p.status));
   const openRevision = revisionsRes.revisions.find(r => r.status === 'OPEN');
   const myEarning = earningsRes.earnings[0] || null;
+  const releaseStatus = videoPreview?.status || null;
+  const releaseCase = videoPreview?.release_payment_status ? {
+    status: videoPreview.release_payment_status,
+    amount_minor: videoPreview.release_amount_minor,
+    method: videoPreview.release_method,
+    instructions: videoPreview.release_instructions,
+    proof_reference: videoPreview.release_proof_reference
+  } : null;
 
   const blocks = [];
   blocks.push(`<a class="backlink" href="#" id="back-to-list">‹ رجوع</a>`);
@@ -3189,6 +3279,57 @@ async function renderProjectDetail(el, id){
     }
   }
 
+  /* ---- Protected video release flow: UI only; backend rules remain unchanged ---- */
+  if (releaseStatus || releaseCase) {
+    let actionHtml='';
+    let note='';
+    if (role === 'EDITOR' && ['IN_PRODUCTION','PREVIEW_READY','REVISION_REQUESTED'].includes(project.status) && ['IN_PRODUCTION','PREVIEW_READY','REVISION_REQUESTED'].includes(project.status)) {
+      actionHtml='<button class="btn btn-primary" id="video-preview-send-btn">📱 تأكيد إرسال المعاينة المائية للمسوق على واتساب</button>';
+    }
+    if (role === 'MARKETER' && releaseStatus === 'EDITOR_SENT') {
+      actionHtml='<button class="btn btn-primary" id="video-marketer-receive-btn">✅ أكدت استلام المعاينة على واتساب</button>';
+    }
+    if (role === 'MARKETER' && releaseStatus === 'MARKETER_RECEIVED') {
+      actionHtml='<button class="btn btn-primary" id="video-send-customer-btn">📤 تأكيد إرسال المعاينة للعميل على واتساب</button>';
+    }
+    if (role === 'CUSTOMER' && releaseStatus === 'CUSTOMER_REVIEW') {
+      actionHtml='<div class="video-release-actions"><button class="btn btn-primary" id="video-approve-btn">✅ موافق — اطلب تسليم الفيديو الأصلي</button><button class="btn btn-ghost" id="video-revise-btn">✏️ أطلب تعديل</button></div>';
+      note='بعد موافقتك النهائية ينتقل الطلب مباشرة لمسار يوسف لتحديد مبلغ وطريقة الدفع.';
+    }
+    if (role === 'CUSTOMER' && releaseCase?.status === 'NEEDS_QUOTE') {
+      actionHtml='<div class="video-release-actions"><button class="btn btn-primary" id="video-open-youssef-btn">💬 فتح محادثة يوسف</button></div>';
+      note='يوسف سيحدد مبلغ الدفع النهائي وطريقة التحويل والتعليمات.';
+    }
+    if (role === 'CUSTOMER' && releaseCase?.status === 'WAITING_PAYMENT') {
+      actionHtml='<button class="btn btn-primary" id="video-proof-btn">💳 أكدت التحويل — أدخل مرجع العملية</button>';
+      note='بعد إرسال مرجع التحويل ينتظر النظام تأكيد يوسف. لا يتم فتح تسليم الأصلي قبل التأكيد.';
+    }
+    if (role === 'CUSTOMER' && releaseCase?.status === 'PROOF_SUBMITTED') {
+      note='تم إرسال إثبات التحويل. في انتظار تأكيد يوسف.';
+    }
+    if (role === 'EDITOR' && releaseStatus === 'PAYMENT_CONFIRMED') {
+      actionHtml='<button class="btn btn-primary" id="video-original-sent-btn">📦 تأكيد إرسال الفيديو الأصلي للمسوق على واتساب</button>';
+      note='هذا الزر لا يعمل إلا بعد تأكيد الدفع النهائي من يوسف.';
+    }
+    if (role === 'MARKETER' && releaseStatus === 'ORIGINAL_SENT') {
+      actionHtml='<button class="btn btn-primary" id="video-original-received-btn">✅ أكدت استلام الفيديو الأصلي</button>';
+    }
+    if (role === 'MARKETER' && releaseStatus === 'ORIGINAL_RECEIVED') {
+      actionHtml='<button class="btn btn-primary" id="video-deliver-customer-btn">🎬 تأكيد تسليم الفيديو الأصلي للعميل على واتساب</button>';
+    }
+    if (releaseStatus === 'DELIVERED') note='اكتمل تسليم الفيديو الأصلي.';
+    blocks.push('<div class="video-release-card"><div class="video-release-head"><div><div class="video-release-title">🔐 مسار الفيديو المحمي</div><div class="video-release-sub">'+esc(videoReleaseLabel(releaseStatus||releaseCase?.status))+' · الملف الأصلي لا يُفتح قبل اكتمال الدفع النهائي وتأكيد يوسف.</div></div><span class="badge badge-purple">PROTECTED RELEASE</span></div><div class="video-release-track">'+videoReleaseProgress(releaseStatus||releaseCase?.status)+'</div>'+
+      '<div class="video-release-info">'+
+      '<div class="video-release-mini"><div class="k">الحالة الحالية</div><div class="v">'+esc(videoReleaseLabel(releaseStatus||releaseCase?.status))+'</div></div>'+
+      '<div class="video-release-mini"><div class="k">الدفع النهائي</div><div class="v">'+(releaseCase?.amount_minor!=null?money(releaseCase.amount_minor)+' EGP · '+esc(releaseCase.method||''):releaseCase?.status==='NEEDS_QUOTE'?'يوسف لم يحدد المبلغ بعد':'غير محدد')+'</div></div>'+
+      (releaseCase?.instructions?'<div class="video-release-mini"><div class="k">تعليمات يوسف</div><div class="v">'+esc(releaseCase.instructions)+'</div></div>':'')+
+      (releaseCase?.proof_reference?'<div class="video-release-mini"><div class="k">مرجع التحويل</div><div class="v mono">'+esc(releaseCase.proof_reference)+'</div></div>':'')+
+      '</div>'+
+      (note?'<div class="video-release-note">'+esc(note)+'</div>':'')+
+      (actionHtml?'<div class="video-release-actions">'+actionHtml+'</div>':'')+
+      '</div>');
+  }
+
   /* ---- Production / revisions (editor + customer) ---- */
   if (role === 'EDITOR' && project.status === 'EDITOR_ASSIGNED') {
     blocks.push(`<div class="section-title">الإنتاج</div><button class="btn btn-primary btn-block" id="start-prod-btn" style="margin-bottom:10px">بدء التنفيذ</button>`);
@@ -3226,6 +3367,33 @@ async function renderProjectDetail(el, id){
 
   el.innerHTML = blocks.join('');
   wireProjectDetailActions(el, project, id);
+
+  const videoRefresh = () => RENDERERS.projects(el);
+  const vSend=el.querySelector('#video-preview-send-btn');
+  if(vSend)vSend.onclick=async()=>{
+    modal('<h3>تأكيد إرسال المعاينة</h3><div style="font-size:12px;color:#768297;line-height:1.8">تأكد أنك أرسلت النسخة المائية للمسوق على WhatsApp، ثم اضغط التأكيد.</div><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" id="confirm-video-preview-send">تأكيد الإرسال</button></div>');
+    document.getElementById('confirm-video-preview-send').onclick=async()=>{
+      try{await api('/projects/'+id+'/video-preview',{method:'POST',body:{watermarkConfirmed:true,whatsappSent:true,editorNote:''}});closeModal();toast('تم تسجيل إرسال المعاينة','ok');videoRefresh();}catch(e){toast(e.message,'err');}
+    };
+  };
+  const vReceive=el.querySelector('#video-marketer-receive-btn');
+  if(vReceive)vReceive.onclick=async()=>{vReceive.disabled=true;try{await api('/projects/'+id+'/video-preview/'+videoPreview.id+'/marketer-receive',{method:'POST'});toast('تم تسجيل استلام المعاينة','ok');videoRefresh();}catch(e){toast(e.message,'err');vReceive.disabled=false;}};
+  const vSendCustomer=el.querySelector('#video-send-customer-btn');
+  if(vSendCustomer)vSendCustomer.onclick=()=>{modal('<h3>إرسال المعاينة للعميل</h3><div class="field"><label>ملخص ما تم وما يراجع عليه العميل</label><textarea id="video-customer-summary" placeholder="اكتب ملخصًا واضحًا..."></textarea></div><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" id="video-send-customer-confirm">إرسال</button></div>');document.getElementById('video-send-customer-confirm').onclick=async()=>{const summary=document.getElementById('video-customer-summary').value.trim();if(!summary){toast('اكتب الملخص','err');return;}try{await api('/projects/'+id+'/video-preview/'+videoPreview.id+'/send-to-customer',{method:'POST',body:{marketerSummary:summary}});closeModal();toast('تم تسجيل إرسال المعاينة للعميل','ok');videoRefresh();}catch(e){toast(e.message,'err');}};};
+  const vApprove=el.querySelector('#video-approve-btn');
+  if(vApprove)vApprove.onclick=async()=>{vApprove.disabled=true;try{await api('/projects/'+id+'/video-preview/'+videoPreview.id+'/customer-approve',{method:'POST'});toast('تمت الموافقة وتحويل الطلب لمسار يوسف','ok');await openYoussefDirectAfterApproval();}catch(e){toast(e.message,'err');vApprove.disabled=false;}};
+  const vRevise=el.querySelector('#video-revise-btn');
+  if(vRevise)vRevise.onclick=()=>{modal('<h3>طلب تعديل</h3><textarea id="video-revision-text" placeholder="اكتب التعديل المطلوب..."></textarea><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" id="video-revision-confirm">إرسال</button></div>');document.getElementById('video-revision-confirm').onclick=async()=>{const text=document.getElementById('video-revision-text').value.trim();if(!text){toast('اكتب التعديل','err');return;}try{await api('/projects/'+id+'/video-preview/'+videoPreview.id+'/customer-revision',{method:'POST',body:{requestText:text}});closeModal();toast('تم إرسال طلب التعديل','ok');videoRefresh();}catch(e){toast(e.message,'err');}};};
+  const vY=el.querySelector('#video-open-youssef-btn');
+  if(vY)vY.onclick=()=>openYoussefDirectAfterApproval();
+  const vProof=el.querySelector('#video-proof-btn');
+  if(vProof)vProof.onclick=()=>{modal('<h3>تأكيد التحويل</h3><div class="field"><label>مرجع العملية / رقم التحويل</label><input id="video-proof-ref" class="ltr" placeholder="مثلاً: 123456789"></div><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" id="video-proof-confirm">إرسال</button></div>');document.getElementById('video-proof-confirm').onclick=async()=>{const proof=document.getElementById('video-proof-ref').value.trim();if(!proof){toast('اكتب مرجع العملية','err');return;}try{await api('/release-payments/'+videoPreview.release_payment_id+'/proof',{method:'POST',body:{proofReference:proof}});closeModal();toast('تم إرسال مرجع التحويل ليوسف','ok');videoRefresh();}catch(e){toast(e.message,'err');}};};
+  const vOriginalSent=el.querySelector('#video-original-sent-btn');
+  if(vOriginalSent)vOriginalSent.onclick=async()=>{vOriginalSent.disabled=true;try{await api('/projects/'+id+'/original-sent',{method:'POST'});toast('تم تسجيل إرسال الفيديو الأصلي للمسوق','ok');videoRefresh();}catch(e){toast(e.message,'err');vOriginalSent.disabled=false;}};
+  const vOriginalReceived=el.querySelector('#video-original-received-btn');
+  if(vOriginalReceived)vOriginalReceived.onclick=async()=>{vOriginalReceived.disabled=true;try{await api('/projects/'+id+'/original-received',{method:'POST'});toast('تم تسجيل استلام الفيديو الأصلي','ok');videoRefresh();}catch(e){toast(e.message,'err');vOriginalReceived.disabled=false;}};
+  const vDeliver=el.querySelector('#video-deliver-customer-btn');
+  if(vDeliver)vDeliver.onclick=async()=>{vDeliver.disabled=true;try{await api('/projects/'+id+'/deliver-original-to-customer',{method:'POST'});toast('تم تسجيل تسليم الفيديو الأصلي للعميل','ok');videoRefresh();}catch(e){toast(e.message,'err');vDeliver.disabled=false;}};
 }
 
 function wireProjectDetailActions(el, project, id){
