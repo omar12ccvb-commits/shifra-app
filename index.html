@@ -1570,7 +1570,7 @@ async function renderDirectChat(host,userId,button){
     input.addEventListener('input',()=>{
       const val=input.value;
       prefs[draftKey]=val; clearTimeout(draftTimer);
-      draftTimer=setTimeout(()=>{directChatSavePrefs(userId,prefs);if(draftNote)draftNote.textContent=val?'مسودة محفوظة تلقائيًا':'',200);
+      draftTimer=setTimeout(()=>{directChatSavePrefs(userId,prefs);if(draftNote)draftNote.textContent=val?'مسودة محفوظة تلقائيًا':'';},200);
       const count=panel.querySelector('#chat-char-count'); if(count)count.textContent=val.length+'/2000';
     });
     const updateToolState=()=>{
@@ -1600,7 +1600,7 @@ async function renderDirectChat(host,userId,button){
         }
         if(action==='chat-pin'||action==='chat-mute'||action==='chat-density'||action==='chat-time'||action==='chat-important'||action==='chat-enter'){
           const key={ 'chat-pin':'pinned','chat-mute':'muted','chat-density':'compact','chat-time':'showTime','chat-important':'important','chat-enter':'enterSend'}[action];
-          prefs[key]=action==='chat-time'?! (prefs[key]===false):!prefs[key];
+          prefs[key]=action==='chat-time' ? prefs[key]===false : !prefs[key];
           if(action==='chat-enter' && prefs.enterSend===undefined)prefs.enterSend=true;
           directChatSavePrefs(userId,prefs); updateToolState(); toast(action==='chat-mute'?(prefs.muted?'المحادثة مكتومة':'تم إلغاء الكتم'):'اتحفظ الإعداد','ok'); return;
         }
