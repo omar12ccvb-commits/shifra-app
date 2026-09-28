@@ -1986,6 +1986,7 @@ body::before{
    ============================================================ */
 const SESSION_TOKEN_KEY = 'shifra_session_token';
 const SESSION_API_KEY = 'shifra_session_api_base';
+const PRODUCTION_API_BASE = 'https://api-production-2964.up.railway.app/api';
 const state = { token:null, user:null, profile:null, accountProfile:null, apiBase:'http://localhost:4000/api', view:null, smartRoutingTimer:null, notificationPollTimer:null, lastUnreadNotifications:null };
 
 
@@ -1999,7 +2000,7 @@ const state = { token:null, user:null, profile:null, accountProfile:null, apiBas
   const guess = isLocal ? 'http://localhost:4000/api' : '/api';
   let savedApi = '';
   try { savedApi = localStorage.getItem(SESSION_API_KEY) || ''; } catch(e) {}
-  if (!isLocal && savedApi && !savedApi.startsWith('/api')) savedApi = '/api';
+  if (!isLocal && savedApi && !savedApi.startsWith('/api') && savedApi !== PRODUCTION_API_BASE) savedApi = '/api';
   state.apiBase = savedApi || guess;
   document.getElementById('login-apibase').value = state.apiBase;
   document.getElementById('signup-apibase').value = state.apiBase;
@@ -2013,15 +2014,36 @@ function toast(msg, kind){
   setTimeout(()=> el.remove(), 4200);
 }
 async function api(path, opts={}){
-  const res = await fetch(state.apiBase + path, {
-    method: opts.method || 'GET',
-    headers: Object.assign({'Content-Type':'application/json'}, state.token ? {Authorization:'Bearer '+state.token} : {}),
-    body: opts.body ? JSON.stringify(opts.body) : undefined,
-  }).catch(()=>{ throw new Error('تعذر الوصول للسيرفر — ' + state.apiBase); });
-  let json = {};
-  try { json = await res.json(); } catch(e) {}
-  if(!res.ok){ if(res.status===401) doLogout(); throw new Error((json.error && json.error.message) || ('HTTP '+res.status)); }
-  return json;
+  const candidates=[state.apiBase, PRODUCTION_API_BASE].filter((v,i,a)=>v && a.indexOf(v)===i);
+  let lastNetworkError=null;
+  for(const base of candidates){
+    try{
+      const res=await fetch(base + path,{
+        method:opts.method||'GET',
+        headers:Object.assign({'Content-Type':'application/json'},state.token?{Authorization:'Bearer '+state.token}:{}),
+        body:opts.body?JSON.stringify(opts.body):undefined,
+      });
+      let json={}; try{json=await res.json();}catch(e){}
+      if(res.ok){
+        if(base!==state.apiBase){
+          state.apiBase=base;
+          try{localStorage.setItem(SESSION_API_KEY,base);}catch(e){}
+          const loginApi=document.getElementById('login-apibase'); if(loginApi) loginApi.value=base;
+          const signupApi=document.getElementById('signup-apibase'); if(signupApi) signupApi.value=base;
+        }
+        return json;
+      }
+      if(res.status===401){doLogout();throw new Error((json.error&&json.error.message)||'انتهت الجلسة، سجل الدخول مرة أخرى');}
+      if([404,502,503,504].includes(res.status) && base!==PRODUCTION_API_BASE) continue;
+      throw new Error((json.error&&json.error.message)||('HTTP '+res.status));
+    }catch(e){
+      if(e&&/انتهت الجلسة/.test(e.message||'')) throw e;
+      lastNetworkError=e;
+      if(base!==PRODUCTION_API_BASE) continue;
+      break;
+    }
+  }
+  throw new Error('تعذر الوصول للسيرفر — جرّبت خادم SHIFRA الأساسي والاحتياطي.');
 }
 const money = (minor) => (Number(minor)/100).toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2});
 const fmtDate = (d) => d ? new Date(d).toLocaleString('ar-EG',{dateStyle:'medium', timeStyle:'short'}) : '—';
@@ -2360,7 +2382,10 @@ function ownerAiAppend(log,kind,text){
 }
 async function ownerAiAsk(command,confirm=false,host){
   const input=host.querySelector('#owner-ai-input'), log=host.querySelector('#owner-ai-log');
-  if(!command) return;
+  const sendBtn=host.querySelector('#owner-ai-send');
+  if(!command || host.dataset.ownerAiBusy==='1') return;
+  host.dataset.ownerAiBusy='1';
+  if(sendBtn) sendBtn.disabled=true;
   if(!confirm){ ownerAiAppend(log,'user',command); input.value=''; }
   try{
     const r=await api('/owner-ai/ask',{method:'POST',body:{command,confirm}});
@@ -2372,6 +2397,10 @@ async function ownerAiAsk(command,confirm=false,host){
       host.querySelector('#owner-ai-confirm').addEventListener('click',async()=>{actionBox.innerHTML='';await ownerAiAsk(command,true,host);});
     }else{ actionBox.innerHTML=''; }
   }catch(e){ownerAiAppend(log,'ai','حصل خطأ: '+e.message);}
+  finally{
+    host.dataset.ownerAiBusy='0';
+    if(sendBtn) sendBtn.disabled=false;
+  }
 }
 RENDERERS['owner-ai'] = async (el) => {
   const s=await api('/owner-ai/status').catch(()=>({enabled:false,model:'gpt-5.6-sol'}));
