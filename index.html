@@ -1422,6 +1422,13 @@ RENDERERS.marketerHome = async (el) => {
       '<div class="mk-kpi"><div class="lab">صافي مستحقك</div><div class="val">'+money(earnings.pendingMinor)+' EGP</div><div class="sub">بانتظار الصرف</div></div>'+
     '</div>'+
     '<div class="card" style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><div style="font-size:20px;font-weight:800">مركز تشغيل '+esc(marketer.full_name||state.user.fullName)+' ⚡</div><div style="font-size:11px;color:#687588;margin-top:4px">كل أدوات المسوّق في مكان واحد.</div></div><span class="badge badge-purple">MARKETER OS</span></div><div class="btn-row" style="margin-top:12px;flex-wrap:wrap"><button class="btn btn-primary btn-sm" id="mk-ref-copy">نسخ كود الدعوة</button><button class="btn btn-ghost btn-sm" data-mk-jump="opportunities">استلام عميل</button><button class="btn btn-ghost btn-sm" data-mk-jump="marketer-followup">ابدأ المتابعة</button><button class="btn btn-ghost btn-sm" data-mk-jump="marketer-analytics">التحليلات</button></div></div>'+
+    '<div class="section-title">5 أدوات ثابتة للمسوّق</div><div class="mk-tools">'+[
+    ['⚡','خطة اليوم','ابدأ بأهم 5 خطوات','mkp-daily'],
+    ['🔥','أولوية العملاء','رتّب العملاء الأكثر نشاطًا','mkp-priority'],
+    ['💳','رادار الدفع','شوف المشاريع المتوقفة على الدفع','mkp-payments'],
+    ['💬','المحادثات المباشرة','كلم أي حساب نشط','mkp-direct'],
+    ['📣','حملة الإحالة','جهز مشاركة كودك بسرعة','mkp-referral']
+  ].map(t=>mkOp(t[0],t[1],t[2],t[3])).join('')+'</div>'+
     '<div class="section-title">لوحة الـ25 أداة</div><div class="mk-tools">'+tools.map(t=>mkOp(t[0],t[1],t[2],t[3],t[4])).join('')+'</div>'+
     '<div class="mk-split">'+
       '<div class="card"><div class="owner-section-head"><div class="title">آخر المشاريع</div><button class="btn btn-ghost btn-sm" data-mk-jump="projects">كل المشاريع</button></div><div class="mk-list">'+(topProjects.map(p=>'<div class="mk-list-row"><div><b>'+esc(p.order_number)+'</b><div style="font-size:10.5px;color:#687588">'+esc(p.customer_name||'')+'</div></div><div>'+badge(p.status)+'</div></div>').join('')||'<div class="empty-state" style="padding:22px">مفيش مشاريع.</div>')+'</div></div>'+
@@ -1441,6 +1448,11 @@ RENDERERS.marketerHome = async (el) => {
     if(a==='export-customers'){marketerCsv('shifra-marketer-customers.csv',customers);return;}
     if(a==='export-projects'){marketerCsv('shifra-marketer-projects.csv',projects);return;}
     if(a==='export-earnings'){marketerCsv('shifra-marketer-earnings.csv',earnings.earnings||[]);return;}
+    if(a==='mkp-daily'){return marketerPowerAction('daily-plan',{el,customers,projects,conversations,earnings,opportunities,ratings,marketer});}
+    if(a==='mkp-priority'){return marketerPowerAction('priority-customers',{el,customers,projects,conversations,earnings,opportunities,ratings,marketer});}
+    if(a==='mkp-payments'){return marketerPowerAction('payment-radar',{el,customers,projects,conversations,earnings,opportunities,ratings,marketer});}
+    if(a==='mkp-direct'){return goView('direct');}
+    if(a==='mkp-referral'){return marketerPowerAction('referral-campaign',{el,customers,projects,conversations,earnings,opportunities,ratings,marketer});}
   }));
 };
 
