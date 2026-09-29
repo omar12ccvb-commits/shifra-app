@@ -1992,7 +1992,78 @@ body::before{
 .workflow-chip.ok{color:#9bf1d0;background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.15)}
 .workflow-chip.wait{color:#ffe39b;background:rgba(251,191,36,.07);border-color:rgba(251,191,36,.14)}
 @media(max-width:620px){.workflow-steps{grid-template-columns:repeat(2,minmax(0,1fr))}.workflow-grid{grid-template-columns:1fr}}
-</style></head>
+</style>
+<style id="shifra-customer-readability-animation-v2">
+/* Customer cards: prevent native button text from falling back to black. */
+.customer-feature{
+  color:#eef3f8 !important;
+  -webkit-appearance:none;
+  appearance:none;
+  text-shadow:0 1px 1px rgba(0,0,0,.22);
+}
+.customer-feature .title{
+  color:#f4f7fb !important;
+  font-weight:800 !important;
+  font-size:13px !important;
+  line-height:1.45 !important;
+  letter-spacing:.05px;
+}
+.customer-feature .desc{
+  color:#b8c2cf !important;
+  font-size:11.25px !important;
+  line-height:1.65 !important;
+}
+.customer-feature .daily{
+  color:#d9e4f6 !important;
+  font-weight:700 !important;
+  border-color:rgba(170,194,235,.26) !important;
+  background:rgba(100,140,220,.13) !important;
+}
+.customer-feature .ic{
+  color:#e9f1ff !important;
+  filter:drop-shadow(0 4px 12px rgba(132,156,255,.22));
+  transform-origin:center;
+}
+
+/* Same readability treatment for small customer dashboard text. */
+.customer-kpi .k{color:#aab6c6 !important}
+.customer-kpi .s{color:#acb7c6 !important}
+.customer-section-head .title{color:#e9eef5 !important}
+.customer-mini{color:#e8eef6 !important}
+.customer-mini .row{color:#e8eef6 !important}
+.customer-note-area{color:#eef2f7 !important}
+
+/* Light cartoon-like motion: soft spring-in + icon bob. */
+@keyframes shifraCustomerFeatureIn{
+  0%{opacity:0;transform:translateY(14px) scale(.97) rotate(-.4deg)}
+  65%{opacity:1;transform:translateY(-2px) scale(1.01) rotate(.15deg)}
+  100%{opacity:1;transform:none}
+}
+@keyframes shifraCustomerIconBob{
+  0%,100%{transform:translateY(0) rotate(0deg) scale(1)}
+  25%{transform:translateY(-2px) rotate(-3deg) scale(1.03)}
+  50%{transform:translateY(0) rotate(2deg) scale(1)}
+  75%{transform:translateY(-1px) rotate(-1deg) scale(1.02)}
+}
+
+.customer-feature{animation:shifraCustomerFeatureIn .58s cubic-bezier(.2,.85,.25,1) both}
+.customer-feature:nth-child(2){animation-delay:.06s}
+.customer-feature:nth-child(3){animation-delay:.12s}
+.customer-feature:nth-child(4){animation-delay:.18s}
+.customer-feature:nth-child(5){animation-delay:.24s}
+.customer-feature:nth-child(6){animation-delay:.30s}
+.customer-feature:nth-child(7){animation-delay:.36s}
+.customer-feature:nth-child(8){animation-delay:.42s}
+.customer-feature .ic{animation:shifraCustomerIconBob 3.8s ease-in-out infinite}
+.customer-feature:hover .ic{animation-play-state:paused}
+
+@media (prefers-reduced-motion:reduce){
+  .customer-feature,
+  .customer-feature .ic{animation:none !important}
+}
+</style>
+
+</head>
 <body>
 
 <div id="auth-screen">
