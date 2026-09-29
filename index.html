@@ -2230,36 +2230,55 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
 document.getElementById('signup-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = document.getElementById('signup-submit');
-  document.getElementById('auth-error').style.display = 'none';
-  state.apiBase = document.getElementById('signup-apibase').value.trim().replace(/\/$/,'');
-  localStorage.setItem(SESSION_API_KEY, state.apiBase);
-  btn.disabled = true; const orig = btn.textContent; btn.innerHTML = '<span class="spinner"></span>';
+  const errorBox = document.getElementById('auth-error');
+  errorBox.style.display = 'none';
+  state.apiBase = (document.getElementById('signup-apibase').value || '').trim().replace(/\/$/,'') || '/api';
+
+  btn.disabled = true;
+  const orig = btn.textContent;
+  btn.innerHTML = '<span class="spinner"></span>';
+
   try {
-    const body = {
-      role: signupRole,
-      fullName: document.getElementById('su-name').value.trim(),
-      phone: document.getElementById('su-phone').value.trim() || undefined,
-    };
+    const fullName = document.getElementById('su-name').value.trim();
+    const phone = document.getElementById('su-phone').value.trim();
+
+    if (!fullName) throw new Error('اكتب الاسم بالكامل.');
+    if (!phone) throw new Error('اكتب رقم الهاتف.');
+
+    const body = { role: signupRole, fullName, phone };
+
     if (signupRole !== 'CUSTOMER') {
-      body.email = document.getElementById('su-email').value.trim() || undefined;
-      body.password = document.getElementById('su-password').value;
-    }
-    if (signupRole === 'CUSTOMER') {
+      const email = document.getElementById('su-email').value.trim();
+      const password = document.getElementById('su-password').value;
+      if (!email && !phone) throw new Error('اكتب البريد الإلكتروني أو رقم الهاتف.');
+      if (!password || password.length < 8) throw new Error('كلمة المرور لازم تكون 8 أحرف على الأقل.');
+      body.email = email || undefined;
+      body.password = password;
+    } else {
       const ref = document.getElementById('su-referral').value.trim();
       if (ref) body.referralCode = ref;
     }
+
     const result = await api('/auth/signup', {method:'POST', body});
-    if (!result.token || !result.user) throw new Error('السيرفر أنشأ الحساب لكنه لم يُرجع بيانات الجلسة');
+    if (!result || !result.token || !result.user) {
+      throw new Error('تم إرسال التسجيل لكن السيرفر لم يُرجع جلسة دخول صالحة.');
+    }
+
     state.token = result.token;
     state.user = result.user;
     try {
       localStorage.setItem(SESSION_TOKEN_KEY, result.token);
       localStorage.setItem(SESSION_API_KEY, state.apiBase);
-    } catch(e) {}
+    } catch(storageErr) {}
+
     await loadMeAndEnter(result.customer || result.marketer || result.editor || null);
-    toast('أهلًا بيك في SHIFRA', 'ok');
-  } catch(err){ authError(err.message); }
-  finally { btn.disabled = false; btn.textContent = orig; }
+    toast('تم إنشاء الحساب بنجاح 🎉', 'ok');
+  } catch(err) {
+    authError(err?.message || 'تعذر إنشاء الحساب. حاول مرة أخرى.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = orig;
+  }
 });
 
 async function loadMeAndEnter(profileOverride = null){
