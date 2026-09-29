@@ -2048,11 +2048,20 @@ async function api(path, opts={}){
         }
         return json;
       }
-      if(res.status===401){doLogout();throw new Error((json.error&&json.error.message)||'انتهت الجلسة، سجل الدخول مرة أخرى');}
+      if(res.status===401){
+        doLogout();
+        const err=new Error((json.error&&json.error.message)||'انتهت الجلسة، سجل الدخول مرة أخرى');
+        err.apiResponse=true;
+        err.status=401;
+        throw err;
+      }
       if([404,502,503,504].includes(res.status) && base!==PRODUCTION_API_BASE) continue;
-      throw new Error((json.error&&json.error.message)||('HTTP '+res.status));
+      const err=new Error((json.error&&json.error.message)||('HTTP '+res.status));
+      err.apiResponse=true;
+      err.status=res.status;
+      throw err;
     }catch(e){
-      if(e&&/انتهت الجلسة/.test(e.message||'')) throw e;
+      if(e&&e.apiResponse) throw e;
       lastNetworkError=e;
       if(base!==PRODUCTION_API_BASE) continue;
       break;
@@ -2113,7 +2122,15 @@ document.querySelectorAll('.role-opt').forEach(btn => btn.addEventListener('clic
   }
 })();
 
-function authError(msg){ const e = document.getElementById('auth-error'); e.textContent = msg; e.style.display = 'block'; }
+function authError(msg){
+  const e = document.getElementById('auth-error');
+  const friendly = {
+    'Invalid credentials':'البريد أو الهاتف أو كلمة المرور غير صحيحة.',
+    'Account is not active':'الحساب غير مفعل حاليًا.'
+  }[msg] || msg;
+  e.textContent = friendly;
+  e.style.display = 'block';
+}
 
 document.getElementById('login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
