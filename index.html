@@ -1903,6 +1903,21 @@ body::before{
 @media(max-width:900px){.owner-ai-shell,.routing-shell{grid-template-columns:1fr}}
 @media(max-width:520px){.owner-ai-quick{grid-template-columns:1fr}.onboard-choice-grid{grid-template-columns:1fr}}
 </style>
+<style id="shifra-anime-cartoon-v1">
+.shifra-anime-buddy{position:absolute;inset:auto 18px 18px auto;width:78px;height:78px;z-index:2;animation:shifraBuddyFloat 3.8s ease-in-out infinite;filter:drop-shadow(0 18px 25px rgba(56,189,248,.18));pointer-events:none}
+.shifra-anime-buddy .head{position:absolute;inset:9px 9px 16px;border-radius:28px 28px 24px 24px;background:linear-gradient(145deg,#fff,#dff7ff 45%,#b8c7ff);border:3px solid rgba(124,92,255,.55);box-shadow:inset 0 -7px 0 rgba(124,92,255,.08),0 0 0 4px rgba(255,255,255,.035)}
+.shifra-anime-buddy .eye{position:absolute;top:30px;width:9px;height:12px;border-radius:99px;background:#17233a;animation:shifraBlink 4.5s ease-in-out infinite}.shifra-anime-buddy .eye.l{left:27px}.shifra-anime-buddy .eye.r{right:27px}
+.shifra-anime-buddy .mouth{position:absolute;left:50%;bottom:27px;width:20px;height:9px;transform:translateX(-50%);border-bottom:3px solid #7c5cff;border-radius:0 0 20px 20px}
+.shifra-anime-buddy .body{position:absolute;bottom:4px;left:21px;right:21px;height:20px;border-radius:12px 12px 9px 9px;background:linear-gradient(145deg,#7c5cff,#22d3ee);border:2px solid rgba(255,255,255,.18)}
+.shifra-anime-buddy .spark{position:absolute;width:7px;height:7px;border-radius:50%;background:#37e0ad;box-shadow:0 0 14px #37e0ad;animation:shifraSpark 1.8s ease-in-out infinite}.shifra-anime-buddy .spark.s1{top:3px;right:4px}.shifra-anime-buddy .spark.s2{bottom:10px;left:0;animation-delay:.6s}
+@keyframes shifraBuddyFloat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-7px) rotate(2deg)}}
+@keyframes shifraBlink{0%,45%,47%,100%{transform:scaleY(1)}46%{transform:scaleY(.12)}}
+@keyframes shifraSpark{0%,100%{opacity:.35;transform:scale(.7)}50%{opacity:1;transform:scale(1.15)}}
+.service-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.service-choice{padding:14px;border:1px solid rgba(255,255,255,.07);border-radius:14px;background:rgba(255,255,255,.025);color:#eef4fb;text-align:start}.service-choice.active{border-color:rgba(124,92,255,.55);background:rgba(124,92,255,.11)}
+.customer-service-status{margin-top:12px;padding:11px;border-radius:13px;background:rgba(52,211,153,.05);border:1px solid rgba(52,211,153,.12);font-size:11px;color:#a8efd1;line-height:1.75}
+.owner-ai-shell{display:grid;gap:12px}.owner-ai-command{display:grid;grid-template-columns:minmax(0,1fr) 112px;gap:8px;padding:10px;border:1px solid rgba(124,92,255,.18);border-radius:18px;background:linear-gradient(145deg,rgba(124,92,255,.08),rgba(56,189,248,.04))}.owner-ai-command textarea{min-height:82px!important;border-radius:13px!important}.owner-ai-response{min-height:220px}.owner-ai-result-card{padding:13px;border-radius:14px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);margin-bottom:8px}.owner-ai-result-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media(max-width:600px){.service-choice-grid{grid-template-columns:1fr}.owner-ai-command{grid-template-columns:1fr}.owner-ai-command .btn{width:100%}.owner-ai-result-grid{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 
@@ -2264,6 +2279,7 @@ const VIEW_META = {
   ratings:{title:'تقييماتي', sub:'متوسط التقييم وآخر ملاحظات العملاء'},
   'marketer-profile':{title:'حسابي', sub:'بياناتك وكود الدعوة والأمان'},
   'owner-home':{title:'مركز قيادة المالك', sub:'الأرقام الحية، الأشخاص، المال، والاختناقات في مكان واحد'},
+  'owner-ai':{title:'Omar AI', sub:'مساعد عمر فقط لفحص الحسابات والأمان وتنفيذ الإجراءات بعد التأكيد'},
   'owner-ai':{title:'Omar AI', sub:'مساعد عمر فقط — يفحص الحسابات والأمان ويقترح ويُنفذ إجراءات بعد التأكيد'},
   'owner-tools':{title:'أدوات المالك', sub:'20 أداة تشغيلية للتحليل والمراقبة واتخاذ الخطوة التالية'},
   'owner-direct':{title:'المراسلات المباشرة', sub:'عمر ويوسف يقدروا يفتحوا محادثة مع أي حساب نشط'},
@@ -2886,12 +2902,16 @@ RENDERERS['owner-direct'] = async (el) => {
   attachDirectContactEvents(el);
 };
 RENDERERS['direct'] = async (el) => {
-  const [r,w]=await Promise.all([api('/direct-conversations'),api('/me/whatsapp')]);const conversations=r.conversations||[],current=w.whatsappPhone||'';
-  el.innerHTML='<div class="card" style="margin-bottom:14px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px"><div><b style="font-size:19px">الرسائل</b><div style="font-size:11px;color:#738198;margin-top:4px">اختار الشخص أولًا، وبعدها المحادثة هتاخد مساحة الشاشة.</div></div><span class="badge badge-purple">مراسلات</span></div><div class="card" style="margin-top:10px;background:linear-gradient(135deg,rgba(34,211,238,.055),rgba(52,211,153,.035));border-color:rgba(34,211,238,.14)"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><b style="color:#7de9f4">واتساب</b><div style="font-size:10.5px;color:#728096;margin-top:2px">أضف رقمك مرة واحدة عشان زر واتساب يظهر لباقي الحسابات.</div></div><span class="badge badge-green">اختياري</span></div><div class="field" style="margin-top:9px;margin-bottom:8px"><input id="my-whatsapp" class="ltr" placeholder="+20 10xxxxxxxx" value="'+esc(current)+'"></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn btn-sm" style="background:linear-gradient(135deg,#22c55e,#22d3ee);color:#04110b;font-weight:850" id="save-whatsapp">حفظ واتساب</button>'+(current?waButton(current,'أهلاً، بتواصل معاك من شفرة.'):'' )+'</div></div></div><div class="card" style="padding:0;overflow:hidden"><div id="direct-enterprise-shell" class="chat-enterprise-shell" style="border:0;border-radius:0"><section class="chat-people"><div class="chat-people-head"><div class="chat-people-title">اختيار الشخص</div><div class="chat-people-sub">كل الحسابات النشطة متاحة حسب صلاحيات حسابك</div><div class="chat-people-search"><input id="direct-search" placeholder="ابحث بالاسم أو الدور..."></div></div><div class="chat-people-list">'+directListMarkup(conversations)+'</div></section><section class="chat-window" id="direct-panel"><div class="chat-color-strip"></div><div class="chat-window-empty"><div class="chat-empty-card"><div class="chat-empty-icon">💬</div><b>اختار شخص من القائمة</b><div style="font-size:10.5px;color:#718097;margin-top:4px">المحادثة هتفتح هنا بشكل كامل.</div></div></section></div></div>';
-  el.querySelector('#save-whatsapp').addEventListener('click',async()=>{const btn=el.querySelector('#save-whatsapp');btn.disabled=true;try{const x=await api('/me/whatsapp',{method:'PATCH',body:{whatsappPhone:el.querySelector('#my-whatsapp').value.trim()}});toast('اتحفظ رقم واتساب','ok');if(x.whatsappUrl)window.open(x.whatsappUrl,'_blank','noopener');await RENDERERS.direct(el);}catch(err){toast(err.message,'err');btn.disabled=false;}});
+  const r=await api('/direct-conversations');const conversations=r.conversations||[];let current='';
+  if(state.user.role!=='CUSTOMER'&&state.user.role!=='EDITOR'){try{const w=await api('/me/whatsapp');current=w.whatsappPhone||'';}catch(e){}}
+  const waPanel=(state.user.role==='CUSTOMER'||state.user.role==='EDITOR')?'':('<div class="card" style="margin-top:10px;background:linear-gradient(135deg,rgba(34,211,238,.055),rgba(52,211,153,.035));border-color:rgba(34,211,238,.14)"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><b style="color:#7de9f4">واتساب</b><div style="font-size:10.5px;color:#728096;margin-top:2px">اختياري للحسابات التي تحتاج تواصل خارجي.</div></div><span class="badge badge-green">اختياري</span></div><div class="field" style="margin-top:9px;margin-bottom:8px"><input id="my-whatsapp" class="ltr" placeholder="+20 10xxxxxxxx" value="'+esc(current)+'"></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn btn-sm" style="background:linear-gradient(135deg,#22c55e,#22d3ee);color:#04110b;font-weight:850" id="save-whatsapp">حفظ واتساب</button>'+(current?waButton(current,'أهلاً، بتواصل معاك من شفرة.'):'' )+'</div></div>');
+  el.innerHTML='<div class="card" style="margin-bottom:14px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px"><div><b style="font-size:19px">الرسائل</b><div style="font-size:11px;color:#738198;margin-top:4px">'+(state.user.role==='CUSTOMER'?'شاتك مع المسوق داخل SHIFRA فقط — أرقام التواصل مخفية.':'اختار الشخص، وبعدها المحادثة هتاخد مساحة الشاشة.')+'</div></div><span class="badge badge-purple">مراسلات</span></div>'+waPanel+'</div><div class="card" style="padding:0;overflow:hidden"><div id="direct-enterprise-shell" class="chat-enterprise-shell" style="border:0;border-radius:0"><section class="chat-people"><div class="chat-people-head"><div class="chat-people-title">'+(state.user.role==='CUSTOMER'?'المسوق الحالي':'اختيار الشخص')+'</div><div class="chat-people-sub">'+(state.user.role==='CUSTOMER'?'التواصل داخل التطبيق فقط':'الحسابات المتاحة حسب الصلاحيات')+'</div><div class="chat-people-search"><input id="direct-search" placeholder="ابحث بالاسم أو الدور..."></div></div><div class="chat-people-list">'+directListMarkup(conversations)+'</div></section><section class="chat-window" id="direct-panel"><div class="chat-color-strip"></div><div class="chat-window-empty"><div class="chat-empty-card"><div class="chat-empty-icon">💬</div><b>'+(conversations.length?'جارِ فتح المحادثة...':'لسه مفيش مسوق مربوط بحسابك')+'</b><div style="font-size:10.5px;color:#718097;margin-top:4px">'+(conversations.length?'المحادثة هتفتح هنا.':'اضغط «طلب خدمة» من مركز العميل لاختيار مسوق.')+'</div></div></div></section></div></div>';
+  if(state.user.role!=='CUSTOMER'&&state.user.role!=='EDITOR'){
+    const save=el.querySelector('#save-whatsapp');if(save)save.addEventListener('click',async()=>{save.disabled=true;try{const x=await api('/me/whatsapp',{method:'PATCH',body:{whatsappPhone:el.querySelector('#my-whatsapp').value.trim()}});toast('اتحفظ رقم واتساب','ok');if(x.whatsappUrl)window.open(x.whatsappUrl,'_blank','noopener');await RENDERERS.direct(el);}catch(err){toast(err.message,'err');save.disabled=false;}});
+  }
   attachDirectContactEvents(el);
+  if(conversations.length&&state.user.role==='CUSTOMER'){const first=conversations.find(x=>x.role==='MARKETER')||conversations[0];const btn=el.querySelector('[data-direct-user="'+first.id+'"]');if(btn)renderDirectChat(el,first.id,btn);}
 };
-
 /* ================= PROJECT CONVERSATIONS ================= */
 RENDERERS['owner-project-chat'] = async (el) => {
   const r=await api('/conversations'); const conversations=r.conversations||[];
@@ -3425,6 +3445,23 @@ async function openOwnerPersonalChat(){
     },180);
   }catch(e){toast(e.message,'err');}
 }
+async function openAssignedMarketerChat(marketerId){
+  try{await goView('direct');const root=document.getElementById('content');const btn=root?.querySelector('[data-direct-user="'+marketerId+'"]');if(btn)await renderDirectChat(root,marketerId,btn);}catch(e){toast(e.message,'err');}
+}
+async function startServiceAssignment(referralCode){
+  try{
+    const r=await api('/customer-service/assign',{method:'POST',body:{referralCode:referralCode||undefined}});
+    const a=r.assignment;closeModal();toast('تم اختيار المسوق '+a.marketerName+' — جاري فتح المحادثة','ok');await openAssignedMarketerChat(a.marketerId);
+    if(!a.existing){
+      setTimeout(async()=>{try{const next=await api('/customer-service/assign-next',{method:'POST',body:{}});const n=next.assignment;if(n.reassigned){toast('المسوق الأول ما ردش — اخترنا مسوق تاني: '+n.marketerName,'ok');await openAssignedMarketerChat(n.marketerId);}else if(n.status==='ACCEPTED')toast('المسوق رد بالفعل ✅','ok');else if(n.status==='NO_MARKETER')toast('المسوق الأول ما ردش ومفيش مسوق متاح تاني دلوقتي.','err');}catch(e){toast(e.message,'err');}},20000);
+    }
+  }catch(e){toast(e.message,'err');}
+}
+function openCustomerServiceWizard(){
+  modal('<h3>طلب خدمة</h3><div style="font-size:11px;color:#7b8aa0;margin-bottom:12px">هل عندك مسوق بتتعامل معاه؟</div><div class="service-choice-grid"><button class="service-choice" id="svc-has"><b>أيوه، عندي مسوق</b><div style="font-size:10px;color:#748299;margin-top:4px">استخدم كود الدعوة الخاص بيه.</div></button><button class="service-choice" id="svc-none"><b>لأ، اختارلي مسوق</b><div style="font-size:10px;color:#748299;margin-top:4px">SHIFRA تختار واحد فاتح ومتواجد.</div></button></div><div class="customer-service-status">اختيار المسوق لا يزوّد سعر الفيديو أو أي خدمة. السعر يفضل هو نفسه.</div><div class="modal-actions"><button class="btn btn-ghost btn-block" onclick="closeModal()">إلغاء</button></div>');
+  document.getElementById('svc-has').onclick=()=>{modal('<h3>كود دعوة المسوق</h3><div class="field"><label>كود الدعوة</label><input id="svc-ref" class="ltr" placeholder="MK-..."></div><div class="customer-service-status">بعد الإرسال هنفتح لك الشات داخل SHIFRA. لو المسوق ما ردش خلال 20 ثانية هنختار مسوق تاني متاح.</div><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal();openCustomerServiceWizard()">رجوع</button><button class="btn btn-primary" id="svc-go">اختيار المسوق</button></div>');document.getElementById('svc-go').onclick=()=>startServiceAssignment(document.getElementById('svc-ref').value.trim());};
+  document.getElementById('svc-none').onclick=()=>startServiceAssignment('');
+}
 RENDERERS['ai-service'] = async (el) => {
   el.innerHTML=
    '<section class="ai-service-hero">'+
@@ -3440,10 +3477,10 @@ RENDERERS['ai-service'] = async (el) => {
       '<div class="ai-service-card"><div class="ai-service-icon">Aa</div><b>ترجمة وترجمة فيديو</b><span>ترجمة وSubtitles وتنسيق المحتوى للجمهور المستهدف.</span></div>'+
       '<div class="ai-service-card"><div class="ai-service-icon">⚡</div><b>حل مخصص بالـAI</b><span>لو عندك فكرة مختلفة، احكِها للمالك وهو يحدد معاك أفضل تنفيذ.</span></div>'+
     '</div>'+
-    '<button class="btn btn-primary ai-talk-owner" id="ai-talk-owner">💬 تحدث مع عمر يوسف — المالك</button>'+
-    '<div class="ai-service-note">السعر والمدة يتم الاتفاق عليهما مباشرة مع المالك داخل المحادثة قبل بدء التنفيذ.</div>'+
+    '<button class="btn btn-primary ai-talk-owner" id="ai-talk-owner">⚡ اطلب خدمة AI الآن</button>'+
+    '<div class="ai-service-note">السعر لا يزيد بسبب المسوق. كل خدمة لها نفس سعر الاتفاق، والتواصل يتم تنظيمه داخل SHIFRA.</div><button class="btn btn-ghost btn-block" id="ai-wa-open" style="margin-top:8px">🟢 واتساب خدمة AI</button><div class="shifra-anime-buddy"><div class="head"></div><div class="eye l"></div><div class="eye r"></div><div class="mouth"></div><div class="body"></div><i class="spark s1"></i><i class="spark s2"></i></div>'+
    '</section>';
-  el.querySelector('#ai-talk-owner').addEventListener('click',openOwnerPersonalChat);
+  el.querySelector('#ai-talk-owner').addEventListener('click',openCustomerServiceWizard);if(el.querySelector('#ai-wa-open'))el.querySelector('#ai-wa-open').addEventListener('click',()=>window.open('https://wa.me/201029062771?text='+encodeURIComponent('مرحبًا، أريد خدمة فيديوهات أو صور بالذكاء الاصطناعي من SHIFRA.'),'_blank','noopener'));
 };
 
 async function openDirectoryContact(userId){
@@ -3605,7 +3642,7 @@ RENDERERS.customerTools = async (el) => {
 
 async function customerStartQuickService(kind){
   if(kind==='ai'){ await goView('ai-service'); return; }
-  if(kind==='experts'){ await goView('people-directory'); return; }
+  if(kind==='service'){ await openCustomerServiceWizard(); return; }
   if(kind==='help'){
     const text='مرحبًا، أنا عميل في SHIFRA ومحتاج مساعدة في اختيار الخدمة المناسبة.';
     window.open('https://wa.me/201029062771?text='+encodeURIComponent(text),'_blank','noopener');
