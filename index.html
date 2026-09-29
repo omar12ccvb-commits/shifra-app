@@ -2222,7 +2222,7 @@ body::before{
 const SESSION_TOKEN_KEY = 'shifra_session_token';
 const SESSION_API_KEY = 'shifra_session_api_base';
 const PRODUCTION_API_BASE = 'https://api-production-2964.up.railway.app/api';
-const state = { token:null, user:null, profile:null, accountProfile:null, apiBase:'http://localhost:4000/api', view:null, smartRoutingTimer:null, notificationPollTimer:null, lastUnreadNotifications:null };
+const state = { token:null, user:null, profile:null, accountProfile:null, apiBase:'http://localhost:4000/api', view:null, smartRoutingTimer:null, notificationPollTimer:null, directChatPollTimer:null, lastUnreadNotifications:null };
 
 
 // Smart default: if this page itself isn't running on localhost (i.e. it's
@@ -3304,12 +3304,41 @@ function openDirectChatTools(ctx){
     if(action==='chat-read'){closeModal();await renderDirectChat(host,userId,button);toast('تم تحديث القراءة','ok');return;}
   }));
 }
+function stopDirectChatPolling(){
+  if(state.directChatPollTimer){clearInterval(state.directChatPollTimer);state.directChatPollTimer=null;}
+}
+function startDirectChatPolling(host,userId,body){
+  stopDirectChatPolling();
+  const poll=async()=>{
+    try{
+      if(!document.body.contains(body)||!host.querySelector('.chat-active-view')) return;
+      const r=await api('/direct-conversations/'+userId+'/messages');
+      const incoming=r.messages||[];
+      if(!incoming.length) return;
+      const pending=body.querySelector('.chat-send-pending');
+      if(pending) return;
+      const ids=new Set(Array.from(body.querySelectorAll('[data-msg-id]')).map(el=>String(el.dataset.msgId)));
+      const hadBottom=(body.scrollHeight-body.scrollTop-body.clientHeight)<140;
+      let added=0;
+      const empty=body.querySelector('.empty-state');
+      for(const m of incoming){
+        if(ids.has(String(m.id))) continue;
+        if(empty) empty.remove();
+        body.insertAdjacentHTML('beforeend',directMessageHtml(m,directChatLoadPrefs(userId)));
+        added++;
+      }
+      if(added && hadBottom) body.scrollTop=body.scrollHeight;
+    }catch(e){}
+  };
+  state.directChatPollTimer=setInterval(poll,3000);
+}
 function appendOptimisticMessage(bodyWrap,msg,mine=true){
   const temp='temp-'+Date.now()+'-'+Math.random().toString(36).slice(2);
   const html='<div class="owner-msg '+(mine?'mine':'theirs')+' chat-send-pending" data-msg-id="'+temp+'"><div class="chat-time">'+esc(state.user.fullName)+' · الآن</div><div style="white-space:pre-wrap;overflow-wrap:anywhere">'+esc(msg)+'</div><div class="chat-send-status">جارٍ الإرسال...</div></div>';
   bodyWrap.insertAdjacentHTML('beforeend',html);bodyWrap.scrollTop=bodyWrap.scrollHeight;return temp;
 }
 async function renderDirectChat(host,userId,button){
+  stopDirectChatPolling();
   host.querySelectorAll('.chat-person').forEach(b=>b.classList.remove('active'));if(button)button.classList.add('active');
   const shell=host.querySelector('#direct-enterprise-shell');if(!shell)return;
   shell.classList.add('chat-open');
@@ -3341,10 +3370,11 @@ async function renderDirectChat(host,userId,button){
     panel.querySelector('#direct-compose').addEventListener('submit',e=>{e.preventDefault();sendText();});
     input.addEventListener('keydown',e=>{if(e.key==='Enter'&&prefs.enterSend!==false&&!e.shiftKey){e.preventDefault();sendText();}});
     panel.querySelector('#chat-tools-open').addEventListener('click',()=>openDirectChatTools({panel,userId,target,messages,prefs,input,body,draftKey,draftNote,intro,button,host}));
-    panel.querySelector('#chat-back').addEventListener('click',()=>{shell.classList.remove('chat-open');panel.innerHTML='<div class="chat-window-empty"><div class="chat-empty-card"><div class="chat-empty-icon">💬</div><b>اختار شخص من القائمة</b><div style="font-size:10.5px;color:#718097;margin-top:4px">المحادثة هتفتح هنا بشكل كامل.</div></div></div>';});
+    panel.querySelector('#chat-back').addEventListener('click',()=>{stopDirectChatPolling();shell.classList.remove('chat-open');panel.innerHTML='<div class="chat-window-empty"><div class="chat-empty-card"><div class="chat-empty-icon">💬</div><b>اختار شخص من القائمة</b><div style="font-size:10.5px;color:#718097;margin-top:4px">المحادثة هتفتح هنا بشكل كامل.</div></div></div>';});
     panel.querySelectorAll('[data-msg-copy]').forEach(b=>b.addEventListener('click',async()=>{const m=messages.find(x=>String(x.id)===String(b.dataset.msgCopy));if(!m)return;try{await navigator.clipboard.writeText(m.body);toast('اتنسخت الرسالة','ok');}catch(e){toast('النسخ غير متاح','err');}}));
     panel.querySelectorAll('[data-msg-quote]').forEach(b=>b.addEventListener('click',()=>{const m=messages.find(x=>String(x.id)===String(b.dataset.msgQuote));if(!m)return;input.value='> '+m.sender_name+': '+m.body+'\n\n';input.focus();input.dispatchEvent(new Event('input'));}));
     const searchInput=panel.querySelector('#chat-search-input');if(searchInput)searchInput.addEventListener('input',()=>{const q=searchInput.value.toLowerCase().trim();panel.querySelectorAll('[data-msg-text]').forEach(m=>m.classList.toggle('chat-hidden',q&&!m.dataset.msgText.includes(q)));});
+    startDirectChatPolling(host,userId,body);
   }catch(err){panel.innerHTML='<div class="chat-window-empty"><div class="chat-empty-card"><div class="chat-empty-icon">⚠</div><b>تعذر تحميل المحادثة</b><div style="font-size:10.5px;color:#718097;margin-top:5px">'+esc(err.message)+'</div></div></div>';}
 }
 function directListMarkup(conversations){
