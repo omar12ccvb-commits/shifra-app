@@ -3566,7 +3566,7 @@ async function openCustomerWorkSetup(){
     const selectedAssignment=current.assignment;
     const serviceList=services.services||[];
     const typeByCode=Object.fromEntries((catalog.serviceTypes||[]).map(x=>[x.code,x]));
-    const contentByCode=Object.fromEntries((catalog.contentTypes||[]).map(x=>[x]));
+    const contentByCode=Object.fromEntries((catalog.contentTypes||[]).map(x=>[x.code,x]));
     const levelByCode=Object.fromEntries((catalog.editingLevels||[]).map(x=>[x]));
     const defaultService=serviceList[0]||null;
 
