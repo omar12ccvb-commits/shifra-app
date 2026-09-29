@@ -3701,7 +3701,12 @@ function customerProjectLabel(p){
   return p.order_number || ('SH-'+p.id);
 }
 function customerFeature(icon,title,desc,action,daily=false){
-  return '<button class="customer-feature" data-customer-action="'+action+'"><div><div class="top"><span class="ic">'+icon+'</span>'+(daily?'<span class="daily">كل يوم</span>':'')+'</div><div class="title">'+esc(title)+'</div><div class="desc">'+esc(desc)+'</div></div><div style="font-size:10px;color:var(--text-faint)">فتح الأداة →</div></button>';
+  return '<button class="customer-feature" data-customer-action="'+action+'" style="color:#eef3f8 !important;-webkit-text-fill-color:#eef3f8 !important;">' +
+    '<div><div class="top"><span class="ic" style="color:#eef3f8 !important;-webkit-text-fill-color:#eef3f8 !important">'+icon+'</span>' +
+    (daily?'<span class="daily" style="color:#d9e4f6 !important;-webkit-text-fill-color:#d9e4f6 !important">كل يوم</span>':'') +
+    '</div><div class="title" style="color:#f7f9fc !important;-webkit-text-fill-color:#f7f9fc !important;font-weight:800">+esc(title)+
+    '</div><div class="desc" style="color:#bdc7d4 !important;-webkit-text-fill-color:#bdc7d4 !important">+esc(desc)+
+    '</div></div><div style="font-size:10px;color:#aeb8c7 !important;-webkit-text-fill-color:#aeb8c7 !important">فتح الأداة →</div></button>';
 }
 function customerIdeas(){
   const ideas=[
