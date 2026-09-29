@@ -1957,8 +1957,18 @@ body::before{
 
       <div id="customer-login-fields">
         <div class="field"><label>الاسم بالكامل</label><input type="text" id="login-customer-name" required></div>
-        <div class="field"><label>رقم الهاتف</label><input type="tel" id="login-customer-phone" class="ltr" inputmode="tel" autocomplete="tel" required></div>
-        <div style="font-size:11px;color:var(--text-faint);margin:-4px 0 14px">دخول العميل يتم بالاسم بالكامل ورقم الهاتف فقط.</div>
+        <div class="auth-tabs" style="margin:0 0 12px">
+          <button type="button" class="auth-tab active" id="login-customer-phone-mode">بالاسم + الهاتف</button>
+          <button type="button" class="auth-tab" id="login-customer-code-mode">بالاسم + رمز الدخول</button>
+        </div>
+        <div id="customer-login-phone-fields">
+          <div class="field"><label>رقم الهاتف</label><input type="tel" id="login-customer-phone" class="ltr" inputmode="tel" autocomplete="tel"></div>
+          <div style="font-size:11px;color:var(--text-faint);margin:-4px 0 14px">الطريقة الأساسية: الاسم بالكامل ورقم الهاتف فقط.</div>
+        </div>
+        <div id="customer-login-code-fields" style="display:none">
+          <div class="field"><label>رمز الدخول البديل</label><input type="text" id="login-customer-code" class="ltr" autocomplete="one-time-code" autocapitalize="characters" maxlength="32"></div>
+          <div style="font-size:11px;color:var(--text-faint);margin:-4px 0 14px">بديل للرقم: استخدم اسمك بالكامل ورمز الدخول الخاص بك.</div>
+        </div>
       </div>
 
       <div id="staff-login-fields" style="display:none">
@@ -1981,9 +1991,10 @@ body::before{
       <div class="field"><label>الاسم بالكامل</label><input type="text" id="su-name" required></div>
       <div class="field" id="su-email-field"><label>البريد الإلكتروني</label><input type="email" id="su-email" class="ltr"></div>
       <div class="field"><label>رقم الهاتف</label><input type="text" id="su-phone" class="ltr" inputmode="tel" autocomplete="tel"></div>
+      <div class="field" id="su-login-code-field" style="display:none"><label>رمز الدخول البديل (اختياري)</label><input type="text" id="su-login-code" class="ltr" autocomplete="off" autocapitalize="characters" maxlength="32" pattern="[A-Za-z0-9]{6,32}"></div>
       <div class="field" id="su-password-field"><label>كلمة المرور (8 أحرف على الأقل)</label><input type="password" id="su-password" class="ltr"></div>
       <div class="field" id="su-referral-field"><label>كود الدعوة (اختياري)</label><input type="text" id="su-referral" class="ltr"></div>
-      <div id="customer-signup-note" style="display:none;font-size:11px;color:var(--text-faint);margin:-4px 0 14px">حساب العميل يتم إنشاؤه بالاسم بالكامل ورقم الهاتف فقط.</div>
+      <div id="customer-signup-note" style="display:none;font-size:11px;color:var(--text-faint);margin:-4px 0 14px">يمكنك إنشاء رمز دخول بديل لاستخدامه بدل رقم الهاتف. لو تركته فارغًا، SHIFRA ينشئ رمزًا تلقائيًا لك.</div>
       <details class="adv"><summary>إعدادات متقدمة</summary>
         <div class="field" style="margin-top:10px"><label>عنوان السيرفر</label><input type="text" id="signup-apibase" class="ltr" value="http://localhost:4000/api"></div>
       </details>
@@ -2131,9 +2142,23 @@ document.getElementById('modal-overlay').addEventListener('click', (e)=>{ if(e.t
 /* ---------------- Auth: tabs + role picker ---------------- */
 let signupRole = 'CUSTOMER';
 let loginMode = 'CUSTOMER';
+let customerLoginMethod = 'PHONE';
 
 document.getElementById('login-customer-mode').addEventListener('click', ()=> switchLoginMode('CUSTOMER'));
 document.getElementById('login-team-mode').addEventListener('click', ()=> switchLoginMode('TEAM'));
+document.getElementById('login-customer-phone-mode').addEventListener('click', ()=> switchCustomerLoginMethod('PHONE'));
+document.getElementById('login-customer-code-mode').addEventListener('click', ()=> switchCustomerLoginMethod('CODE'));
+
+function switchCustomerLoginMethod(method){
+  customerLoginMethod = method;
+  const phone = method === 'PHONE';
+  document.getElementById('login-customer-phone-mode').classList.toggle('active', phone);
+  document.getElementById('login-customer-code-mode').classList.toggle('active', !phone);
+  document.getElementById('customer-login-phone-fields').style.display = phone ? 'block' : 'none';
+  document.getElementById('customer-login-code-fields').style.display = phone ? 'none' : 'block';
+  document.getElementById('login-customer-phone').required = phone;
+  document.getElementById('login-customer-code').required = !phone;
+}
 
 function switchLoginMode(mode){
   loginMode = mode;
@@ -2143,12 +2168,14 @@ function switchLoginMode(mode){
   document.getElementById('customer-login-fields').style.display = customer ? 'block' : 'none';
   document.getElementById('staff-login-fields').style.display = customer ? 'none' : 'block';
   document.getElementById('login-customer-name').required = customer;
-  document.getElementById('login-customer-phone').required = customer;
+  document.getElementById('login-customer-phone').required = customer && customerLoginMethod === 'PHONE';
+  document.getElementById('login-customer-code').required = customer && customerLoginMethod === 'CODE';
   document.getElementById('login-identifier').required = !customer;
   document.getElementById('login-password').required = !customer;
   document.getElementById('login-submit').textContent = customer ? 'دخول كعميل' : 'دخول';
 }
 
+switchCustomerLoginMethod('PHONE');
 switchLoginMode('CUSTOMER');
 
 document.getElementById('tab-login').addEventListener('click', ()=> switchAuthTab('login'));
@@ -2165,9 +2192,11 @@ function updateSignupFields(){
   document.getElementById('su-email-field').style.display = customer ? 'none' : 'block';
   document.getElementById('su-password-field').style.display = customer ? 'none' : 'block';
   document.getElementById('su-referral-field').style.display = customer ? 'block' : 'none';
+  document.getElementById('su-login-code-field').style.display = customer ? 'block' : 'none';
   document.getElementById('customer-signup-note').style.display = customer ? 'block' : 'none';
   document.getElementById('su-phone').required = customer;
   document.getElementById('su-password').required = !customer;
+  document.getElementById('su-login-code').required = false;
 }
 
 document.querySelectorAll('.role-opt').forEach(btn => btn.addEventListener('click', () => {
@@ -2210,8 +2239,13 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     let result;
     if (loginMode === 'CUSTOMER') {
       const fullName = document.getElementById('login-customer-name').value.trim();
-      const phone = document.getElementById('login-customer-phone').value.trim();
-      result = await api('/auth/customer-login', {method:'POST', body:{fullName, phone}});
+      if (customerLoginMethod === 'PHONE') {
+        const phone = document.getElementById('login-customer-phone').value.trim();
+        result = await api('/auth/customer-login', {method:'POST', body:{fullName, phone}});
+      } else {
+        const loginCode = document.getElementById('login-customer-code').value.trim();
+        result = await api('/auth/customer-code-login', {method:'POST', body:{fullName, loginCode}});
+      }
     } else {
       const identifier = document.getElementById('login-identifier').value.trim();
       const password = document.getElementById('login-password').value;
@@ -2223,6 +2257,12 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
       localStorage.setItem(SESSION_API_KEY, state.apiBase);
     } catch(e) {}
     await loadMeAndEnter();
+    if (result && result.loginCode) {
+      modal(`<h3>تم إنشاء رمز دخول بديل لك</h3>
+        <div style="color:var(--text-dim);font-size:12px;line-height:1.8;margin-bottom:12px">احفظ الرمز ده. المرات الجاية تقدر تدخل باسمك والرمز بدون رقم الهاتف.</div>
+        <div style="font:900 24px/1 var(--mono);letter-spacing:3px;text-align:center;padding:18px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.03)" dir="ltr">${esc(result.loginCode)}</div>
+        <div class="modal-actions"><button class="btn btn-primary btn-block" onclick="closeModal()">حفظت الرمز</button></div>`);
+    }
   } catch(err){ authError(err.message); }
   finally { btn.disabled = false; btn.textContent = orig; }
 });
@@ -2256,7 +2296,12 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
       body.password = password;
     } else {
       const ref = document.getElementById('su-referral').value.trim();
+      const loginCode = document.getElementById('su-login-code').value.trim().toUpperCase();
       if (ref) body.referralCode = ref;
+      if (loginCode) {
+        if (!/^[A-Z0-9]{6,32}$/.test(loginCode)) throw new Error('رمز الدخول لازم يكون من 6 إلى 32 حرفًا أو رقمًا.');
+        body.loginCode = loginCode;
+      }
     }
 
     const result = await api('/auth/signup', {method:'POST', body});
@@ -2273,6 +2318,12 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
 
     await loadMeAndEnter(result.customer || result.marketer || result.editor || null);
     toast('تم إنشاء الحساب بنجاح 🎉', 'ok');
+    if (signupRole === 'CUSTOMER' && result.loginCode) {
+      modal(`<h3>رمز الدخول البديل</h3>
+        <div style="color:var(--text-dim);font-size:12px;line-height:1.8;margin-bottom:12px">احتفظ بالرمز ده. تقدر تستخدمه مع اسمك للدخول بدون كتابة رقم الهاتف.</div>
+        <div style="font:900 24px/1 var(--mono);letter-spacing:3px;text-align:center;padding:18px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.03)" dir="ltr">${esc(result.loginCode)}</div>
+        <div class="modal-actions"><button class="btn btn-primary btn-block" onclick="closeModal()">حفظت الرمز</button></div>`);
+    }
   } catch(err) {
     authError(err?.message || 'تعذر إنشاء الحساب. حاول مرة أخرى.');
   } finally {
