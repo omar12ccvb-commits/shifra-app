@@ -2610,6 +2610,9 @@ const NAV_BY_ROLE = {
     {id:'owner-project-chat', label:'محادثات المشاريع', icon:'☷'},
     {id:'owner-finance', label:'الأرباح والخسائر', icon:'₿'},
     {id:'owner-team', label:'الفريق والحضور', icon:'◉'},
+    {id:'owner-customers', label:'العملاء', icon:'☺'},
+    {id:'owner-editors', label:'المنتجين', icon:'🎬'},
+    {id:'owner-marketers', label:'المسوّقين', icon:'📣'},
     {id:'owner-ops', label:'العمليات والاختناقات', icon:'⚙'},
     {id:'owner-accounts', label:'كل الحسابات', icon:'👥'},
     {id:'owner-payments', label:'المدفوعات', icon:'▤'},
@@ -2648,6 +2651,9 @@ const VIEW_META = {
   'owner-project-chat':{title:'محادثات المشاريع', sub:'كل محادثات العملاء والمسوقين والمحررين'},
   'owner-finance':{title:'الأرباح والخسائر', sub:'قراءة مالية من الـLedger الفعلي'},
   'owner-team':{title:'الفريق والحضور', sub:'المسجلين، الفاتحين، غير الفاتحين، والمشاركين في العمل'},
+  'owner-customers':{title:'العملاء', sub:'كل العملاء في مكان مستقل'},
+  'owner-editors':{title:'المنتجين / المحررين', sub:'كل المنتجين والمحررين في مكان مستقل'},
+  'owner-marketers':{title:'المسوّقين', sub:'كل المسوقين في مكان مستقل'},
   'owner-ops':{title:'العمليات والاختناقات', sub:'حالات المشاريع، التأخير، الدفع، والشكاوى'},
   'owner-accounts':{title:'كل الحسابات', sub:'المستخدمون والجلسات والحالة'},
   'owner-payments':{title:'المدفوعات', sub:'مراجعة إثباتات الدفع ومتابعة الحالة'},
@@ -3051,6 +3057,59 @@ RENDERERS['owner-finance'] = async (el) => {
       ((er.entries||[]).slice(0,80).map(e=>'<tr><td>'+esc(e.account_code)+'</td><td class="mono">'+(Number(e.debit_minor)?money(e.debit_minor):'—')+'</td><td class="mono">'+(Number(e.credit_minor)?money(e.credit_minor):'—')+'</td><td>'+esc(e.description||e.reference_type||'—')+'</td><td class="mono">'+fmtDate(e.created_at)+'</td></tr>').join('')||'<tr><td colspan="5"><div class="empty-state">مفيش قيود.</div></td></tr>')+
     '</tbody></table></div>';
 };
+
+function ownerPeopleViewConfig(kind){
+  return {
+    customers:{title:'العملاء',subtitle:'كل عملاء SHIFRA في مكان مستقل — الحالة، الجلسات، المشاريع وبيانات التواصل.',role:'CUSTOMER',icon:'☺'},
+    editors:{title:'المنتجين / المحررين',subtitle:'كل المنتجين والمحررين في مساحة مستقلة لمتابعة الحضور، المشاريع والأرباح.',role:'EDITOR',icon:'🎬'},
+    marketers:{title:'المسوّقين',subtitle:'كل المسوقين في مساحة مستقلة لمتابعة الحضور، العملاء، المشاريع والأرباح.',role:'MARKETER',icon:'📣'}
+  }[kind];
+}
+
+RENDERERS['owner-customers'] = async (el) => renderOwnerPeople(el,'customers');
+RENDERERS['owner-editors'] = async (el) => renderOwnerPeople(el,'editors');
+RENDERERS['owner-marketers'] = async (el) => renderOwnerPeople(el,'marketers');
+
+async function renderOwnerPeople(el,kind){
+  const cfg=ownerPeopleViewConfig(kind);
+  const r=await api('/accounts');
+  const accounts=(r.accounts||[]).filter(a=>a.role===cfg.role);
+  const active=accounts.filter(a=>a.status==='ACTIVE').length;
+  const online=accounts.filter(a=>Number(a.active_sessions||0)>0).length;
+  const projects=accounts.reduce((n,a)=>n+Number(a.related_projects||0),0);
+
+  el.innerHTML='<section class="team-directory-hero" style="margin-bottom:12px">'+
+    '<div class="team-directory-hero-top"><div><h2>'+cfg.icon+' '+esc(cfg.title)+'</h2><p>'+esc(cfg.subtitle)+'</p></div><span class="badge badge-purple">'+accounts.length+' حساب</span></div>'+
+    '<div class="owner-kpi-grid" style="margin-top:14px">'+
+      '<div class="owner-kpi"><div class="k">إجمالي</div><div class="v">'+accounts.length+'</div></div>'+
+      '<div class="owner-kpi"><div class="k">نشطين</div><div class="v">'+active+'</div></div>'+
+      '<div class="owner-kpi"><div class="k">فاتحين الآن</div><div class="v">'+online+'</div></div>'+
+      '<div class="owner-kpi"><div class="k">مشاريع مرتبطة</div><div class="v">'+projects+'</div></div>'+
+    '</div></section>'+
+    '<div class="card" style="margin-bottom:12px"><input id="owner-people-search" placeholder="ابحث بالاسم أو الهاتف أو البريد..." style="width:100%"></div>'+
+    '<div class="team-grid" id="owner-people-grid"></div>';
+
+  const grid=el.querySelector('#owner-people-grid');
+  const search=el.querySelector('#owner-people-search');
+  const render=()=>{
+    const q=(search.value||'').toLowerCase().trim();
+    const rows=accounts.filter(a=>!q||[a.full_name,a.email,a.phone].filter(Boolean).join(' ').toLowerCase().includes(q));
+    grid.innerHTML=rows.length?rows.map(a=>{
+      const onlineNow=Number(a.active_sessions||0)>0;
+      const status=a.status==='SUSPENDED'?'موقوف':a.status==='ACTIVE'?'نشط':String(a.status||'غير معروف');
+      return '<article class="team-card"><div class="team-card-head"><div class="team-card-avatar">'+esc((a.full_name||'?').trim().charAt(0))+'</div><div style="min-width:0"><div class="team-card-name">'+esc(a.full_name||'بدون اسم')+'</div><div class="team-card-title">'+esc(cfg.title)+'</div></div></div>'+
+        '<div class="team-card-expertise">'+esc(a.email||a.phone||'بدون بيانات تواصل')+'</div>'+
+        '<div class="team-stats"><div class="team-stat"><div class="v">'+Number(a.related_projects||0)+'</div><div class="k">مشاريع</div></div><div class="team-stat"><div class="v">'+Number(a.active_sessions||0)+'</div><div class="k">جلسات</div></div><div class="team-stat"><div class="v">'+money(a.total_earnings_minor||0)+'</div><div class="k">أرباح EGP</div></div></div>'+
+        '<div class="team-card-foot"><span class="team-status" style="color:'+(onlineNow?'#5ee7b7':'#8d9aae')+'">● '+(onlineNow?'فاتح الآن':'مش فاتح')+' · '+esc(status)+'</span><div style="display:flex;gap:6px;flex-wrap:wrap">'+
+        (a.phone?'<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener" href="'+waHref(a.phone)+'">واتساب</a>':'')+
+        (Number(a.id)!==Number(state.user?.id)?'<button class="btn btn-primary btn-sm" data-owner-direct="'+a.id+'">مراسلة</button>':'')+
+        '</div></div></article>';
+    }).join(''):'<div class="empty-state"><div class="ic">'+cfg.icon+'</div>مفيش حسابات مطابقة دلوقتي.</div>';
+  };
+  render();
+  search.addEventListener('input',render);
+  grid.addEventListener('click',e=>{const b=e.target.closest('[data-owner-direct]');if(!b)return;openDirectoryContact(b.dataset.ownerDirect);});
+}
 
 RENDERERS['owner-team'] = async (el) => {
   const [ar,pr]=await Promise.all([api('/accounts'),api('/projects')]); const accounts=ar.accounts||[], projects=pr.projects||[];
