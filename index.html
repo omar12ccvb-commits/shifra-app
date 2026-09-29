@@ -2269,9 +2269,9 @@ async function api(path, opts={}){
         return json;
       }
       if(res.status===401){
-        doLogout();
         const err=new Error((json.error&&json.error.message)||'انتهت الجلسة، سجل الدخول مرة أخرى');
         err.apiResponse=true;
+        err.authExpired=true;
         err.status=401;
         throw err;
       }
@@ -2448,11 +2448,12 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
       result = await api('/auth/login', {method:'POST', body:{identifier, password}});
     }
     state.token = result.token;
+    state.user = result.user || null;
     try {
       localStorage.setItem(SESSION_TOKEN_KEY, result.token);
       localStorage.setItem(SESSION_API_KEY, state.apiBase);
     } catch(e) {}
-    await loadMeAndEnter();
+    await loadMeAndEnter(result.customer || result.marketer || result.editor || null);
     if (result && result.loginCode) {
       modal(`<h3>تم إنشاء رمز دخول بديل لك</h3>
         <div style="color:var(--text-dim);font-size:12px;line-height:1.8;margin-bottom:12px">احفظ الرمز ده. المرات الجاية تقدر تدخل باسمك والرمز بدون رقم الهاتف.</div>
@@ -2537,28 +2538,48 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
 
 async function loadMeAndEnter(profileOverride = null){
   if (!state.user) {
-    const me = await api('/auth/me');
-    state.user = me.user;
+    try {
+      const me = await api('/auth/me');
+      state.user = me.user;
+    } catch(err) {
+      // Only /auth/me is authoritative for deciding whether a saved session is dead.
+      if (err && err.authExpired) {
+        doLogout();
+      }
+      throw err;
+    }
   }
-  // OWNER/ADMIN use this exact same login form too. The backend already authenticates them,
-  // so do not bounce them back to a separate login screen.
-  if (state.user.role === 'OWNER' || state.user.role === 'ADMIN') {
-    state.profile = null;
-    enterApp();
-    if (state.user.ownerKey === 'OMAR') setTimeout(() => startNotificationPolling(), 250);
-    return;
+
+  if (!state.user || !NAV_BY_ROLE[state.user.role]) {
+    throw new Error('جلسة الدخول غير صالحة أو الدور غير معروف.');
   }
-  // On signup the backend already returns the role profile, so enter without making
-  // another dependent profile request first. Returning logins still load the profile normally.
-  state.profile = profileOverride || null;
-  if (!state.profile) {
-    if (state.user.role === 'MARKETER') state.profile = (await api('/marketers/me')).marketer;
-    else if (state.user.role === 'EDITOR') state.profile = (await api('/editors/me')).editor;
-    else if (state.user.role === 'CUSTOMER') state.profile = (await api('/customers/me')).customer;
-  }
-  try { state.accountProfile = (await api('/me/profile')).profile; } catch(e) { state.accountProfile = null; }
+
+  // Never block entering the app on secondary profile/account requests.
+  // Login itself has already been authenticated by the backend.
+  state.profile = profileOverride || state.profile || null;
   enterApp();
-  setTimeout(() => { maybeOpenOnboarding(); startNotificationPolling(); }, 250);
+
+  setTimeout(async () => {
+    try {
+      if (!state.profile) {
+        if (state.user.role === 'MARKETER') state.profile = (await api('/marketers/me')).marketer;
+        else if (state.user.role === 'EDITOR') state.profile = (await api('/editors/me')).editor;
+        else if (state.user.role === 'CUSTOMER') state.profile = (await api('/customers/me')).customer;
+      }
+    } catch(e) {
+      // Secondary profile loading must never throw the user back to login.
+      state.profile = state.profile || null;
+    }
+
+    try {
+      state.accountProfile = (await api('/me/profile')).profile;
+    } catch(e) {
+      state.accountProfile = null;
+    }
+
+    try { maybeOpenOnboarding(); } catch(e) {}
+    try { startNotificationPolling(); } catch(e) {}
+  }, 250);
 }
 
 function clearSavedSession(){
@@ -4785,6 +4806,9 @@ function wireProjectDetailActions(el, project, id){
     state.profile = null;
     document.getElementById('app-shell').classList.remove('active');
     document.getElementById('auth-screen').style.display = 'flex';
+    if (err && err.message && err.message !== 'انتهت الجلسة، سجل الدخول مرة أخرى') {
+      authError(err.message);
+    }
   }
 })();
 </script><script>
