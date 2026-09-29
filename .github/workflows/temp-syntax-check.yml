@@ -16,7 +16,7 @@ jobs:
           from pathlib import Path
           import re
           html = Path("index.html").read_text(encoding="utf-8")
-          scripts = re.findall(r"<script(?:\\s[^>]*)?>([\\s\\S]*?)</script>", html, re.I)
+          scripts = re.findall(r"<script(?:\s[^>]*)?>([\s\S]*?)</script>", html, re.I)
           if not scripts:
               raise SystemExit("No script tags found")
           Path("/tmp/index-inline.js").write_text("\n\n".join(scripts), encoding="utf-8")
