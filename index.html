@@ -1960,10 +1960,11 @@ body::before{
         <button type="button" class="role-opt" data-role="EDITOR">محرر</button>
       </div>
       <div class="field"><label>الاسم بالكامل</label><input type="text" id="su-name" required></div>
-      <div class="field"><label>البريد الإلكتروني</label><input type="email" id="su-email" class="ltr"></div>
-      <div class="field"><label>رقم الهاتف</label><input type="text" id="su-phone" class="ltr"></div>
-      <div class="field"><label>كلمة المرور (8 أحرف على الأقل)</label><input type="password" id="su-password" class="ltr" required></div>
+      <div class="field" id="su-email-field"><label>البريد الإلكتروني</label><input type="email" id="su-email" class="ltr"></div>
+      <div class="field"><label>رقم الهاتف</label><input type="text" id="su-phone" class="ltr" inputmode="tel" autocomplete="tel"></div>
+      <div class="field" id="su-password-field"><label>كلمة المرور (8 أحرف على الأقل)</label><input type="password" id="su-password" class="ltr"></div>
       <div class="field" id="su-referral-field"><label>كود الدعوة (اختياري)</label><input type="text" id="su-referral" class="ltr"></div>
+      <div id="customer-signup-note" style="display:none;font-size:11px;color:var(--text-faint);margin:-4px 0 14px">حساب العميل يتم إنشاؤه بالاسم بالكامل ورقم الهاتف فقط.</div>
       <details class="adv"><summary>إعدادات متقدمة</summary>
         <div class="field" style="margin-top:10px"><label>عنوان السيرفر</label><input type="text" id="signup-apibase" class="ltr" value="http://localhost:4000/api"></div>
       </details>
@@ -2140,12 +2141,23 @@ function switchAuthTab(which){
   document.getElementById('signup-form').style.display = which==='signup' ? 'block' : 'none';
   document.getElementById('auth-error').style.display = 'none';
 }
+function updateSignupFields(){
+  const customer = signupRole === 'CUSTOMER';
+  document.getElementById('su-email-field').style.display = customer ? 'none' : 'block';
+  document.getElementById('su-password-field').style.display = customer ? 'none' : 'block';
+  document.getElementById('su-referral-field').style.display = customer ? 'block' : 'none';
+  document.getElementById('customer-signup-note').style.display = customer ? 'block' : 'none';
+  document.getElementById('su-phone').required = customer;
+  document.getElementById('su-password').required = !customer;
+}
+
 document.querySelectorAll('.role-opt').forEach(btn => btn.addEventListener('click', () => {
   document.querySelectorAll('.role-opt').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   signupRole = btn.dataset.role;
-  document.getElementById('su-referral-field').style.display = signupRole === 'CUSTOMER' ? 'block' : 'none';
+  updateSignupFields();
 }));
+updateSignupFields();
 
 // A referral link looks like index.html?ref=SARA-AB12CD -- auto-fill + default to Customer signup.
 (function autoDetectReferral(){
@@ -2207,10 +2219,12 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
     const body = {
       role: signupRole,
       fullName: document.getElementById('su-name').value.trim(),
-      email: document.getElementById('su-email').value.trim() || undefined,
       phone: document.getElementById('su-phone').value.trim() || undefined,
-      password: document.getElementById('su-password').value,
     };
+    if (signupRole !== 'CUSTOMER') {
+      body.email = document.getElementById('su-email').value.trim() || undefined;
+      body.password = document.getElementById('su-password').value;
+    }
     if (signupRole === 'CUSTOMER') {
       const ref = document.getElementById('su-referral').value.trim();
       if (ref) body.referralCode = ref;
