@@ -2150,6 +2150,21 @@ document.getElementById('modal-overlay').addEventListener('click', (e)=>{ if(e.t
 let signupRole = 'CUSTOMER';
 let loginMode = 'CUSTOMER';
 let customerLoginMethod = 'PHONE';
+let customerSignupMethod = 'PHONE';
+
+document.getElementById('signup-customer-phone-mode').addEventListener('click', ()=> switchCustomerSignupMethod('PHONE'));
+document.getElementById('signup-customer-code-mode').addEventListener('click', ()=> switchCustomerSignupMethod('CODE'));
+
+function switchCustomerSignupMethod(method){
+  customerSignupMethod = method;
+  const phone = method === 'PHONE';
+  document.getElementById('signup-customer-phone-mode').classList.toggle('active', phone);
+  document.getElementById('signup-customer-code-mode').classList.toggle('active', !phone);
+  document.getElementById('su-phone-field').style.display = phone ? 'block' : 'none';
+  document.getElementById('su-login-code-field').style.display = phone ? 'none' : 'block';
+  document.getElementById('su-phone').required = phone;
+  document.getElementById('su-login-code').required = !phone;
+}
 
 document.getElementById('login-customer-mode').addEventListener('click', ()=> switchLoginMode('CUSTOMER'));
 document.getElementById('login-team-mode').addEventListener('click', ()=> switchLoginMode('TEAM'));
@@ -2196,21 +2211,24 @@ function switchAuthTab(which){
 }
 function updateSignupFields(){
   const customer = signupRole === 'CUSTOMER';
+  document.getElementById('customer-signup-method').style.display = customer ? 'block' : 'none';
   document.getElementById('su-email-field').style.display = customer ? 'none' : 'block';
   document.getElementById('su-password-field').style.display = customer ? 'none' : 'block';
   document.getElementById('su-referral-field').style.display = customer ? 'block' : 'none';
-  document.getElementById('su-login-code-field').style.display = customer ? 'block' : 'none';
+  document.getElementById('su-phone-field').style.display = customer && customerSignupMethod === 'PHONE' ? 'block' : 'none';
+  document.getElementById('su-login-code-field').style.display = customer && customerSignupMethod === 'CODE' ? 'block' : 'none';
   document.getElementById('customer-signup-note').style.display = customer ? 'block' : 'none';
-  document.getElementById('su-phone').required = customer;
+  document.getElementById('su-phone').required = customer && customerSignupMethod === 'PHONE';
   document.getElementById('su-password').required = !customer;
-  document.getElementById('su-login-code').required = false;
+  document.getElementById('su-login-code').required = customer && customerSignupMethod === 'CODE';
 }
 
 document.querySelectorAll('.role-opt').forEach(btn => btn.addEventListener('click', () => {
   document.querySelectorAll('.role-opt').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   signupRole = btn.dataset.role;
-  updateSignupFields();
+  switchCustomerSignupMethod('PHONE');
+updateSignupFields();
 }));
 updateSignupFields();
 
