@@ -2124,7 +2124,7 @@ body::before{
       </div>
 
       <div id="customer-login-fields">
-        <div class="field"><label>الاسم بالكامل</label><input type="text" id="login-customer-name" required></div>
+        <div class="field"><label>الاسم بالكامل</label><input type="text" id="login-customer-name" autocomplete="name"></div>
         <div class="auth-tabs" style="margin:0 0 12px">
           <button type="button" class="auth-tab active" id="login-customer-phone-mode" onclick="switchCustomerLoginMethod('PHONE');return false;">بالاسم + الهاتف</button>
           <button type="button" class="auth-tab" id="login-customer-code-mode" onclick="switchCustomerLoginMethod('CODE');return false;">بالاسم + رمز الدخول</button>
@@ -2432,11 +2432,14 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     let result;
     if (loginMode === 'CUSTOMER') {
       const fullName = document.getElementById('login-customer-name').value.trim();
+      if (!fullName) throw new Error('اكتب الاسم بالكامل.');
       if (customerLoginMethod === 'PHONE') {
         const phone = document.getElementById('login-customer-phone').value.trim();
+        if (!phone) throw new Error('اكتب رقم الهاتف، أو اختر «بالاسم + رمز الدخول».');
         result = await api('/auth/customer-login', {method:'POST', body:{fullName, phone}});
       } else {
         const loginCode = document.getElementById('login-customer-code').value.trim();
+        if (!loginCode) throw new Error('اكتب رمز الدخول البديل.');
         result = await api('/auth/customer-code-login', {method:'POST', body:{fullName, loginCode}});
       }
     } else {
