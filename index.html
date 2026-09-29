@@ -2574,6 +2574,7 @@ async function loadMeAndEnter(profileOverride = null){
 
     try { maybeOpenOnboarding(); } catch(e) {}
     try { startNotificationPolling(); } catch(e) {}
+    try { initPushNotifications(); } catch(e) {}
   }, 250);
 }
 
@@ -2581,6 +2582,7 @@ function clearSavedSession(){
   try { localStorage.removeItem(SESSION_TOKEN_KEY); } catch(e) {}
 }
 function doLogout(){
+  try { if (typeof detachPushSubscription === 'function') detachPushSubscription(); } catch(e) {}
   clearSavedSession();
   if (state.notificationPollTimer) { clearInterval(state.notificationPollTimer); state.notificationPollTimer = null; }
   state.token = null; state.user = null; state.profile = null;
@@ -2593,6 +2595,10 @@ document.getElementById('user-menu-btn').addEventListener('click', () => {
   modal(`<h3>${esc(state.user.fullName)}</h3>
     <div class="kv"><span class="k">الدور</span><span class="v">${esc(state.user.role)}</span></div>
     ${state.profile && state.profile.referral_code ? `<div class="kv"><span class="k">كود الدعوة</span><span class="v mono">${esc(state.profile.referral_code)}</span></div>` : ''}
+    <div style="display:grid;gap:8px;margin-top:16px">
+      <button class="btn btn-primary btn-block" type="button" onclick="enablePushNotifications();">🔔 تفعيل إشعارات الجهاز</button>
+      <button class="btn btn-ghost btn-block" type="button" onclick="testPushNotifications();">إرسال إشعار اختبار</button>
+    </div>
     <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button>
       <button class="btn btn-danger" id="modal-logout">تسجيل الخروج</button></div>`);
   document.getElementById('modal-logout').addEventListener('click', doLogout);
@@ -2756,6 +2762,11 @@ async function refreshBellBadge(){
 document.getElementById('bell-btn').addEventListener('click', async () => {
   const { notifications } = await api('/notifications');
   modal(`<h3>الإشعارات</h3>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <button class="btn btn-primary btn-sm" type="button" onclick="enablePushNotifications();">🔔 تفعيل إشعارات الجهاز</button>
+      <button class="btn btn-ghost btn-sm" type="button" onclick="testPushNotifications();">إرسال اختبار</button>
+    </div>
+    <div style="font-size:11.5px;color:var(--text-faint);margin-bottom:12px;line-height:1.7">بعد التفعيل، إشعارات SHIFRA تقدر توصلك حتى لو الموقع مقفول.</div>
     <div style="max-height:60vh; overflow-y:auto">
       ${notifications.length ? notifications.map(n => `
         <div class="card list-card" data-notif="${n.id}" data-entity="${n.related_entity_id||''}" style="margin-bottom:8px; ${n.is_read?'opacity:.55':''}">
@@ -4814,6 +4825,7 @@ function wireProjectDetailActions(el, project, id){
   }));
 }
 </script>
+<script src="push-notifications.js"></script>
 <script>
 /* ---------------- Persistent session restore ---------------- */
 (async function restoreSavedSession(){
