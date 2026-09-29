@@ -2215,7 +2215,7 @@ function updateSignupFields(){
   document.getElementById('su-email-field').style.display = customer ? 'none' : 'block';
   document.getElementById('su-password-field').style.display = customer ? 'none' : 'block';
   document.getElementById('su-referral-field').style.display = customer ? 'block' : 'none';
-  document.getElementById('su-phone-field').style.display = customer && customerSignupMethod === 'PHONE' ? 'block' : 'none';
+  document.getElementById('su-phone-field').style.display = customer ? (customerSignupMethod === 'PHONE' ? 'block' : 'none') : 'block';
   document.getElementById('su-login-code-field').style.display = customer && customerSignupMethod === 'CODE' ? 'block' : 'none';
   document.getElementById('customer-signup-note').style.display = customer ? 'block' : 'none';
   document.getElementById('su-phone').required = customer && customerSignupMethod === 'PHONE';
