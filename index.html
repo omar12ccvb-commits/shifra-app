@@ -2412,12 +2412,12 @@ async function ownerAiAsk(command,confirm=false,host){
   if(sendBtn) sendBtn.disabled=true;
   if(!confirm){ ownerAiAppend(log,'user',command); input.value=''; }
   try{
-    const r=await api('/owner-ai/ask',{method:'POST',body:{command,confirm}});
-    ownerAiAppend(log,'ai',r.answer||'تمت قراءة البيانات.');
+    const r=await api('/owner-ai/command',{method:'POST',body:{command,confirm}});
+    ownerAiAppend(log,'ai',r.message||r.answer||'تمت قراءة البيانات.');
     const actionBox=host.querySelector('#owner-ai-action');
-    if(r.needsConfirmation){
+    if(r.type==='confirm'||r.needsConfirmation){
       ownerAiPendingCommand=command;
-      actionBox.innerHTML='<div class="owner-ai-action">⚠ '+esc(r.answer||'يوجد إجراء يحتاج تأكيدًا.')+'<button class="btn btn-primary btn-sm" id="owner-ai-confirm" style="margin-top:8px;width:100%">تنفيذ الإجراء</button></div>';
+      actionBox.innerHTML='<div class="owner-ai-action">⚠ '+esc(r.message||r.answer||'يوجد إجراء يحتاج تأكيدًا.')+'<button class="btn btn-primary btn-sm" id="owner-ai-confirm" style="margin-top:8px;width:100%">تنفيذ الإجراء</button></div>';
       host.querySelector('#owner-ai-confirm').addEventListener('click',async()=>{actionBox.innerHTML='';await ownerAiAsk(command,true,host);});
     }else{ actionBox.innerHTML=''; }
   }catch(e){ownerAiAppend(log,'ai','حصل خطأ: '+e.message);}
@@ -2427,7 +2427,7 @@ async function ownerAiAsk(command,confirm=false,host){
   }
 }
 RENDERERS['owner-ai'] = async (el) => {
-  const s=await api('/owner-ai/status').catch(()=>({enabled:false,model:'gpt-5.6-sol'}));
+  const s={enabled:false,model:'Live Ops'};
   el.innerHTML=
     '<div class="owner-ai-shell">'+
       '<div class="owner-ai-chat">'+
@@ -2436,7 +2436,7 @@ RENDERERS['owner-ai'] = async (el) => {
         '<div class="owner-ai-input"><textarea id="owner-ai-input" placeholder="اكتب مثلًا: شوفلي الأمان / مين مش داخل / فلان خليه مراقبة / رجع فلان من الحظر / غير فلان لمسوق"></textarea><button class="btn btn-primary" id="owner-ai-send">إرسال</button></div>'+
       '</div>'+
       '<div class="owner-ai-side">'+
-        '<div class="owner-ai-hero"><h2>Omar AI ✦</h2><p>مساعد تشغيل خاص بعمر. يقرأ بيانات SHIFRA الحقيقية ويحوّل طلبك إلى تقرير أو إجراء واضح.</p><span class="owner-ai-status">● '+(s.enabled?'AI متصل · '+esc(s.model):'وضع التشغيل المحلي · يعمل بدون مفتاح خارجي')+'</span></div>'+
+        '<div class="owner-ai-hero"><h2>Omar AI ✦</h2><p>مساعد تشغيل خاص بعمر. يقرأ بيانات SHIFRA الحقيقية ويحوّل طلبك إلى تقرير أو إجراء واضح.</p><span class="owner-ai-status">● '+('مساعد تشغيل مباشر · بيانات حقيقية')+'</span></div>'+
         '<div class="card"><b>أوامر سريعة</b><div class="owner-ai-quick">'+
           ['فحص الأمان','مين مش فاتح الموقع؟','مين لسه ناقصه بيانات؟','ملخص كل الحسابات','اعرض حالة المشاريع'].map(x=>'<button type="button" data-owner-ai-quick="'+esc(x)+'">'+esc(x)+'</button>').join('')+
         '</div></div>'+
@@ -2793,13 +2793,13 @@ function ownerDirectContactMarkup(c){
   const wa=c.whatsapp_phone?'<span class="wa-mini" data-direct-wa="'+esc(c.whatsapp_phone)+'" title="فتح واتساب">🟢 WA</span>':'';
   return '<button class="chat-person" data-direct-user="'+c.id+'"><div class="chat-avatar">'+chatInitial(c.full_name)+'</div><div class="chat-person-main"><div class="chat-person-name">'+esc(c.full_name)+'</div><div class="chat-person-meta">'+esc(c.email||c.phone||'بدون بيانات')+(c.latest_message?' · '+esc(String(c.latest_message).slice(0,42)):'')+'</div></div><div class="chat-person-side"><span class="chat-role-chip '+chatRoleClass(c.role)+'">'+ownerRoleAr(c.role)+'</span>'+(c.unread_count?'<span class="badge badge-red">'+c.unread_count+'</span>':'')+wa+'</div></button>';
 }
-function directChatToolsList(){return [
+function directChatToolsList(){const tools=[
  ['chat-search','🔎','بحث الرسائل'],['chat-pin','📌','تثبيت المحادثة'],['chat-mute','🔕','كتم المحادثة'],['chat-density','▤','كثافة العرض'],
  ['chat-time','◷','إظهار التوقيت'],['chat-draft','📝','المسودة'],['chat-emoji','😊','إيموجي'],['chat-quote-last','↩','اقتباس آخر رسالة'],
  ['chat-copy-last','⧉','نسخ آخر رسالة'],['chat-templates','☰','قوالب سريعة'],['chat-export','⇩','تصدير المحادثة'],['chat-refresh','↻','تحديث'],
  ['chat-bottom','↓','آخر الرسائل'],['chat-notes','🗒','ملاحظات المحادثة'],['chat-contact','👤','بطاقة الاتصال'],['chat-whatsapp','🟢','فتح واتساب'],
  ['chat-important','★','تمييز مهم'],['chat-read','✓','تأكيد القراءة'],['chat-enter','↵','Enter للإرسال'],['chat-clear-draft','⌫','مسح المسودة']
-];}
+];return (state.user.role==='CUSTOMER'||state.user.role==='EDITOR')?tools.filter(x=>x[0]!=='chat-whatsapp'):tools;}
 function directChatToolButton(){return '<button type="button" class="chat-tools-launch" id="chat-tools-open">⚙ الأدوات <span style="opacity:.7">20</span></button>';}
 function directMessageHtml(m,prefs){
   const mine=Number(m.sender_id)===Number(state.user.id);
