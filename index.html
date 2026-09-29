@@ -2016,7 +2016,7 @@ const state = { token:null, user:null, profile:null, accountProfile:null, apiBas
   let savedApi = '';
   try { savedApi = localStorage.getItem(SESSION_API_KEY) || ''; } catch(e) {}
   if (!isLocal && savedApi && !savedApi.startsWith('/api') && savedApi !== PRODUCTION_API_BASE) savedApi = '/api';
-  state.apiBase = savedApi || guess;
+  state.apiBase = isLocal ? (savedApi || guess) : '/api';
   document.getElementById('login-apibase').value = state.apiBase;
   document.getElementById('signup-apibase').value = state.apiBase;
 })();
@@ -3001,7 +3001,7 @@ RENDERERS.marketerHome = async (el) => {
       '<div class="mk-kpi"><div class="lab">نشط</div><div class="val">'+active.length+'</div><div class="sub">'+overdue.length+' متأخر</div></div>'+
       '<div class="mk-kpi"><div class="lab">صافي مستحقك</div><div class="val">'+money(earnings.pendingMinor)+' EGP</div><div class="sub">بانتظار الصرف</div></div>'+
     '</div>'+
-    '<div class="card" style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><div style="font-size:20px;font-weight:800">مركز تشغيل '+esc(marketer.full_name||state.user.fullName)+' ⚡</div><div style="font-size:11px;color:#687588;margin-top:4px">كل أدوات المسوّق في مكان واحد.</div></div><span class="badge badge-purple">MARKETER OS</span></div><div class="btn-row" style="margin-top:12px;flex-wrap:wrap"><button class="btn btn-primary btn-sm" id="mk-ref-copy">نسخ كود الدعوة</button><button class="btn btn-ghost btn-sm" data-mk-jump="opportunities">استلام عميل</button><button class="btn btn-ghost btn-sm" data-mk-jump="marketer-followup">ابدأ المتابعة</button><button class="btn btn-ghost btn-sm" data-mk-jump="marketer-analytics">التحليلات</button></div></div>'+
+    '<div class="card" style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><div style="font-size:20px;font-weight:800">مركز تشغيل '+esc(marketer.full_name||state.user.fullName)+' ⚡</div><div style="font-size:11px;color:#687588;margin-top:4px">كل أدوات المسوّق في مكان واحد.</div></div><span class="badge badge-purple">MARKETER OS</span></div><div class="btn-row" style="margin-top:12px;flex-wrap:wrap"><button class="btn btn-primary btn-sm" id="mk-ref-copy">نسخ كود الدعوة</button><button class="btn btn-ghost btn-sm" id="mk-ref-link">نسخ رابط الدعوة</button><button class="btn btn-ghost btn-sm" data-mk-jump="opportunities">استلام عميل</button><button class="btn btn-ghost btn-sm" data-mk-jump="marketer-followup">ابدأ المتابعة</button><button class="btn btn-ghost btn-sm" data-mk-jump="marketer-analytics">التحليلات</button></div></div>'+
     '<div class="section-title">5 أدوات ثابتة للمسوّق</div><div class="mk-tools">'+[
     ['⚡','خطة اليوم','ابدأ بأهم 5 خطوات','mkp-daily'],
     ['🔥','أولوية العملاء','رتّب العملاء الأكثر نشاطًا','mkp-priority'],
@@ -3018,6 +3018,10 @@ RENDERERS.marketerHome = async (el) => {
       [['تحتاج تسعير',pricing.length],['بانتظار الدفع',waitingPayment.length],['قيد التنفيذ',production.length],['تم التسليم',delivered.length],['متأخر',overdue.length],['بدون رسالة',quiet]].map(x=>'<span class="mk-tag">'+esc(x[0])+' · '+x[1]+'</span>').join('')+
     '</div></div>';
   el.querySelector('#mk-ref-copy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(marketer.referral_code||'');toast('اتنسخ كود الدعوة','ok');}catch(e){modal('<h3>كود الدعوة</h3><div class="mono" style="font-size:20px">'+esc(marketer.referral_code||'—')+'</div>');}});
+  el.querySelector('#mk-ref-link')?.addEventListener('click',async()=>{
+    const link=location.origin+location.pathname+'?ref='+encodeURIComponent(marketer.referral_code||'');
+    try{await navigator.clipboard.writeText(link);toast('اتنسخ رابط الدعوة','ok');}catch(e){modal('<h3>رابط الدعوة</h3><div class="mono" style="font-size:12px;overflow-wrap:anywhere">'+esc(link)+'</div>');}
+  });
   el.querySelectorAll('[data-mk-jump]').forEach(b=>b.addEventListener('click',()=>goView(b.dataset.mkJump)));
   el.querySelectorAll('[data-mk-action]').forEach(b=>b.addEventListener('click',async()=>{
     const a=b.dataset.mkAction;
@@ -3459,7 +3463,7 @@ async function startServiceAssignment(referralCode){
 }
 function openCustomerServiceWizard(){
   modal('<h3>طلب خدمة</h3><div style="font-size:11px;color:#7b8aa0;margin-bottom:12px">هل عندك مسوق بتتعامل معاه؟</div><div class="service-choice-grid"><button class="service-choice" id="svc-has"><b>أيوه، عندي مسوق</b><div style="font-size:10px;color:#748299;margin-top:4px">استخدم كود الدعوة الخاص بيه.</div></button><button class="service-choice" id="svc-none"><b>لأ، اختارلي مسوق</b><div style="font-size:10px;color:#748299;margin-top:4px">SHIFRA تختار واحد فاتح ومتواجد.</div></button></div><div class="customer-service-status">اختيار المسوق لا يزوّد سعر الفيديو أو أي خدمة. السعر يفضل هو نفسه.</div><div class="modal-actions"><button class="btn btn-ghost btn-block" onclick="closeModal()">إلغاء</button></div>');
-  document.getElementById('svc-has').onclick=()=>{modal('<h3>كود دعوة المسوق</h3><div class="field"><label>كود الدعوة</label><input id="svc-ref" class="ltr" placeholder="MK-..."></div><div class="customer-service-status">بعد الإرسال هنفتح لك الشات داخل SHIFRA. لو المسوق ما ردش خلال 20 ثانية هنختار مسوق تاني متاح.</div><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal();openCustomerServiceWizard()">رجوع</button><button class="btn btn-primary" id="svc-go">اختيار المسوق</button></div>');document.getElementById('svc-go').onclick=()=>startServiceAssignment(document.getElementById('svc-ref').value.trim());};
+  document.getElementById('svc-has').onclick=()=>{modal('<h3>كود دعوة المسوق</h3><div class="field"><label>كود الدعوة</label><input id="svc-ref" class="ltr" placeholder="MK-..."></div><div class="customer-service-status">بعد الإرسال هنفتح لك الشات داخل SHIFRA. لو المسوق ما ردش خلال 20 ثانية هنختار مسوق تاني متاح.</div><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal();openCustomerServiceWizard()">رجوع</button><button class="btn btn-primary" id="svc-go">اختيار المسوق</button></div>');document.getElementById('svc-go').onclick=()=>{const raw=document.getElementById('svc-ref').value.trim();let ref=raw;try{const u=new URL(raw);ref=u.searchParams.get('ref')||raw;}catch(e){}startServiceAssignment(ref);};};
   document.getElementById('svc-none').onclick=()=>startServiceAssignment('');
 }
 RENDERERS['ai-service'] = async (el) => {
@@ -3467,7 +3471,7 @@ RENDERERS['ai-service'] = async (el) => {
    '<section class="ai-service-hero">'+
     '<div class="ai-service-eyebrow">SHIFRA · AI CREATIVE STUDIO</div>'+
     '<h1 class="ai-service-title">خلي الذكاء الاصطناعي يصنع فكرتك.</h1>'+
-    '<div class="ai-service-copy">خدمة خاصة داخل شفرة لتنفيذ الصور والفيديوهات والمحتوى الإعلاني بالذكاء الاصطناعي. مش خدمة آلية وخلاص — أنت بتتكلم مباشرة مع المالك، وهو يتفق معاك على الفكرة والسعر وينفذ الشغل بنفسه.</div>'+
+    '<div class="ai-service-copy">خدمة خاصة داخل شفرة لتنفيذ الصور والفيديوهات والمحتوى الإعلاني بالذكاء الاصطناعي. اطلب الخدمة، استخدم مسوقك الحالي أو خلّي SHIFRA تختار لك مسوق متاح، وكل التواصل والمتابعة تتم داخل التطبيق.</div>'+
     '<div class="ai-owner-badge">✦ تنفيذ مباشر · عمر يوسف · المالك</div>'+
     '<div class="ai-service-grid">'+
       '<div class="ai-service-card"><div class="ai-service-icon">🎬</div><b>فيديو بالذكاء الاصطناعي</b><span>فيديوهات إعلانية وسينمائية ومحتوى قصير حسب فكرتك.</span></div>'+
