@@ -1918,7 +1918,26 @@ body::before{
 .owner-ai-shell{display:grid;gap:12px}.owner-ai-command{display:grid;grid-template-columns:minmax(0,1fr) 112px;gap:8px;padding:10px;border:1px solid rgba(124,92,255,.18);border-radius:18px;background:linear-gradient(145deg,rgba(124,92,255,.08),rgba(56,189,248,.04))}.owner-ai-command textarea{min-height:82px!important;border-radius:13px!important}.owner-ai-response{min-height:220px}.owner-ai-result-card{padding:13px;border-radius:14px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);margin-bottom:8px}.owner-ai-result-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 @media(max-width:600px){.service-choice-grid{grid-template-columns:1fr}.owner-ai-command{grid-template-columns:1fr}.owner-ai-command .btn{width:100%}.owner-ai-result-grid{grid-template-columns:1fr}}
 </style>
-</head>
+<style id="shifra-workflow-orchestrator-v1">
+.workflow-orchestrator{display:grid;gap:12px}
+.workflow-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:4px}
+.workflow-step{padding:10px 8px;border:1px solid rgba(255,255,255,.06);border-radius:13px;background:rgba(255,255,255,.025);text-align:center}
+.workflow-step .n{width:28px;height:28px;border-radius:9px;margin:0 auto 5px;display:flex;align-items:center;justify-content:center;background:rgba(139,92,246,.12);color:#cdbfff;font-weight:800}
+.workflow-step b{font-size:11px}.workflow-step span{display:block;font-size:9.5px;color:#718097;margin-top:2px}
+.workflow-step.done{border-color:rgba(52,211,153,.22);background:rgba(52,211,153,.05)}
+.workflow-step.done .n{background:rgba(52,211,153,.12);color:#8ef0c7}
+.workflow-form{display:grid;gap:10px}
+.workflow-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.workflow-status{padding:11px 12px;border-radius:13px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.025);font-size:11px;line-height:1.7;color:#a9b4c5}
+.workflow-status strong{color:#eef4fb}
+.workflow-result{display:grid;gap:8px}
+.workflow-result-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;border:1px solid rgba(255,255,255,.06);border-radius:12px;background:rgba(255,255,255,.025)}
+.workflow-result-row .meta{font-size:10px;color:#748299}
+.workflow-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;font-size:10px;font-weight:700;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.025)}
+.workflow-chip.ok{color:#9bf1d0;background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.15)}
+.workflow-chip.wait{color:#ffe39b;background:rgba(251,191,36,.07);border-color:rgba(251,191,36,.14)}
+@media(max-width:620px){.workflow-steps{grid-template-columns:repeat(2,minmax(0,1fr))}.workflow-grid{grid-template-columns:1fr}}
+</style></head>
 <body>
 
 <div id="auth-screen">
@@ -3534,6 +3553,109 @@ async function startServiceAssignment(referralCode){
     }
   }catch(e){toast(e.message,'err');}
 }
+function workflowOptionHtml(items, valueKey, labelKey, placeholder){
+  return '<option value="">'+placeholder+'</option>'+((items||[]).map(x=>'<option value="'+esc(x[valueKey]||x.code||'')+'">'+esc(x[labelKey]||x.name_ar||x.name_en||x.code||'')+'</option>').join(''));
+}
+async function openCustomerWorkSetup(){
+  try{
+    const [catalog,services,current] = await Promise.all([
+      api('/services/catalog'),
+      api('/services'),
+      customerSafe('/customer-service/current',{assignment:null})
+    ]);
+    const selectedAssignment=current.assignment;
+    const serviceList=services.services||[];
+    const typeByCode=Object.fromEntries((catalog.serviceTypes||[]).map(x=>[x.code,x]));
+    const contentByCode=Object.fromEntries((catalog.contentTypes||[]).map(x=>[x]));
+    const levelByCode=Object.fromEntries((catalog.editingLevels||[]).map(x=>[x]));
+    const defaultService=serviceList[0]||null;
+
+    modal(
+      '<div class="workflow-orchestrator">'+
+        '<div><div style="font:800 10px/1.2 IBM Plex Mono,monospace;color:#7df3c4;letter-spacing:1.6px">SHIFRA AUTO WORKFLOW</div><h3 style="margin-top:5px">منشئ المشروع الذكي</h3><div style="font-size:11px;color:#78879d;margin-top:3px">حدد المطلوب مرة واحدة، وشفرة ترتّب باقي المسار.</div></div>'+
+        '<div class="workflow-steps">'+
+          '<div class="workflow-step"><div class="n">1</div><b>الخدمة</b><span>نوع الشغل</span></div>'+
+          '<div class="workflow-step"><div class="n">2</div><b>المسوّق</b><span>تعيين تلقائي</span></div>'+
+          '<div class="workflow-step"><div class="n">3</div><b>المونتير</b><span>مطابقة ذكية</span></div>'+
+          '<div class="workflow-step"><div class="n">4</div><b>التنفيذ</b><span>متابعة داخل SHIFRA</span></div>'+
+        '</div>'+
+        (selectedAssignment?'<div class="workflow-status"><strong>المسوّق الحالي:</strong> '+esc(selectedAssignment.marketer_name)+' — SHIFRA ستستخدمه في المسار الحالي بدل إنشاء تعيين جديد.</div>':'<div class="workflow-status"><strong>التعيين:</strong> سنستخدم مسوّقك الحالي إن وجد، أو نختار مسوّقًا متاحًا تلقائيًا ونفتح معاه المحادثة.</div>')+
+        '<div class="workflow-form">'+
+          '<div class="field"><label>اسم المشروع</label><input id="workflow-title" maxlength="120" placeholder="مثال: فيديو إعلان الشركة الجديد"></div>'+
+          '<div class="workflow-grid">'+
+            '<div class="field"><label>الخدمة</label><select id="workflow-service">'+workflowOptionHtml(catalog.serviceTypes||[],'code','name_ar','اختر نوع الخدمة')+'</select></div>'+
+            '<div class="field"><label>نوع المحتوى</label><select id="workflow-content">'+workflowOptionHtml(catalog.contentTypes||[],'code','name_ar','اختر نوع المحتوى')+'</select></div>'+
+            '<div class="field"><label>مستوى المونتاج</label><select id="workflow-level">'+workflowOptionHtml(catalog.editingLevels||[],'code','name_ar','اختر المستوى')+'</select></div>'+
+            '<div class="field"><label>الكمية</label><input id="workflow-qty" type="number" min="1" max="50" value="1"></div>'+
+          '</div>'+
+          '<div class="field"><label>تفاصيل البريف</label><textarea id="workflow-notes" rows="4" maxlength="2000" placeholder="اكتب الفكرة، المدة المطلوبة، الجمهور، الأسلوب أو أي تفاصيل مهمة..."></textarea></div>'+
+          '<div class="workflow-status"><strong>المونتير:</strong> لن يتم إسناده بشكل نهائي قبل مرحلة الدفع/التأكيد؛ بعد تأكيد السعر والدفع يتم تمرير الطلب للمطابقة واختيار المونتير المناسب بدل اختيار شخص عشوائي.</div>'+
+        '</div>'+
+        '<div class="modal-actions"><button class="btn btn-ghost" id="workflow-cancel">إلغاء</button><button class="btn btn-primary" id="workflow-start">⚡ ابدأ تجهيز المشروع</button></div>'+
+      '</div>'
+    );
+
+    if(defaultService){
+      document.getElementById('workflow-service').value=defaultService.service_type_code;
+      document.getElementById('workflow-content').value=defaultService.content_type_code;
+      document.getElementById('workflow-level').value=defaultService.editing_level_code;
+    }
+    document.getElementById('workflow-cancel').onclick=closeModal;
+    document.getElementById('workflow-start').onclick=async()=>{
+      const title=document.getElementById('workflow-title').value.trim();
+      const serviceTypeCode=document.getElementById('workflow-service').value;
+      const contentTypeCode=document.getElementById('workflow-content').value;
+      const editingLevelCode=document.getElementById('workflow-level').value;
+      const quantity=Math.max(1,Math.min(50,Number(document.getElementById('workflow-qty').value||1)));
+      const requirements=document.getElementById('workflow-notes').value.trim();
+      if(!title||!serviceTypeCode||!contentTypeCode||!editingLevelCode){
+        toast('كمّل اسم المشروع والخدمة ونوع المحتوى ومستوى المونتاج','err'); return;
+      }
+      const exact=serviceList.find(s=>s.service_type_code===serviceTypeCode&&s.content_type_code===contentTypeCode&&s.editing_level_code===editingLevelCode);
+      if(!exact){toast('الخدمة دي مش متاحة حاليًا داخل الكتالوج','err');return;}
+      const btn=document.getElementById('workflow-start');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';
+
+      try{
+        const assignment=(await api('/customer-service/assign',{method:'POST',body:{}})).assignment;
+        const serviceName=typeByCode[serviceTypeCode]?.name_ar||serviceTypeCode;
+        const contentName=contentByCode[contentTypeCode]?.name_ar||contentTypeCode;
+        const levelName=levelByCode[editingLevelCode]?.name_ar||editingLevelCode;
+        const brief=[
+          'طلب مشروع جديد من SHIFRA',
+          'الاسم: '+title,
+          'الخدمة: '+serviceName,
+          'نوع المحتوى: '+contentName,
+          'مستوى المونتاج: '+levelName,
+          'الكمية: '+quantity,
+          requirements?'التفاصيل: '+requirements:''
+        ].filter(Boolean).join('\n');
+
+        try{
+          await api('/direct-conversations/'+assignment.marketerId+'/messages',{method:'POST',body:{body:brief}});
+        }catch(sendErr){}
+
+        modal(
+          '<div class="workflow-orchestrator">'+
+            '<div><div style="font:800 10px/1.2 IBM Plex Mono,monospace;color:#7df3c4;letter-spacing:1.6px">WORKFLOW READY</div><h3 style="margin-top:5px">المشروع اتجهّز 🎯</h3><div style="font-size:11px;color:#78879d;margin-top:3px">SHIFRA رتبت أول مراحل الشغل وفتحت المسار الصحيح.</div></div>'+
+            '<div class="workflow-result">'+
+              '<div class="workflow-result-row"><div><b>الخدمة</b><div class="meta">'+esc(serviceName+' · '+contentName+' · '+levelName)+'</div></div><span class="workflow-chip ok">✓ جاهزة</span></div>'+
+              '<div class="workflow-result-row"><div><b>المسوّق</b><div class="meta">'+esc(assignment.marketerName||'تم التعيين تلقائيًا')+'</div></div><span class="workflow-chip ok">✓ تم التوجيه</span></div>'+
+              '<div class="workflow-result-row"><div><b>المونتير</b><div class="meta">سيتم تعيينه تلقائيًا بعد تأكيد السعر والدفع</div></div><span class="workflow-chip wait">◷ المرحلة التالية</span></div>'+
+              '<div class="workflow-result-row"><div><b>البريف</b><div class="meta">تم إرسال ملخص الطلب للمسوّق داخل SHIFRA</div></div><span class="workflow-chip ok">✓ تم الإرسال</span></div>'+
+            '</div>'+
+            '<div class="workflow-status"><strong>الخطوة التالية:</strong> افتح محادثة المسوّق، اتفقوا على التفاصيل والسعر، وبعد تأكيد الدفع يدخل المشروع تلقائيًا لمسار المونتير.</div>'+
+            '<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button><button class="btn btn-primary" id="workflow-open-chat">💬 فتح محادثة المسوّق</button></div>'+
+          '</div>'
+        );
+        document.getElementById('workflow-open-chat').onclick=async()=>{closeModal();await openAssignedMarketerChat(assignment.marketerId);};
+      }catch(err){
+        toast(err.message||'تعذر تجهيز المشروع','err');
+        btn.disabled=false;btn.textContent='⚡ ابدأ تجهيز المشروع';
+      }
+    };
+  }catch(e){toast(e.message||'تعذر فتح منشئ المشروع','err');}
+}
+
 function openCustomerServiceWizard(){
   modal('<h3>طلب خدمة</h3><div style="font-size:11px;color:#7b8aa0;margin-bottom:12px">هل عندك مسوق بتتعامل معاه؟</div><div class="service-choice-grid"><button class="service-choice" id="svc-has"><b>أيوه، عندي مسوق</b><div style="font-size:10px;color:#748299;margin-top:4px">استخدم كود الدعوة الخاص بيه.</div></button><button class="service-choice" id="svc-none"><b>لأ، اختارلي مسوق</b><div style="font-size:10px;color:#748299;margin-top:4px">SHIFRA تختار واحد فاتح ومتواجد.</div></button></div><div class="customer-service-status">اختيار المسوق لا يزوّد سعر الفيديو أو أي خدمة. السعر يفضل هو نفسه.</div><div class="modal-actions"><button class="btn btn-ghost btn-block" onclick="closeModal()">إلغاء</button></div>');
   document.getElementById('svc-has').onclick=()=>{modal('<h3>كود دعوة المسوق</h3><div class="field"><label>كود الدعوة</label><input id="svc-ref" class="ltr" placeholder="MK-..."></div><div class="customer-service-status">بعد الإرسال هنفتح لك الشات داخل SHIFRA. لو المسوق ما ردش خلال 20 ثانية هنختار مسوق تاني متاح.</div><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal();openCustomerServiceWizard()">رجوع</button><button class="btn btn-primary" id="svc-go">اختيار المسوق</button></div>');document.getElementById('svc-go').onclick=()=>{const raw=document.getElementById('svc-ref').value.trim();let ref=raw;try{const u=new URL(raw);ref=u.searchParams.get('ref')||raw;}catch(e){}startServiceAssignment(ref);};};
@@ -3689,6 +3811,7 @@ RENDERERS.customerHome = async (el) => {
         '<div class="customer-kpi"><div class="k">إشعارات جديدة</div><div class="v">'+unread+'</div><div class="s">'+direct.length+' محادثة مباشرة</div></div>'+
         '<div class="customer-kpi"><div class="k">سلسلة حضور</div><div class="v">'+streak+' يوم</div><div class="s">آخر زيارة: اليوم</div></div>'+
       '</div>'+
+    ''<div data-workflow-orchestrator class="card" style="margin:14px 0;padding:0;overflow:hidden;border-color:rgba(52,211,153,.18);background:linear-gradient(120deg,rgba(52,211,153,.08),rgba(56,189,248,.05),rgba(124,92,255,.08))">'+'<div style="padding:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">'+'<div><div style="font:800 10px/1 IBM Plex Mono,monospace;color:#7df3c4;letter-spacing:2px">SHIFRA AUTO WORKFLOW</div><div style="font:900 24px/1.3 Cairo,sans-serif;margin-top:7px">جهّز شغلك كله من زر واحد</div><div style="font:500 11px/1.7 Cairo,sans-serif;color:#8290a4;margin-top:3px">الخدمة + المسوّق + البريف + مسار المونتير، بترتيب واضح داخل شفرة.</div></div>'+'<button class="btn btn-primary" data-workflow-open style="min-width:205px">⚡ جهّزلي شغلي</button></div></div>'+
     '<div data-ai-service-promo class="card" style="margin:14px 0;padding:0;overflow:hidden;border-color:rgba(124,92,255,.2);background:linear-gradient(120deg,rgba(124,92,255,.11),rgba(56,189,248,.06),rgba(52,211,153,.05))">'+'<div style="padding:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">'+'<div><div style="font:800 10px/1 IBM Plex Mono,monospace;color:#70e5ff;letter-spacing:2px">SHIFRA AI STUDIO</div><div style="font:900 24px/1.3 Cairo,sans-serif;margin-top:7px">صور · فيديو · محتوى بالذكاء الاصطناعي</div><div style="font:500 11px/1.7 Cairo,sans-serif;color:#7e8da3;margin-top:3px">تنفيذ مباشر مع عمر يوسف، المالك شخصيًا.</div></div>'+'<button class="btn btn-primary" data-ai-service-open style="min-width:190px">✦ اكتشف خدمة AI</button></div></div>'+'<div class="customer-section-head"><div class="title">10 ميزات للاستخدام اليومي</div><span class="badge badge-gray">'+dailyDone.length+' مكتملة اليوم</span></div>'+
     '<div class="customer-feature-grid">'+dailyCards+'</div>'+
     '<div class="customer-section-head"><div class="title">10 أدوات قوية للحساب</div><button class="btn btn-ghost btn-sm" data-customer-jump="customerTools">عرض الأدوات</button></div>'+
@@ -3701,6 +3824,7 @@ RENDERERS.customerHome = async (el) => {
     '</div>';
 
   el.querySelector('[data-ai-service-open]')?.addEventListener('click',()=>goView('ai-service'));
+  el.querySelector('[data-workflow-open]')?.addEventListener('click',openCustomerWorkSetup);
   el.querySelectorAll('[data-quick-service]').forEach(b=>b.addEventListener('click',()=>customerStartQuickService(b.dataset.quickService)));
   el.querySelectorAll('[data-customer-jump]').forEach(b=>b.addEventListener('click',()=>goView(b.dataset.customerJump)));
   el.querySelectorAll('[data-customer-action]').forEach(b=>b.addEventListener('click',()=>customerHandleAction(b.dataset.customerAction,el,projects,notifications,cat)));
