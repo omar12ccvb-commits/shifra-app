@@ -2124,7 +2124,7 @@ body::before{
       </div>
 
       <div id="customer-login-fields">
-        <div class="field"><label>الاسم بالكامل</label><input type="text" id="login-customer-name" required></div>
+        <div class="field"><label>الاسم بالكامل</label><input type="text" id="login-customer-name" autocomplete="name"></div>
         <div class="auth-tabs" style="margin:0 0 12px">
           <button type="button" class="auth-tab active" id="login-customer-phone-mode" onclick="switchCustomerLoginMethod('PHONE');return false;">بالاسم + الهاتف</button>
           <button type="button" class="auth-tab" id="login-customer-code-mode" onclick="switchCustomerLoginMethod('CODE');return false;">بالاسم + رمز الدخول</button>
@@ -2269,9 +2269,9 @@ async function api(path, opts={}){
         return json;
       }
       if(res.status===401){
-        doLogout();
         const err=new Error((json.error&&json.error.message)||'انتهت الجلسة، سجل الدخول مرة أخرى');
         err.apiResponse=true;
+        err.authExpired=true;
         err.status=401;
         throw err;
       }
@@ -2367,6 +2367,7 @@ function switchLoginMode(mode){
 
 switchCustomerLoginMethod('PHONE');
 switchLoginMode('CUSTOMER');
+document.getElementById('login-form').noValidate = true;
 
 document.getElementById('tab-login').addEventListener('click', ()=> switchAuthTab('login'));
 document.getElementById('tab-signup').addEventListener('click', ()=> switchAuthTab('signup'));
@@ -2432,11 +2433,14 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     let result;
     if (loginMode === 'CUSTOMER') {
       const fullName = document.getElementById('login-customer-name').value.trim();
+      if (!fullName) throw new Error('اكتب الاسم بالكامل.');
       if (customerLoginMethod === 'PHONE') {
         const phone = document.getElementById('login-customer-phone').value.trim();
+        if (!phone) throw new Error('اكتب رقم الهاتف، أو اختر «بالاسم + رمز الدخول».');
         result = await api('/auth/customer-login', {method:'POST', body:{fullName, phone}});
       } else {
         const loginCode = document.getElementById('login-customer-code').value.trim();
+        if (!loginCode) throw new Error('اكتب رمز الدخول البديل.');
         result = await api('/auth/customer-code-login', {method:'POST', body:{fullName, loginCode}});
       }
     } else {
@@ -2445,11 +2449,12 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
       result = await api('/auth/login', {method:'POST', body:{identifier, password}});
     }
     state.token = result.token;
+    state.user = result.user || null;
     try {
       localStorage.setItem(SESSION_TOKEN_KEY, result.token);
       localStorage.setItem(SESSION_API_KEY, state.apiBase);
     } catch(e) {}
-    await loadMeAndEnter();
+    await loadMeAndEnter(result.customer || result.marketer || result.editor || null);
     if (result && result.loginCode) {
       modal(`<h3>تم إنشاء رمز دخول بديل لك</h3>
         <div style="color:var(--text-dim);font-size:12px;line-height:1.8;margin-bottom:12px">احفظ الرمز ده. المرات الجاية تقدر تدخل باسمك والرمز بدون رقم الهاتف.</div>
@@ -2534,28 +2539,42 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
 
 async function loadMeAndEnter(profileOverride = null){
   if (!state.user) {
-    const me = await api('/auth/me');
-    state.user = me.user;
+    try {
+      const me = await api('/auth/me');
+      state.user = me.user;
+    } catch(err) {
+      if (err && err.authExpired) doLogout();
+      throw err;
+    }
   }
-  // OWNER/ADMIN use this exact same login form too. The backend already authenticates them,
-  // so do not bounce them back to a separate login screen.
-  if (state.user.role === 'OWNER' || state.user.role === 'ADMIN') {
-    state.profile = null;
-    enterApp();
-    if (state.user.ownerKey === 'OMAR') setTimeout(() => startNotificationPolling(), 250);
-    return;
+
+  if (!state.user || !NAV_BY_ROLE[state.user.role]) {
+    throw new Error('جلسة الدخول غير صالحة أو الدور غير معروف.');
   }
-  // On signup the backend already returns the role profile, so enter without making
-  // another dependent profile request first. Returning logins still load the profile normally.
-  state.profile = profileOverride || null;
-  if (!state.profile) {
-    if (state.user.role === 'MARKETER') state.profile = (await api('/marketers/me')).marketer;
-    else if (state.user.role === 'EDITOR') state.profile = (await api('/editors/me')).editor;
-    else if (state.user.role === 'CUSTOMER') state.profile = (await api('/customers/me')).customer;
-  }
-  try { state.accountProfile = (await api('/me/profile')).profile; } catch(e) { state.accountProfile = null; }
+
+  state.profile = profileOverride || state.profile || null;
   enterApp();
-  setTimeout(() => { maybeOpenOnboarding(); startNotificationPolling(); }, 250);
+
+  setTimeout(async () => {
+    try {
+      if (!state.profile) {
+        if (state.user.role === 'MARKETER') state.profile = (await api('/marketers/me')).marketer;
+        else if (state.user.role === 'EDITOR') state.profile = (await api('/editors/me')).editor;
+        else if (state.user.role === 'CUSTOMER') state.profile = (await api('/customers/me')).customer;
+      }
+    } catch(e) {
+      state.profile = state.profile || null;
+    }
+
+    try {
+      state.accountProfile = (await api('/me/profile')).profile;
+    } catch(e) {
+      state.accountProfile = null;
+    }
+
+    try { maybeOpenOnboarding(); } catch(e) {}
+    try { startNotificationPolling(); } catch(e) {}
+  }, 250);
 }
 
 function clearSavedSession(){
@@ -2620,7 +2639,22 @@ const NAV_BY_ROLE = {
     {id:'owner-audit', label:'التتبع والتدقيق', icon:'▧'},
     {id:'owner-weekly', label:'الأداء الأسبوعي', icon:'★'}
   ],
-  ADMIN: [ {id:'people-directory', label:'الخبراء', icon:'👥'}, {id:'direct', label:'رسائل', icon:'💬'}, {id:'projects', label:'المشاريع', icon:'▦'} ],
+  ADMIN: [
+    {id:'owner-home', label:'مركز التشغيل', icon:'◆'},
+    {id:'owner-direct', label:'مراسلات مباشرة', icon:'💬'},
+    {id:'owner-project-chat', label:'محادثات المشاريع', icon:'☷'},
+    {id:'owner-finance', label:'الأرباح والخسائر', icon:'₿'},
+    {id:'owner-team', label:'الفريق والحضور', icon:'◉'},
+    {id:'owner-customers', label:'العملاء', icon:'☺'},
+    {id:'owner-editors', label:'المنتجين', icon:'🎬'},
+    {id:'owner-marketers', label:'المسوّقين', icon:'📣'},
+    {id:'owner-ops', label:'العمليات والاختناقات', icon:'⚙'},
+    {id:'owner-accounts', label:'كل الحسابات', icon:'👥'},
+    {id:'owner-payments', label:'المدفوعات', icon:'▤'},
+    {id:'owner-payouts', label:'المستحقات', icon:'⇄'},
+    {id:'owner-audit', label:'التتبع والتدقيق', icon:'▧'},
+    {id:'owner-weekly', label:'الأداء الأسبوعي', icon:'★'}
+  ],
 };
 const VIEW_META = {
   customerHome:{title:'مركز العميل', sub:'كل ما تحتاجه اليوم لمتابعة مشاريعك وطلب الخدمة بسرعة'},
@@ -2675,12 +2709,12 @@ const MOBILE_PRIMARY_BY_ROLE = {
   CUSTOMER:['customerHome','projects','direct','customerTools'],
   MARKETER:['marketerHome','smart-routing','projects','people-directory'],
   EDITOR:['editorHome','projects','earnings','people-directory'],
-  OWNER:['owner-home','owner-ai','owner-direct','people-directory'],
-  ADMIN:['direct','projects']
+  OWNER:['owner-home','owner-customers','owner-editors','owner-marketers'],
+  ADMIN:['owner-home','owner-customers','owner-editors','owner-marketers']
 };
 function renderNav(){
   let items = NAV_BY_ROLE[state.user.role] || [];
-  if (state.user.role === 'OWNER' && state.user.ownerKey !== 'OMAR') items = items.filter(n => n.id !== 'owner-ai');
+  if ((state.user.role === 'OWNER' || state.user.role === 'ADMIN') && state.user.ownerKey !== 'OMAR') items = items.filter(n => n.id !== 'owner-ai');
   const html = items.map(n => `<button class="nav-item" data-view="${n.id}"><span class="ic">${n.icon}</span><span>${esc(n.label)}</span></button>`).join('');
   document.getElementById('nav-list-desktop').innerHTML = html;
   const primaryIds = MOBILE_PRIMARY_BY_ROLE[state.user.role] || items.slice(0,4).map(x=>x.id);
@@ -3871,7 +3905,7 @@ function startNotificationPolling(){
     }catch(e){}
   },15000);
 }
-function openOwnerPersonalChat(){
+async function openOwnerPersonalChat(){
   try{
     const r=await api('/direct-conversations');
     const list=r.conversations||[];
