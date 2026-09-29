@@ -1931,8 +1931,22 @@ body::before{
     <div class="auth-error" id="auth-error"></div>
 
     <form id="login-form">
-      <div class="field"><label>البريد أو الهاتف</label><input type="text" id="login-identifier" class="ltr" required></div>
-      <div class="field"><label>كلمة المرور</label><input type="password" id="login-password" class="ltr" required></div>
+      <div class="auth-tabs" style="margin-bottom:16px">
+        <button type="button" class="auth-tab active" id="login-customer-mode">دخول عميل</button>
+        <button type="button" class="auth-tab" id="login-team-mode">دخول فريق SHIFRA</button>
+      </div>
+
+      <div id="customer-login-fields">
+        <div class="field"><label>الاسم بالكامل</label><input type="text" id="login-customer-name" required></div>
+        <div class="field"><label>رقم الهاتف</label><input type="tel" id="login-customer-phone" class="ltr" inputmode="tel" autocomplete="tel" required></div>
+        <div style="font-size:11px;color:var(--text-faint);margin:-4px 0 14px">دخول العميل يتم بالاسم بالكامل ورقم الهاتف فقط.</div>
+      </div>
+
+      <div id="staff-login-fields" style="display:none">
+        <div class="field"><label>البريد أو الهاتف</label><input type="text" id="login-identifier" class="ltr"></div>
+        <div class="field"><label>كلمة المرور</label><input type="password" id="login-password" class="ltr"></div>
+      </div>
+
       <details class="adv"><summary>إعدادات متقدمة</summary>
         <div class="field" style="margin-top:10px"><label>عنوان السيرفر</label><input type="text" id="login-apibase" class="ltr" value="http://localhost:4000/api"></div>
       </details>
@@ -2096,6 +2110,27 @@ document.getElementById('modal-overlay').addEventListener('click', (e)=>{ if(e.t
 
 /* ---------------- Auth: tabs + role picker ---------------- */
 let signupRole = 'CUSTOMER';
+let loginMode = 'CUSTOMER';
+
+document.getElementById('login-customer-mode').addEventListener('click', ()=> switchLoginMode('CUSTOMER'));
+document.getElementById('login-team-mode').addEventListener('click', ()=> switchLoginMode('TEAM'));
+
+function switchLoginMode(mode){
+  loginMode = mode;
+  const customer = mode === 'CUSTOMER';
+  document.getElementById('login-customer-mode').classList.toggle('active', customer);
+  document.getElementById('login-team-mode').classList.toggle('active', !customer);
+  document.getElementById('customer-login-fields').style.display = customer ? 'block' : 'none';
+  document.getElementById('staff-login-fields').style.display = customer ? 'none' : 'block';
+  document.getElementById('login-customer-name').required = customer;
+  document.getElementById('login-customer-phone').required = customer;
+  document.getElementById('login-identifier').required = !customer;
+  document.getElementById('login-password').required = !customer;
+  document.getElementById('login-submit').textContent = customer ? 'دخول كعميل' : 'دخول';
+}
+
+switchLoginMode('CUSTOMER');
+
 document.getElementById('tab-login').addEventListener('click', ()=> switchAuthTab('login'));
 document.getElementById('tab-signup').addEventListener('click', ()=> switchAuthTab('signup'));
 function switchAuthTab(which){
@@ -2126,6 +2161,7 @@ function authError(msg){
   const e = document.getElementById('auth-error');
   const friendly = {
     'Invalid credentials':'البريد أو الهاتف أو كلمة المرور غير صحيحة.',
+    'Invalid customer credentials':'الاسم أو رقم الهاتف غير صحيحين.',
     'Account is not active':'الحساب غير مفعل حاليًا.'
   }[msg] || msg;
   e.textContent = friendly;
@@ -2140,12 +2176,19 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   localStorage.setItem(SESSION_API_KEY, state.apiBase);
   btn.disabled = true; const orig = btn.textContent; btn.innerHTML = '<span class="spinner"></span>';
   try {
-    const identifier = document.getElementById('login-identifier').value.trim();
-    const password = document.getElementById('login-password').value;
-    const { token } = await api('/auth/login', {method:'POST', body:{identifier, password}});
-    state.token = token;
+    let result;
+    if (loginMode === 'CUSTOMER') {
+      const fullName = document.getElementById('login-customer-name').value.trim();
+      const phone = document.getElementById('login-customer-phone').value.trim();
+      result = await api('/auth/customer-login', {method:'POST', body:{fullName, phone}});
+    } else {
+      const identifier = document.getElementById('login-identifier').value.trim();
+      const password = document.getElementById('login-password').value;
+      result = await api('/auth/login', {method:'POST', body:{identifier, password}});
+    }
+    state.token = result.token;
     try {
-      localStorage.setItem(SESSION_TOKEN_KEY, token);
+      localStorage.setItem(SESSION_TOKEN_KEY, result.token);
       localStorage.setItem(SESSION_API_KEY, state.apiBase);
     } catch(e) {}
     await loadMeAndEnter();
