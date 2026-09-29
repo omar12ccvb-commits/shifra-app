@@ -1989,12 +1989,19 @@ body::before{
         <button type="button" class="role-opt" data-role="EDITOR">محرر</button>
       </div>
       <div class="field"><label>الاسم بالكامل</label><input type="text" id="su-name" required></div>
+      <div id="customer-signup-method" style="display:none;margin:2px 0 4px">
+        <div style="font-size:12px;color:var(--text-dim);margin-bottom:8px">اختار طريقة تسجيل الدخول بعد إنشاء الحساب</div>
+        <div class="auth-tabs" style="margin:0 0 12px">
+          <button type="button" class="auth-tab active" id="signup-customer-phone-mode">الاسم + رقم الهاتف</button>
+          <button type="button" class="auth-tab" id="signup-customer-code-mode">الاسم + رمز الدخول</button>
+        </div>
+      </div>
       <div class="field" id="su-email-field"><label>البريد الإلكتروني</label><input type="email" id="su-email" class="ltr"></div>
-      <div class="field"><label>رقم الهاتف</label><input type="text" id="su-phone" class="ltr" inputmode="tel" autocomplete="tel"></div>
-      <div class="field" id="su-login-code-field" style="display:none"><label>رمز الدخول البديل (اختياري)</label><input type="text" id="su-login-code" class="ltr" autocomplete="off" autocapitalize="characters" maxlength="32" pattern="[A-Za-z0-9]{6,32}"></div>
+      <div class="field" id="su-phone-field"><label>رقم الهاتف</label><input type="text" id="su-phone" class="ltr" inputmode="tel" autocomplete="tel"></div>
+      <div class="field" id="su-login-code-field"><label>رمز الدخول</label><input type="text" id="su-login-code" class="ltr" autocomplete="off" autocapitalize="characters" maxlength="32" pattern="[A-Za-z0-9]{6,32}"></div>
       <div class="field" id="su-password-field"><label>كلمة المرور (8 أحرف على الأقل)</label><input type="password" id="su-password" class="ltr"></div>
       <div class="field" id="su-referral-field"><label>كود الدعوة (اختياري)</label><input type="text" id="su-referral" class="ltr"></div>
-      <div id="customer-signup-note" style="display:none;font-size:11px;color:var(--text-faint);margin:-4px 0 14px">يمكنك إنشاء رمز دخول بديل لاستخدامه بدل رقم الهاتف. لو تركته فارغًا، SHIFRA ينشئ رمزًا تلقائيًا لك.</div>
+      <div id="customer-signup-note" style="display:none;font-size:11px;color:var(--text-faint);margin:-4px 0 14px">تقدر تختار الدخول باسمك ورقم الهاتف، أو باسمك ورمز دخول بدون الحاجة لكتابة رقم الهاتف.</div>
       <details class="adv"><summary>إعدادات متقدمة</summary>
         <div class="field" style="margin-top:10px"><label>عنوان السيرفر</label><input type="text" id="signup-apibase" class="ltr" value="http://localhost:4000/api"></div>
       </details>
