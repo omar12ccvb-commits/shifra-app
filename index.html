@@ -2280,7 +2280,6 @@ const VIEW_META = {
   'marketer-profile':{title:'حسابي', sub:'بياناتك وكود الدعوة والأمان'},
   'owner-home':{title:'مركز قيادة المالك', sub:'الأرقام الحية، الأشخاص، المال، والاختناقات في مكان واحد'},
   'owner-ai':{title:'Omar AI', sub:'مساعد عمر فقط لفحص الحسابات والأمان وتنفيذ الإجراءات بعد التأكيد'},
-  'owner-ai':{title:'Omar AI', sub:'مساعد عمر فقط — يفحص الحسابات والأمان ويقترح ويُنفذ إجراءات بعد التأكيد'},
   'owner-tools':{title:'أدوات المالك', sub:'20 أداة تشغيلية للتحليل والمراقبة واتخاذ الخطوة التالية'},
   'owner-direct':{title:'المراسلات المباشرة', sub:'عمر ويوسف يقدروا يفتحوا محادثة مع أي حساب نشط'},
   'owner-project-chat':{title:'محادثات المشاريع', sub:'كل محادثات العملاء والمسوقين والمحررين'},
@@ -3429,7 +3428,7 @@ function startNotificationPolling(){
   if(state.notificationPollTimer) clearInterval(state.notificationPollTimer);
   state.notificationPollTimer=setInterval(async()=>{
     try{const r=await api('/notifications');const unread=(r.notifications||[]).filter(n=>!n.is_read);if(state.lastUnreadNotifications!==null&&unread.length>state.lastUnreadNotifications){const latest=unread[0];toast('🔔 '+(latest?.title||'عندك إشعار جديد'),'ok');}state.lastUnreadNotifications=unread.length;refreshBellBadge();}catch(e){}
-  },20000);
+  },5000);
 }
 async function openOwnerPersonalChat(){
   try{
