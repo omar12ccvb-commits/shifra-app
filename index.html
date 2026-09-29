@@ -1185,6 +1185,61 @@ body{
     overflow:hidden!important;
   }
 }
+</style><style id="shifra-mobile-readability-scroll-v1">
+:root{
+  --text-dim:#c4c1cc;
+  --text-faint:#a6a3af;
+}
+.modal-overlay{
+  overflow-y:auto!important;
+  overscroll-behavior-y:contain;
+  -webkit-overflow-scrolling:touch;
+  touch-action:pan-y;
+}
+.modal{
+  max-height:calc(100dvh - 12px)!important;
+  overflow-y:auto!important;
+  overscroll-behavior-y:contain;
+  -webkit-overflow-scrolling:touch;
+  touch-action:pan-y;
+  scrollbar-width:thin;
+  padding-bottom:calc(24px + env(safe-area-inset-bottom))!important;
+}
+.modal .field label,
+.workflow-form .field label{
+  color:#c9c6d2!important;
+  font-size:12.5px!important;
+  font-weight:600!important;
+}
+.workflow-step span,
+.workflow-result-row .meta{
+  color:#aeb7c7!important;
+  font-size:10.5px!important;
+}
+.workflow-status{
+  color:#c1c5cf!important;
+}
+.workflow-status strong{
+  color:#f3f5f8!important;
+}
+.workflow-orchestrator{
+  color:#f1f3f7;
+}
+.workflow-orchestrator .workflow-status,
+.workflow-orchestrator .workflow-result-row,
+.workflow-orchestrator .field input,
+.workflow-orchestrator .field select,
+.workflow-orchestrator .field textarea{
+  border-color:rgba(255,255,255,.10);
+}
+@media(max-width:819px){
+  .modal{
+    width:100%!important;
+    max-width:100%!important;
+    border-radius:18px 18px 0 0!important;
+    max-height:calc(100dvh - 6px)!important;
+  }
+}
 </style><style id="shifra-chat-enterprise-v5">
 :root{
   --chat-violet:#8b5cf6;--chat-blue:#38bdf8;--chat-cyan:#22d3ee;
