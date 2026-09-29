@@ -2204,7 +2204,7 @@ document.getElementById('user-menu-btn').addEventListener('click', () => {
 /* ---------------- Role-adaptive nav + router ---------------- */
 const NAV_BY_ROLE = {
   CUSTOMER: [
-    {id:'customerHome', label:'مركز العميل', icon:'◆'}, {id:'people-directory', label:'الخبراء', icon:'👥'}, {id:'ai-service', label:'خدمات AI', icon:'✦'},
+    {id:'customerHome', label:'مركز العميل', icon:'◆'}, {id:'ai-service', label:'خدمات AI', icon:'✦'},
     {id:'customerTools', label:'الأدوات', icon:'✦'},
     {id:'projects', label:'مشاريعي', icon:'▦'},
     {id:'direct', label:'رسائل', icon:'💬'}
@@ -2226,7 +2226,7 @@ const NAV_BY_ROLE = {
     {id:'direct', label:'رسائل', icon:'💬'}
   ],
   OWNER: [
-    {id:'owner-home', label:'مركز القيادة', icon:'◆'}, {id:'people-directory', label:'الخبراء', icon:'👥'},
+    {id:'owner-home', label:'مركز القيادة', icon:'◆'}, {id:'owner-ai', label:'Omar AI', icon:'✦'}, {id:'people-directory', label:'الخبراء', icon:'👥'},
     {id:'owner-tools', label:'أدوات المالك', icon:'✦'},
     {id:'owner-direct', label:'مراسلات مباشرة', icon:'💬'},
     {id:'owner-project-chat', label:'محادثات المشاريع', icon:'☷'},
@@ -2264,6 +2264,7 @@ const VIEW_META = {
   ratings:{title:'تقييماتي', sub:'متوسط التقييم وآخر ملاحظات العملاء'},
   'marketer-profile':{title:'حسابي', sub:'بياناتك وكود الدعوة والأمان'},
   'owner-home':{title:'مركز قيادة المالك', sub:'الأرقام الحية، الأشخاص، المال، والاختناقات في مكان واحد'},
+  'owner-ai':{title:'Omar AI', sub:'مساعد عمر فقط — يفحص الحسابات والأمان ويقترح ويُنفذ إجراءات بعد التأكيد'},
   'owner-tools':{title:'أدوات المالك', sub:'20 أداة تشغيلية للتحليل والمراقبة واتخاذ الخطوة التالية'},
   'owner-direct':{title:'المراسلات المباشرة', sub:'عمر ويوسف يقدروا يفتحوا محادثة مع أي حساب نشط'},
   'owner-project-chat':{title:'محادثات المشاريع', sub:'كل محادثات العملاء والمسوقين والمحررين'},
@@ -2287,7 +2288,7 @@ function enterApp(){
   goView(firstView);
 }
 const MOBILE_PRIMARY_BY_ROLE = {
-  CUSTOMER:['customerHome','people-directory','projects','direct'],
+  CUSTOMER:['customerHome','projects','direct','customerTools'],
   MARKETER:['marketerHome','smart-routing','projects','people-directory'],
   EDITOR:['editorHome','projects','earnings','people-directory'],
   OWNER:['owner-home','owner-ai','owner-direct','people-directory'],
