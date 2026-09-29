@@ -1,0 +1,25 @@
+name: temp-syntax-check
+on:
+  push:
+    branches: [main]
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check inline JavaScript
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          html = Path('index.html').read_text(encoding='utf-8')
+          scripts = re.findall(r'<script(?:\s[^>]*)?>([\s\S]*?)</script>', html, re.I)
+          if not scripts:
+              raise SystemExit('No script tags found')
+          Path('/tmp/index-inline.js').write_text('\n\n'.join(scripts), encoding='utf-8')
+          print('Extracted', len(scripts), 'script blocks')
+          PY
+          node --check /tmp/index-inline.js
