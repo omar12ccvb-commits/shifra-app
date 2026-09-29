@@ -3577,104 +3577,69 @@ function workflowOptionHtml(items, valueKey, labelKey, placeholder){
 }
 async function openCustomerWorkSetup(){
   try{
-    const [catalog,services,current] = await Promise.all([
+    const [catalog,services,current]=await Promise.all([
       api('/services/catalog'),
       api('/services'),
       customerSafe('/customer-service/current',{assignment:null})
     ]);
     const selectedAssignment=current.assignment;
-    const serviceList=services.services||[];
+    const serviceList=(services.services||[]).filter(s=>s.is_active!==false&&s.service_type_code&&s.content_type_code&&s.editing_level_code);
     const typeByCode=Object.fromEntries((catalog.serviceTypes||[]).map(x=>[x.code,x]));
     const contentByCode=Object.fromEntries((catalog.contentTypes||[]).map(x=>[x.code,x]));
-    const levelByCode=Object.fromEntries((catalog.editingLevels||[]).map(x=>[x]));
-    const defaultService=serviceList[0]||null;
-
+    const levelByCode=Object.fromEntries((catalog.editingLevels||[]).map(x=>[x.code,x]));
+    if(!serviceList.length){toast('لا توجد خدمة متاحة حاليًا داخل الكتالوج.','err');return;}
+    const unique=a=>[...new Set(a)];
+    const label=(map,code)=>map[code]?.name_ar||map[code]?.name_en||code;
+    const serviceCodes=unique(serviceList.map(s=>s.service_type_code));
+    const first=serviceList[0];
     modal(
       '<div class="workflow-orchestrator">'+
         '<div><div style="font:800 10px/1.2 IBM Plex Mono,monospace;color:#7df3c4;letter-spacing:1.6px">SHIFRA AUTO WORKFLOW</div><h3 style="margin-top:5px">منشئ المشروع الذكي</h3><div style="font-size:11px;color:#78879d;margin-top:3px">حدد المطلوب مرة واحدة، وشفرة ترتّب باقي المسار.</div></div>'+
-        '<div class="workflow-steps">'+
-          '<div class="workflow-step"><div class="n">1</div><b>الخدمة</b><span>نوع الشغل</span></div>'+
-          '<div class="workflow-step"><div class="n">2</div><b>المسوّق</b><span>تعيين تلقائي</span></div>'+
-          '<div class="workflow-step"><div class="n">3</div><b>المونتير</b><span>مطابقة ذكية</span></div>'+
-          '<div class="workflow-step"><div class="n">4</div><b>التنفيذ</b><span>متابعة داخل SHIFRA</span></div>'+
-        '</div>'+
+        '<div class="workflow-steps"><div class="workflow-step"><div class="n">1</div><b>الخدمة</b><span>نوع الشغل</span></div><div class="workflow-step"><div class="n">2</div><b>المسوّق</b><span>تعيين تلقائي</span></div><div class="workflow-step"><div class="n">3</div><b>المونتير</b><span>مطابقة ذكية</span></div><div class="workflow-step"><div class="n">4</div><b>التنفيذ</b><span>متابعة داخل SHIFRA</span></div></div>'+
         (selectedAssignment?'<div class="workflow-status"><strong>المسوّق الحالي:</strong> '+esc(selectedAssignment.marketer_name)+' — SHIFRA ستستخدمه في المسار الحالي بدل إنشاء تعيين جديد.</div>':'<div class="workflow-status"><strong>التعيين:</strong> سنستخدم مسوّقك الحالي إن وجد، أو نختار مسوّقًا متاحًا تلقائيًا ونفتح معاه المحادثة.</div>')+
-        '<div class="workflow-form">'+
-          '<div class="field"><label>اسم المشروع</label><input id="workflow-title" maxlength="120" placeholder="مثال: فيديو إعلان الشركة الجديد"></div>'+
-          '<div class="workflow-grid">'+
-            '<div class="field"><label>الخدمة</label><select id="workflow-service">'+workflowOptionHtml(catalog.serviceTypes||[],'code','name_ar','اختر نوع الخدمة')+'</select></div>'+
-            '<div class="field"><label>نوع المحتوى</label><select id="workflow-content">'+workflowOptionHtml(catalog.contentTypes||[],'code','name_ar','اختر نوع المحتوى')+'</select></div>'+
-            '<div class="field"><label>مستوى المونتاج</label><select id="workflow-level">'+workflowOptionHtml(catalog.editingLevels||[],'code','name_ar','اختر المستوى')+'</select></div>'+
-            '<div class="field"><label>الكمية</label><input id="workflow-qty" type="number" min="1" max="50" value="1"></div>'+
-          '</div>'+
-          '<div class="field"><label>تفاصيل البريف</label><textarea id="workflow-notes" rows="4" maxlength="2000" placeholder="اكتب الفكرة، المدة المطلوبة، الجمهور، الأسلوب أو أي تفاصيل مهمة..."></textarea></div>'+
-          '<div class="workflow-status"><strong>المونتير:</strong> لن يتم إسناده بشكل نهائي قبل مرحلة الدفع/التأكيد؛ بعد تأكيد السعر والدفع يتم تمرير الطلب للمطابقة واختيار المونتير المناسب بدل اختيار شخص عشوائي.</div>'+
-        '</div>'+
+        '<div class="workflow-form"><div class="field"><label>اسم المشروع</label><input id="workflow-title" maxlength="120" placeholder="مثال: فيديو إعلان الشركة الجديد"></div><div class="workflow-grid"><div class="field"><label>الخدمة</label><select id="workflow-service"></select></div><div class="field"><label>نوع المحتوى</label><select id="workflow-content"></select></div><div class="field"><label>مستوى المونتاج</label><select id="workflow-level"></select></div><div class="field"><label>الكمية</label><input id="workflow-qty" type="number" min="1" max="50" value="1"></div></div><div class="field"><label>تفاصيل البريف</label><textarea id="workflow-notes" rows="4" maxlength="2000" placeholder="اكتب الفكرة، المدة المطلوبة، الجمهور، الأسلوب أو أي تفاصيل مهمة..."></textarea></div><div class="workflow-status"><strong>المونتير:</strong> لن يتم إسناده بشكل نهائي قبل مرحلة الدفع/التأكيد؛ بعد تأكيد السعر والدفع يتم تمرير الطلب للمطابقة واختيار المونتير المناسب بدل اختيار شخص عشوائي.</div></div>'+
         '<div class="modal-actions"><button class="btn btn-ghost" id="workflow-cancel">إلغاء</button><button class="btn btn-primary" id="workflow-start">⚡ ابدأ تجهيز المشروع</button></div>'+
       '</div>'
     );
-
-    if(defaultService){
-      document.getElementById('workflow-service').value=defaultService.service_type_code;
-      document.getElementById('workflow-content').value=defaultService.content_type_code;
-      document.getElementById('workflow-level').value=defaultService.editing_level_code;
+    const serviceEl=document.getElementById('workflow-service'),contentEl=document.getElementById('workflow-content'),levelEl=document.getElementById('workflow-level');
+    serviceEl.innerHTML='<option value="">اختر نوع الخدمة</option>'+serviceCodes.map(code=>'<option value="'+esc(code)+'">'+esc(label(typeByCode,code))+'</option>').join('');
+    function syncContent(preferred){
+      const codes=unique(serviceList.filter(s=>s.service_type_code===serviceEl.value).map(s=>s.content_type_code));
+      contentEl.innerHTML='<option value="">اختر نوع المحتوى</option>'+codes.map(code=>'<option value="'+esc(code)+'">'+esc(label(contentByCode,code))+'</option>').join('');
+      contentEl.value=(preferred&&codes.includes(preferred))?preferred:(codes[0]||'');
+      syncLevel();
     }
+    function syncLevel(preferred){
+      const codes=unique(serviceList.filter(s=>s.service_type_code===serviceEl.value&&s.content_type_code===contentEl.value).map(s=>s.editing_level_code));
+      levelEl.innerHTML='<option value="">اختر المستوى</option>'+codes.map(code=>'<option value="'+esc(code)+'">'+esc(label(levelByCode,code))+'</option>').join('');
+      levelEl.value=(preferred&&codes.includes(preferred))?preferred:(codes[0]||'');
+    }
+    serviceEl.addEventListener('change',()=>syncContent());
+    contentEl.addEventListener('change',()=>syncLevel());
+    serviceEl.value=serviceCodes.includes(first.service_type_code)?first.service_type_code:serviceCodes[0];
+    syncContent(first.content_type_code);
+    syncLevel(first.editing_level_code);
     document.getElementById('workflow-cancel').onclick=closeModal;
     document.getElementById('workflow-start').onclick=async()=>{
       const title=document.getElementById('workflow-title').value.trim();
-      const serviceTypeCode=document.getElementById('workflow-service').value;
-      const contentTypeCode=document.getElementById('workflow-content').value;
-      const editingLevelCode=document.getElementById('workflow-level').value;
+      const serviceTypeCode=serviceEl.value,contentTypeCode=contentEl.value,editingLevelCode=levelEl.value;
       const quantity=Math.max(1,Math.min(50,Number(document.getElementById('workflow-qty').value||1)));
       const requirements=document.getElementById('workflow-notes').value.trim();
-      if(!title||!serviceTypeCode||!contentTypeCode||!editingLevelCode){
-        toast('كمّل اسم المشروع والخدمة ونوع المحتوى ومستوى المونتاج','err'); return;
-      }
+      if(!title||!serviceTypeCode||!contentTypeCode||!editingLevelCode){toast('كمّل البيانات المطلوبة: اسم المشروع والخدمة ونوع المحتوى ومستوى المونتاج','err');return;}
       const exact=serviceList.find(s=>s.service_type_code===serviceTypeCode&&s.content_type_code===contentTypeCode&&s.editing_level_code===editingLevelCode);
-      if(!exact){toast('الخدمة دي مش متاحة حاليًا داخل الكتالوج','err');return;}
+      if(!exact){toast('الاختيار الحالي غير متاح داخل الكتالوج.','err');return;}
       const btn=document.getElementById('workflow-start');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';
-
       try{
         const assignment=(await api('/customer-service/assign',{method:'POST',body:{}})).assignment;
-        const serviceName=typeByCode[serviceTypeCode]?.name_ar||serviceTypeCode;
-        const contentName=contentByCode[contentTypeCode]?.name_ar||contentTypeCode;
-        const levelName=levelByCode[editingLevelCode]?.name_ar||editingLevelCode;
-        const brief=[
-          'طلب مشروع جديد من SHIFRA',
-          'الاسم: '+title,
-          'الخدمة: '+serviceName,
-          'نوع المحتوى: '+contentName,
-          'مستوى المونتاج: '+levelName,
-          'الكمية: '+quantity,
-          requirements?'التفاصيل: '+requirements:''
-        ].filter(Boolean).join('\n');
-
-        try{
-          await api('/direct-conversations/'+assignment.marketerId+'/messages',{method:'POST',body:{body:brief}});
-        }catch(sendErr){}
-
-        modal(
-          '<div class="workflow-orchestrator">'+
-            '<div><div style="font:800 10px/1.2 IBM Plex Mono,monospace;color:#7df3c4;letter-spacing:1.6px">WORKFLOW READY</div><h3 style="margin-top:5px">المشروع اتجهّز 🎯</h3><div style="font-size:11px;color:#78879d;margin-top:3px">SHIFRA رتبت أول مراحل الشغل وفتحت المسار الصحيح.</div></div>'+
-            '<div class="workflow-result">'+
-              '<div class="workflow-result-row"><div><b>الخدمة</b><div class="meta">'+esc(serviceName+' · '+contentName+' · '+levelName)+'</div></div><span class="workflow-chip ok">✓ جاهزة</span></div>'+
-              '<div class="workflow-result-row"><div><b>المسوّق</b><div class="meta">'+esc(assignment.marketerName||'تم التعيين تلقائيًا')+'</div></div><span class="workflow-chip ok">✓ تم التوجيه</span></div>'+
-              '<div class="workflow-result-row"><div><b>المونتير</b><div class="meta">سيتم تعيينه تلقائيًا بعد تأكيد السعر والدفع</div></div><span class="workflow-chip wait">◷ المرحلة التالية</span></div>'+
-              '<div class="workflow-result-row"><div><b>البريف</b><div class="meta">تم إرسال ملخص الطلب للمسوّق داخل SHIFRA</div></div><span class="workflow-chip ok">✓ تم الإرسال</span></div>'+
-            '</div>'+
-            '<div class="workflow-status"><strong>الخطوة التالية:</strong> افتح محادثة المسوّق، اتفقوا على التفاصيل والسعر، وبعد تأكيد الدفع يدخل المشروع تلقائيًا لمسار المونتير.</div>'+
-            '<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button><button class="btn btn-primary" id="workflow-open-chat">💬 فتح محادثة المسوّق</button></div>'+
-          '</div>'
-        );
+        const serviceName=label(typeByCode,serviceTypeCode),contentName=label(contentByCode,contentTypeCode),levelName=label(levelByCode,editingLevelCode);
+        const brief=['طلب مشروع جديد من SHIFRA','الاسم: '+title,'الخدمة: '+serviceName,'نوع المحتوى: '+contentName,'مستوى المونتاج: '+levelName,'الكمية: '+quantity,requirements?'التفاصيل: '+requirements:''].filter(Boolean).join('\n');
+        try{await api('/direct-conversations/'+assignment.marketerId+'/messages',{method:'POST',body:{body:brief}});}catch(sendErr){}
+        modal('<div class="workflow-orchestrator"><div><div style="font:800 10px/1.2 IBM Plex Mono,monospace;color:#7df3c4;letter-spacing:1.6px">WORKFLOW READY</div><h3 style="margin-top:5px">المشروع اتجهّز 🎯</h3><div style="font-size:11px;color:#78879d;margin-top:3px">SHIFRA رتبت أول مراحل الشغل وفتحت المسار الصحيح.</div></div><div class="workflow-result"><div class="workflow-result-row"><div><b>الخدمة</b><div class="meta">'+esc(serviceName+' · '+contentName+' · '+levelName)+'</div></div><span class="workflow-chip ok">✓ جاهزة</span></div><div class="workflow-result-row"><div><b>المسوّق</b><div class="meta">'+esc(assignment.marketerName||'تم التعيين تلقائيًا')+'</div></div><span class="workflow-chip ok">✓ تم التوجيه</span></div><div class="workflow-result-row"><div><b>المونتير</b><div class="meta">سيتم تعيينه تلقائيًا بعد تأكيد السعر والدفع</div></div><span class="workflow-chip wait">◷ المرحلة التالية</span></div><div class="workflow-result-row"><div><b>البريف</b><div class="meta">تم إرسال ملخص الطلب للمسوّق داخل SHIFRA</div></div><span class="workflow-chip ok">✓ تم الإرسال</span></div></div><div class="workflow-status"><strong>الخطوة التالية:</strong> افتح محادثة المسوّق، اتفقوا على التفاصيل والسعر، وبعد تأكيد الدفع يدخل المشروع تلقائيًا لمسار المونتير.</div><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button><button class="btn btn-primary" id="workflow-open-chat">💬 فتح محادثة المسوّق</button></div></div>');
         document.getElementById('workflow-open-chat').onclick=async()=>{closeModal();await openAssignedMarketerChat(assignment.marketerId);};
-      }catch(err){
-        toast(err.message||'تعذر تجهيز المشروع','err');
-        btn.disabled=false;btn.textContent='⚡ ابدأ تجهيز المشروع';
-      }
+      }catch(err){toast(err.message||'تعذر تجهيز المشروع','err');btn.disabled=false;btn.textContent='⚡ ابدأ تجهيز المشروع';}
     };
   }catch(e){toast(e.message||'تعذر فتح منشئ المشروع','err');}
 }
-
 function openCustomerServiceWizard(){
   modal('<h3>طلب خدمة</h3><div style="font-size:11px;color:#7b8aa0;margin-bottom:12px">هل عندك مسوق بتتعامل معاه؟</div><div class="service-choice-grid"><button class="service-choice" id="svc-has"><b>أيوه، عندي مسوق</b><div style="font-size:10px;color:#748299;margin-top:4px">استخدم كود الدعوة الخاص بيه.</div></button><button class="service-choice" id="svc-none"><b>لأ، اختارلي مسوق</b><div style="font-size:10px;color:#748299;margin-top:4px">SHIFRA تختار واحد فاتح ومتواجد.</div></button></div><div class="customer-service-status">اختيار المسوق لا يزوّد سعر الفيديو أو أي خدمة. السعر يفضل هو نفسه.</div><div class="modal-actions"><button class="btn btn-ghost btn-block" onclick="closeModal()">إلغاء</button></div>');
   document.getElementById('svc-has').onclick=()=>{modal('<h3>كود دعوة المسوق</h3><div class="field"><label>كود الدعوة</label><input id="svc-ref" class="ltr" placeholder="MK-..."></div><div class="customer-service-status">بعد الإرسال هنفتح لك الشات داخل SHIFRA. لو المسوق ما ردش خلال 20 ثانية هنختار مسوق تاني متاح.</div><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal();openCustomerServiceWizard()">رجوع</button><button class="btn btn-primary" id="svc-go">اختيار المسوق</button></div>');document.getElementById('svc-go').onclick=()=>{const raw=document.getElementById('svc-ref').value.trim();let ref=raw;try{const u=new URL(raw);ref=u.searchParams.get('ref')||raw;}catch(e){}startServiceAssignment(ref);};};
