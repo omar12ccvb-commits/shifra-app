@@ -3954,7 +3954,7 @@ async function renderProjectDetail(el, id){
     </div>
     <div class="kv"><span class="k">العميل</span><span class="v">${esc(project.customer_name)}</span></div>
     <div class="kv"><span class="k">المسوّق</span><span class="v">${esc(project.marketer_name)}</span></div>
-    <div class="kv"><span class="k">المحرر</span><span class="v">${project.editor_name ? esc(project.editor_name) : 'لسه ماتحددش'}</span></div>
+    ${role==='CUSTOMER'?'':('<div class="kv"><span class="k">المحرر</span><span class="v">'+(project.editor_name?esc(project.editor_name):'لسه ماتحددش')+'</span></div>')}
     <div class="kv"><span class="k">الديدلاين</span><span class="v mono">${project.deadline ? fmtDay(project.deadline) : '—'}</span></div>
     ${project.notes ? `<div class="kv"><span class="k">ملاحظات</span><span class="v">${esc(project.notes)}</span></div>` : ''}
   </div>`);
