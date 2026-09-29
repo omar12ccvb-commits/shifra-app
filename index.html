@@ -3910,7 +3910,7 @@ function startNotificationPolling(){
     }catch(e){}
   },15000);
 }
-function openOwnerPersonalChat(){
+async function openOwnerPersonalChat(){
   try{
     const r=await api('/direct-conversations');
     const list=r.conversations||[];
