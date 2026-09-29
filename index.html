@@ -4699,7 +4699,7 @@ function wireProjectDetailActions(el, project, id){
 /* Keep focused auth fields visible when Android/iOS opens the keyboard. */
 (function(){
   const mobile = () => window.matchMedia && window.matchMedia('(max-width:600px)').matches;
-  document.querySelectorAll('#auth-card input, #auth-card textarea, #auth-card select').forEach(el=>{
+  document.querySelectorAll('.auth-card input, .auth-card textarea, .auth-card select').forEach(el=>{
     el.addEventListener('focus',()=>{
       if(!mobile()) return;
       setTimeout(()=>{
