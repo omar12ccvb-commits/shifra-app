@@ -2658,13 +2658,17 @@ function renderNav(){
 }
 
 /* ---------------- Notifications bell ---------------- */
+function applyUnreadBellBadge(notifications){
+  const unread = (notifications||[]).filter(n => !n.is_read).length;
+  const badge = document.getElementById('bell-badge');
+  if(!badge) return;
+  if (unread > 0) { badge.style.display = 'flex'; badge.textContent = unread > 9 ? '9+' : unread; }
+  else { badge.style.display = 'none'; }
+}
 async function refreshBellBadge(){
   try {
     const { notifications } = await api('/notifications');
-    const unread = notifications.filter(n => !n.is_read).length;
-    const badge = document.getElementById('bell-badge');
-    if (unread > 0) { badge.style.display = 'flex'; badge.textContent = unread > 9 ? '9+' : unread; }
-    else { badge.style.display = 'none'; }
+    applyUnreadBellBadge(notifications);
   } catch(e) { /* non-fatal */ }
 }
 document.getElementById('bell-btn').addEventListener('click', async () => {
@@ -3753,10 +3757,20 @@ async function maybeOpenOnboarding(){
 function startNotificationPolling(){
   if(state.notificationPollTimer) clearInterval(state.notificationPollTimer);
   state.notificationPollTimer=setInterval(async()=>{
-    try{const r=await api('/notifications');const unread=(r.notifications||[]).filter(n=>!n.is_read);if(state.lastUnreadNotifications!==null&&unread.length>state.lastUnreadNotifications){const latest=unread[0];toast('🔔 '+(latest?.title||'عندك إشعار جديد'),'ok');}state.lastUnreadNotifications=unread.length;refreshBellBadge();}catch(e){}
-  },5000);
+    try{
+      const r=await api('/notifications');
+      const notifications=r.notifications||[];
+      const unread=notifications.filter(n=>!n.is_read);
+      if(state.lastUnreadNotifications!==null&&unread.length>state.lastUnreadNotifications){
+        const latest=unread[0];
+        toast('🔔 '+(latest?.title||'عندك إشعار جديد'),'ok');
+      }
+      state.lastUnreadNotifications=unread.length;
+      applyUnreadBellBadge(notifications);
+    }catch(e){}
+  },15000);
 }
-async function openOwnerPersonalChat(){
+function openOwnerPersonalChat(){
   try{
     const r=await api('/direct-conversations');
     const list=r.conversations||[];
