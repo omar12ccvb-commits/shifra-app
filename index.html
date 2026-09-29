@@ -2620,7 +2620,22 @@ const NAV_BY_ROLE = {
     {id:'owner-audit', label:'التتبع والتدقيق', icon:'▧'},
     {id:'owner-weekly', label:'الأداء الأسبوعي', icon:'★'}
   ],
-  ADMIN: [ {id:'people-directory', label:'الخبراء', icon:'👥'}, {id:'direct', label:'رسائل', icon:'💬'}, {id:'projects', label:'المشاريع', icon:'▦'} ],
+  ADMIN: [
+    {id:'owner-home', label:'مركز التشغيل', icon:'◆'},
+    {id:'owner-direct', label:'مراسلات مباشرة', icon:'💬'},
+    {id:'owner-project-chat', label:'محادثات المشاريع', icon:'☷'},
+    {id:'owner-finance', label:'الأرباح والخسائر', icon:'₿'},
+    {id:'owner-team', label:'الفريق والحضور', icon:'◉'},
+    {id:'owner-customers', label:'العملاء', icon:'☺'},
+    {id:'owner-editors', label:'المنتجين', icon:'🎬'},
+    {id:'owner-marketers', label:'المسوّقين', icon:'📣'},
+    {id:'owner-ops', label:'العمليات والاختناقات', icon:'⚙'},
+    {id:'owner-accounts', label:'كل الحسابات', icon:'👥'},
+    {id:'owner-payments', label:'المدفوعات', icon:'▤'},
+    {id:'owner-payouts', label:'المستحقات', icon:'⇄'},
+    {id:'owner-audit', label:'التتبع والتدقيق', icon:'▧'},
+    {id:'owner-weekly', label:'الأداء الأسبوعي', icon:'★'}
+  ],
 };
 const VIEW_META = {
   customerHome:{title:'مركز العميل', sub:'كل ما تحتاجه اليوم لمتابعة مشاريعك وطلب الخدمة بسرعة'},
@@ -2676,11 +2691,11 @@ const MOBILE_PRIMARY_BY_ROLE = {
   MARKETER:['marketerHome','smart-routing','projects','people-directory'],
   EDITOR:['editorHome','projects','earnings','people-directory'],
   OWNER:['owner-home','owner-ai','owner-direct','people-directory'],
-  ADMIN:['direct','projects']
+  ADMIN:['owner-home','owner-customers','owner-editors','owner-marketers']
 };
 function renderNav(){
   let items = NAV_BY_ROLE[state.user.role] || [];
-  if (state.user.role === 'OWNER' && state.user.ownerKey !== 'OMAR') items = items.filter(n => n.id !== 'owner-ai');
+  if ((state.user.role === 'OWNER' || state.user.role === 'ADMIN') && state.user.ownerKey !== 'OMAR') items = items.filter(n => n.id !== 'owner-ai');
   const html = items.map(n => `<button class="nav-item" data-view="${n.id}"><span class="ic">${n.icon}</span><span>${esc(n.label)}</span></button>`).join('');
   document.getElementById('nav-list-desktop').innerHTML = html;
   const primaryIds = MOBILE_PRIMARY_BY_ROLE[state.user.role] || items.slice(0,4).map(x=>x.id);
