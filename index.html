@@ -2063,33 +2063,6 @@ body::before{
 }
 </style>
 
-<style id="shifra-mobile-auth-keyboard-v1">
-@media (max-width:600px){
-  #auth-screen{
-    min-height:100svh !important;
-    height:auto !important;
-    max-height:none !important;
-    overflow-y:auto !important;
-    overflow-x:hidden !important;
-    align-items:flex-start !important;
-    justify-content:center !important;
-    padding:14px 14px calc(28px + env(safe-area-inset-bottom)) !important;
-    -webkit-overflow-scrolling:touch;
-    scroll-padding-bottom:48vh;
-  }
-  .auth-card{
-    margin-top:8px !important;
-    margin-bottom:12px !important;
-    max-height:none !important;
-  }
-  .auth-card input,
-  .auth-card textarea,
-  .auth-card select{
-    scroll-margin-top:18px;
-    scroll-margin-bottom:42vh;
-  }
-}
-</style>
 </head>
 <body>
 
@@ -4695,20 +4668,6 @@ function wireProjectDetailActions(el, project, id){
     document.getElementById('auth-screen').style.display = 'flex';
   }
 })();
-</script><script>
-/* Keep focused auth fields visible when Android/iOS opens the keyboard. */
-(function(){
-  const mobile = () => window.matchMedia && window.matchMedia('(max-width:600px)').matches;
-  document.querySelectorAll('.auth-card input, .auth-card textarea, .auth-card select').forEach(el=>{
-    el.addEventListener('focus',()=>{
-      if(!mobile()) return;
-      setTimeout(()=>{
-        try{ el.scrollIntoView({behavior:'smooth', block:'center', inline:'nearest'}); }catch(e){}
-      },120);
-    });
-  });
-})();
-</script>
-</body>
+</script></body>
 </html>
 
