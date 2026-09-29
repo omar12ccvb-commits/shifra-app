@@ -2063,31 +2063,18 @@ body::before{
 }
 </style>
 
-<style id="shifra-mobile-auth-keyboard-v1">
-@media (max-width:600px){
-  #auth-screen{
-    min-height:100svh !important;
-    height:auto !important;
-    max-height:none !important;
-    overflow-y:auto !important;
-    overflow-x:hidden !important;
-    align-items:flex-start !important;
-    justify-content:center !important;
-    padding:14px 14px calc(28px + env(safe-area-inset-bottom)) !important;
-    -webkit-overflow-scrolling:touch;
-    scroll-padding-bottom:48vh;
-  }
-  .auth-card{
-    margin-top:8px !important;
-    margin-bottom:12px !important;
-    max-height:none !important;
-  }
-  .auth-card input,
-  .auth-card textarea,
-  .auth-card select{
-    scroll-margin-top:18px;
-    scroll-margin-bottom:42vh;
-  }
+<style id="shifra-auth-interaction-hardening-v1">
+#auth-screen .auth-tabs > .auth-tab{
+  position:relative !important;
+  z-index:30 !important;
+  pointer-events:auto !important;
+  touch-action:manipulation !important;
+  user-select:none;
+  -webkit-user-select:none;
+}
+.auth-card::before,
+.auth-card::after{
+  pointer-events:none !important;
 }
 </style>
 </head>
@@ -2097,22 +2084,22 @@ body::before{
   <div class="auth-card">
     <div class="brand shifra-brand"><div class="brand-mark shifra-mark"><span>SH</span><small>شفرة</small></div><div class="shifra-wordmark"><div class="brand-text">SHIFRA</div><div class="brand-sub">OPERATING SYSTEM</div></div></div>
     <div class="auth-tabs">
-      <button class="auth-tab active" id="tab-login">دخول</button>
-      <button class="auth-tab" id="tab-signup">حساب جديد</button>
+      <button type="button" class="auth-tab active" id="tab-login" onclick="switchAuthTab('login');return false;">دخول</button>
+      <button type="button" class="auth-tab" id="tab-signup" onclick="switchAuthTab('signup');return false;">حساب جديد</button>
     </div>
     <div class="auth-error" id="auth-error"></div>
 
     <form id="login-form">
       <div class="auth-tabs" style="margin-bottom:16px">
-        <button type="button" class="auth-tab active" id="login-customer-mode">دخول عميل</button>
-        <button type="button" class="auth-tab" id="login-team-mode">دخول فريق SHIFRA</button>
+        <button type="button" class="auth-tab active" id="login-customer-mode" onclick="switchLoginMode('CUSTOMER');return false;">دخول عميل</button>
+        <button type="button" class="auth-tab" id="login-team-mode" onclick="switchLoginMode('TEAM');return false;">دخول فريق SHIFRA</button>
       </div>
 
       <div id="customer-login-fields">
         <div class="field"><label>الاسم بالكامل</label><input type="text" id="login-customer-name" required></div>
         <div class="auth-tabs" style="margin:0 0 12px">
-          <button type="button" class="auth-tab active" id="login-customer-phone-mode">بالاسم + الهاتف</button>
-          <button type="button" class="auth-tab" id="login-customer-code-mode">بالاسم + رمز الدخول</button>
+          <button type="button" class="auth-tab active" id="login-customer-phone-mode" onclick="switchCustomerLoginMethod('PHONE');return false;">بالاسم + الهاتف</button>
+          <button type="button" class="auth-tab" id="login-customer-code-mode" onclick="switchCustomerLoginMethod('CODE');return false;">بالاسم + رمز الدخول</button>
         </div>
         <div id="customer-login-phone-fields">
           <div class="field"><label>رقم الهاتف</label><input type="tel" id="login-customer-phone" class="ltr" inputmode="tel" autocomplete="tel"></div>
@@ -2145,8 +2132,8 @@ body::before{
       <div id="customer-signup-method" style="display:none;margin:2px 0 4px">
         <div style="font-size:12px;color:var(--text-dim);margin-bottom:8px">اختار طريقة تسجيل الدخول بعد إنشاء الحساب</div>
         <div class="auth-tabs" style="margin:0 0 12px">
-          <button type="button" class="auth-tab active" id="signup-customer-phone-mode">الاسم + رقم الهاتف</button>
-          <button type="button" class="auth-tab" id="signup-customer-code-mode">الاسم + رمز الدخول</button>
+          <button type="button" class="auth-tab active" id="signup-customer-phone-mode" onclick="switchCustomerSignupMethod('PHONE');return false;">الاسم + رقم الهاتف</button>
+          <button type="button" class="auth-tab" id="signup-customer-code-mode" onclick="switchCustomerSignupMethod('CODE');return false;">الاسم + رمز الدخول</button>
         </div>
       </div>
       <div class="field" id="su-email-field"><label>البريد الإلكتروني</label><input type="email" id="su-email" class="ltr"></div>
@@ -4694,19 +4681,6 @@ function wireProjectDetailActions(el, project, id){
     document.getElementById('app-shell').classList.remove('active');
     document.getElementById('auth-screen').style.display = 'flex';
   }
-})();
-</script><script>
-/* Keep focused auth fields visible when Android/iOS opens the keyboard. */
-(function(){
-  const mobile = () => window.matchMedia && window.matchMedia('(max-width:600px)').matches;
-  document.querySelectorAll('.auth-card input, .auth-card textarea, .auth-card select').forEach(el=>{
-    el.addEventListener('focus',()=>{
-      if(!mobile()) return;
-      setTimeout(()=>{
-        try{ el.scrollIntoView({behavior:'smooth', block:'center', inline:'nearest'}); }catch(e){}
-      },120);
-    });
-  });
 })();
 </script>
 </body>
