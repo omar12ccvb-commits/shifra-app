@@ -1,0 +1,23 @@
+name: shifra-syntax-check
+on:
+  push:
+    branches: ["main"]
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Extract and check inline scripts
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const html=fs.readFileSync('index.html','utf8');
+          const re=/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi;
+          let i=0,m;
+          while((m=re.exec(html))) fs.writeFileSync('/tmp/shifra-'+(i++)+'.js',m[1]);
+          console.log('scripts:',i);
+          NODE
+          for f in /tmp/shifra-*.js; do node --check "$f"; done
