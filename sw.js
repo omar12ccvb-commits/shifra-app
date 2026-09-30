@@ -16,6 +16,8 @@ self.addEventListener('push', event => {
     tag: payload.tag || 'shifra-notification',
     renotify: true,
     requireInteraction: false,
+    silent: false,
+    vibrate: [180, 80, 180],
     data: payload.data || { url: '/' },
   };
 
