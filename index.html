@@ -2149,6 +2149,9 @@ body::before{
 .ai-hunter-run .r1{display:flex;justify-content:space-between;gap:8px;font:800 10px Cairo,var(--font);color:#e5ebf4}
 .ai-hunter-run .r2{margin-top:3px;color:#7f8da1;font:500 9px/1.6 Cairo,var(--font)}
 .ai-hunter-empty{padding:28px 14px;text-align:center;color:#78869a;font:700 11px/1.8 Cairo,var(--font)}
+.ai-hunter-engine-status{margin-top:9px;padding:8px 10px;border-radius:11px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.025);font:700 9.5px/1.7 Cairo,var(--font);color:#9aa8ba}
+.ai-hunter-engine-status.ready{border-color:rgba(52,211,153,.18);background:rgba(52,211,153,.055);color:#8be0bb}
+.ai-hunter-engine-status.error{border-color:rgba(251,191,36,.2);background:rgba(251,191,36,.055);color:#f6d58a}
 @media(max-width:900px){.ai-hunter-grid{grid-template-columns:1fr}.ai-hunter-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 <style id="shifra-ai-teammate-v1">
@@ -3090,6 +3093,25 @@ RENDERERS['owner-ai'] = async (el) => {
 };
 
 
+function aiHunterSafeUrl(raw){
+  try{
+    const u=new URL(String(raw||'').trim());
+    if(u.protocol==='http:'||u.protocol==='https:') return u.href;
+  }catch(e){}
+  return '#';
+}
+async function aiHunterCopy(text){
+  try{
+    if(navigator.clipboard?.writeText) await navigator.clipboard.writeText(String(text||''));
+    else{
+      const ta=document.createElement('textarea');
+      ta.value=String(text||''); ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      document.execCommand('copy'); ta.remove();
+    }
+    toast('اتنسخت رسالة التواصل','ok');
+  }catch(e){toast('النسخ غير متاح — انسخ الرسالة يدويًا','err');}
+}
 function aiHunterScoreClass(score){
   const n=Number(score||0);
   return n>=80?'مرتفع':n>=60?'متوسط':'منخفض';
@@ -3125,14 +3147,18 @@ function aiHunterRenderLeads(host,leads,run){
       (signals.length?'<div class="ai-hunter-meta">'+signals.slice(0,5).map(s=>'<span class="ai-hunter-chip">'+esc(s)+'</span>').join('')+'</div>':'')+
       (lead.outreach_message?'<p><b>الرسالة المقترحة:</b> '+esc(lead.outreach_message)+'</p>':'')+
       '<div class="ai-hunter-lead-actions">'+
-      (lead.website?'<a class="btn btn-secondary btn-sm" target="_blank" rel="noopener" href="'+esc(lead.website)+'">الموقع</a>':'')+
-      (lead.contact_url?'<a class="btn btn-secondary btn-sm" target="_blank" rel="noopener" href="'+esc(lead.contact_url)+'">التواصل</a>':'')+
-      (src[0]?'<a class="btn btn-secondary btn-sm" target="_blank" rel="noopener" href="'+esc(src[0])+'">المصدر</a>':'')+
+      (lead.website?'<a class="btn btn-secondary btn-sm" target="_blank" rel="noopener" href="'+esc(aiHunterSafeUrl(lead.website))+'">الموقع</a>':'')+
+      (lead.contact_url?'<a class="btn btn-secondary btn-sm" target="_blank" rel="noopener" href="'+esc(aiHunterSafeUrl(lead.contact_url))+'">التواصل</a>':'')+
+      (src[0]?'<a class="btn btn-secondary btn-sm" target="_blank" rel="noopener" href="'+esc(aiHunterSafeUrl(src[0]))+'">المصدر</a>':'')+
+      (lead.outreach_message?'<button class="btn btn-secondary btn-sm" data-copy-outreach="'+esc(lead.outreach_message)+'">نسخ الرسالة</button>':'')+
       '<button class="btn btn-secondary btn-sm" data-hunter-status="REVIEWED" data-id="'+lead.id+'">مراجعة</button>'+
       '<button class="btn btn-secondary btn-sm" data-hunter-status="CONTACTED" data-id="'+lead.id+'">تم التواصل</button>'+
       '<button class="btn btn-primary btn-sm" data-hunter-status="INTERESTED" data-id="'+lead.id+'">مهتم</button>'+
+      '<button class="btn btn-primary btn-sm" data-hunter-status="CONVERTED" data-id="'+lead.id+'">تحويل لعميل</button>'+
+      '<button class="btn btn-secondary btn-sm" data-hunter-status="NOT_INTERESTED" data-id="'+lead.id+'">غير مهتم</button>'+
       '</div></div>';
   }).join(''):'<div class="ai-hunter-empty">لسه مفيش Leads في النتيجة دي. شغّل بحث جديد.</div>';
+  host.querySelectorAll('[data-copy-outreach]').forEach(b=>b.addEventListener('click',()=>aiHunterCopy(b.dataset.copyOutreach||'')));
   host.querySelectorAll('[data-hunter-status]').forEach(b=>b.addEventListener('click',async()=>{
     b.disabled=true;
     try{
@@ -3144,7 +3170,7 @@ function aiHunterRenderLeads(host,leads,run){
 }
 RENDERERS['ai-hunter'] = async (el) => {
   el.innerHTML='<div class="ai-hunter-shell">'+
-    '<div class="ai-hunter-hero"><h2>AI Hunter 🎯</h2><p>يبحث على الويب عن شركات حقيقية، يقيّم مدى ملاءمتها لخدمات SHIFRA، يشرح سبب الترشيح، ويجهّز رسالة مخصصة. لا يتم إرسال رسائل تلقائيًا.</p></div>'+
+    '<div class="ai-hunter-hero"><h2>AI Hunter 🎯</h2><p>محرك مبيعات يبحث على الويب عن شركات وبراندات ومحلات ومشاريع وقنوات وصنّاع محتوى لديهم نشاط تجاري عام وإشارات حقيقية تدل على حاجتهم للمونتاج أو الفيديو، ثم يحلل الفرصة ويجهّز رسالة شخصية تقنع العميل بالتعرّف على SHIFRA. الإرسال الخارجي يظل يدويًا بعد مراجعتك.</p><div class="ai-hunter-engine-status" id="hunter-engine-status">جاري التحقق من محرك البحث...</div></div>'+
     '<div class="ai-hunter-grid">'+
       '<div class="ai-hunter-panel"><div class="ai-hunter-fields">'+
         '<div><label>هدف البحث</label><textarea id="hunter-query" placeholder="مثال: دور على 15 براند في القاهرة محتاجين فيديوهات إعلانية ومحتوى قصير"></textarea></div>'+
@@ -3161,6 +3187,14 @@ RENDERERS['ai-hunter'] = async (el) => {
   '</div>';
 
   const runBox=el.querySelector('#hunter-run'), status=el.querySelector('#hunter-status');
+  const loadStatus=async()=>{
+    const box=el.querySelector('#hunter-engine-status');
+    const r=await api('/ai-hunter/status').catch(()=>null);
+    if(!box) return;
+    if(!r){box.textContent='⚠ تعذر التحقق من حالة محرك البحث الآن.';box.className='ai-hunter-engine-status error';return;}
+    if(r.enabled){box.textContent='✓ محرك البحث الحي جاهز — يقدر يبحث ويحلل المصادر العامة ويجهز رسائل مخصصة.';box.className='ai-hunter-engine-status ready';}
+    else{box.textContent='⚠ محرك البحث متجهز داخل الموقع لكنه يحتاج OPENAI_API_KEY على السيرفر قبل تشغيل البحث الحي.';box.className='ai-hunter-engine-status error';}
+  };
   const loadRuns=async()=>{
     const r=await api('/ai-hunter/runs?limit=12').catch(()=>({runs:[]}));
     const runs=r.runs||[];
@@ -3191,6 +3225,7 @@ RENDERERS['ai-hunter'] = async (el) => {
     }finally{runBox.disabled=false;}
   });
   loadRuns();
+  loadStatus();
 };
 
 function aiTeamEscSource(s){return String(s||'').trim();}
