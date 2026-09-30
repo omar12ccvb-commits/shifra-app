@@ -3192,8 +3192,8 @@ RENDERERS['ai-hunter'] = async (el) => {
     const r=await api('/ai-hunter/status').catch(()=>null);
     if(!box) return;
     if(!r){box.textContent='⚠ تعذر التحقق من حالة محرك البحث الآن.';box.className='ai-hunter-engine-status error';return;}
-    if(r.enabled){box.textContent='✓ محرك البحث الحي جاهز — يقدر يبحث ويحلل المصادر العامة ويجهز رسائل مخصصة.';box.className='ai-hunter-engine-status ready';}
-    else{box.textContent='⚠ محرك البحث متجهز داخل الموقع لكنه يحتاج OPENAI_API_KEY على السيرفر قبل تشغيل البحث الحي.';box.className='ai-hunter-engine-status error';}
+    if(r.enabled){box.textContent='✓ محرك البحث الحي جاهز عبر Gemini — يقدر يبحث ويحلل المصادر العامة ويجهز رسائل مخصصة.';box.className='ai-hunter-engine-status ready';}
+    else{box.textContent='⚠ AI Hunter محتاج GEMINI_API_KEY من Google AI Studio على السيرفر قبل البحث الحي.';box.className='ai-hunter-engine-status error';}
   };
   const loadRuns=async()=>{
     const r=await api('/ai-hunter/runs?limit=12').catch(()=>({runs:[]}));
