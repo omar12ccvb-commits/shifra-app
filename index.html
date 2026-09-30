@@ -4295,9 +4295,10 @@ async function openNotificationTarget(notification){
   }
 
   if(type === 'direct_messages' || type === 'direct_message'){
-    if(!hasView('direct')) { toast('المحادثة المرتبطة بالإشعار غير متاحة لهذا الحساب.','err'); return; }
+    const directView = hasView('direct') ? 'direct' : (hasView('owner-direct') ? 'owner-direct' : null);
+    if(!directView) { toast('المحادثة المرتبطة بالإشعار غير متاحة لهذا الحساب.','err'); return; }
     closeModal();
-    await goView('direct');
+    await goView(directView);
     const root = document.getElementById('content');
     const safeId = targetUserId == null ? '' : String(targetUserId).replace(/"/g,'');
     const button = safeId ? root?.querySelector('[data-direct-user="'+safeId+'"]') : null;
