@@ -3174,10 +3174,103 @@ RENDERERS['owner-ops'] = async (el) => {
 };
 
 RENDERERS['owner-accounts'] = async (el) => {
-  const {accounts=[]}=await api('/accounts'); const isOmar=state.user.ownerKey==='OMAR';
+  const {accounts=[]}=await api('/accounts');
+  const isOmar=state.user.ownerKey==='OMAR';
   el.innerHTML='<div class="card" style="margin-bottom:12px"><input id="oa-search" placeholder="ابحث بالاسم أو البريد أو الهاتف..." style="width:100%"></div><div class="table-wrap"><table><thead><tr><th>الحساب</th><th>الدور</th><th>الحالة</th><th>جلسات</th><th>مشاريع</th><th>أرباح</th><th>إجراء</th></tr></thead><tbody id="oa-body"></tbody></table></div>';
-  const body=el.querySelector('#oa-body'); const render=()=>{const q=(el.querySelector('#oa-search').value||'').toLowerCase().trim(); const rows=accounts.filter(a=>!q||[a.full_name,a.email,a.phone].filter(Boolean).join(' ').toLowerCase().includes(q)); body.innerHTML=rows.map(a=>'<tr><td><b>'+esc(a.full_name)+'</b><div style="font-size:10px;color:#687488">'+esc(a.email||a.phone||'')+'</div></td><td>'+ownerRoleAr(a.role)+'</td><td>'+esc(a.status)+'</td><td>'+a.active_sessions+'</td><td>'+a.related_projects+'</td><td>'+money(a.total_earnings_minor||0)+' EGP</td><td>'+(a.role==='OWNER'||Number(a.id)===Number(state.user.id)?'<span class="badge badge-gray">محمي</span>':isOmar?'<button class="btn btn-sm '+(a.status==='SUSPENDED'?'btn-primary':'btn-danger')+'" data-acct="'+a.id+'" data-next="'+(a.status==='SUSPENDED'?'ACTIVE':'SUSPENDED')+'">'+(a.status==='SUSPENDED'?'تفعيل':'حظر')+'</button>':'<span class="badge badge-gray">عرض فقط</span>')+'</td></tr>').join('')||'<tr><td colspan="7"><div class="empty-state">مفيش حسابات مطابقة.</div></td></tr>';};
-  render(); el.querySelector('#oa-search').addEventListener('input',render); body.addEventListener('click',async e=>{const b=e.target.closest('[data-acct]');if(!b)return;b.disabled=true;try{await api('/accounts/'+b.dataset.acct+'/status',{method:'POST',body:{status:b.dataset.next}});toast('اتغيرت حالة الحساب','ok');const fresh=await api('/accounts');accounts.splice(0,accounts.length,...fresh.accounts);render();}catch(err){toast(err.message,'err');b.disabled=false;}});
+
+  const body=el.querySelector('#oa-body');
+  const render=()=>{
+    const q=(el.querySelector('#oa-search').value||'').toLowerCase().trim();
+    const rows=accounts.filter(a=>!q||[a.full_name,a.email,a.phone].filter(Boolean).join(' ').toLowerCase().includes(q));
+    body.innerHTML=rows.map(a=>{
+      let action='<span class="badge badge-gray">محمي</span>';
+      if(a.owner_key==='YOUSSEF' && isOmar){
+        action='<button class="btn btn-sm btn-primary" data-ysec>مركز أمان يوسف</button>';
+      }else if(a.role!=='OWNER' && Number(a.id)!==Number(state.user.id) && isOmar){
+        action='<button class="btn btn-sm '+(a.status==='SUSPENDED'?'btn-primary':'btn-danger')+'" data-acct="'+a.id+'" data-next="'+(a.status==='SUSPENDED'?'ACTIVE':'SUSPENDED')+'">'+(a.status==='SUSPENDED'?'تفعيل':'حظر')+'</button>';
+      }else if(a.role!=='OWNER' && Number(a.id)!==Number(state.user.id)){
+        action='<span class="badge badge-gray">عرض فقط</span>';
+      }
+      return '<tr><td><b>'+esc(a.full_name)+'</b><div style="font-size:10px;color:#687488">'+esc(a.email||a.phone||'')+'</div></td><td>'+ownerRoleAr(a.role)+'</td><td>'+esc(a.status)+'</td><td>'+a.active_sessions+'</td><td>'+a.related_projects+'</td><td>'+money(a.total_earnings_minor||0)+' EGP</td><td>'+action+'</td></tr>';
+    }).join('')||'<tr><td colspan="7"><div class="empty-state">مفيش حسابات مطابقة.</div></td></tr>';
+  };
+
+  render();
+  el.querySelector('#oa-search').addEventListener('input',render);
+
+  body.addEventListener('click',async e=>{
+    const sec=e.target.closest('[data-ysec]');
+    if(sec){
+      sec.disabled=true;
+      try{
+        const r=await api('/auth/owners/youssef/security');
+        const sessions=r.sessions||[], events=r.securityEvents||[], audits=r.auditLogs||[], a=r.account||{};
+        const active=sessions.filter(s=>!s.revokedAt&&new Date(s.expiresAt)>new Date());
+        modal(
+          '<h3>مركز أمان يوسف</h3>'+
+          '<div class="card" style="margin-bottom:10px"><div class="kv"><span class="k">الحساب</span><span class="v">'+esc(a.fullName||'Youssef')+'</span></div>'+
+          '<div class="kv"><span class="k">البريد</span><span class="v ltr">'+esc(a.email||'—')+'</span></div>'+
+          '<div class="kv"><span class="k">الحالة</span><span class="v">'+esc(a.status||'—')+'</span></div>'+
+          '<div class="kv"><span class="k">الجلسات النشطة</span><span class="v">'+active.length+'</span></div></div>'+
+          '<div class="section-title">إجراءات الإدارة</div>'+
+          '<div class="btn-row" style="margin-bottom:12px">'+
+          '<button class="btn btn-danger btn-sm" id="ysec-revoke">إنهاء كل الجلسات</button>'+
+          '<button class="btn btn-ghost btn-sm" id="ysec-status">'+(a.status==='SUSPENDED'?'إعادة التفعيل':'إيقاف الحساب')+'</button></div>'+
+          '<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:8px">تغيير كلمة المرور</div>'+
+          '<div class="field"><label>كلمة مرور عمر الحالية للتأكيد</label><input id="ysec-omar-pass" type="password" class="ltr" autocomplete="current-password"></div>'+
+          '<div class="field"><label>كلمة مرور يوسف الجديدة</label><input id="ysec-new-pass" type="password" class="ltr" minlength="8" autocomplete="new-password"></div>'+
+          '<button class="btn btn-primary btn-block" id="ysec-reset">تغيير وإجبار إعادة تسجيل الدخول</button></div>'+
+          '<div class="section-title">آخر جلسات الدخول</div>'+
+          '<div style="max-height:220px;overflow:auto">'+(sessions.slice(0,12).map(s=>
+            '<div class="card" style="padding:10px;margin-bottom:7px"><div style="display:flex;justify-content:space-between;gap:8px"><b>'+esc(s.clientType||'جلسة')+'</b><span class="badge '+(s.revokedAt?'badge-red':(new Date(s.expiresAt)>new Date()?'badge-green':'badge-gray'))+'">'+(s.revokedAt?'ملغاة':(new Date(s.expiresAt)>new Date()?'نشطة':'منتهية'))+'</span></div>'+
+            '<div style="font-size:10px;color:#7f8a9a;margin-top:4px">'+esc(s.ip||'—')+' · '+fmtDate(s.createdAt)+'</div>'+
+            '<div style="font-size:10px;color:#657083;margin-top:3px;white-space:normal;word-break:break-word">'+esc(s.userAgent||'—')+'</div></div>'
+          ).join('')||'<div class="empty-state" style="padding:20px">لا توجد جلسات.</div>')+'</div>'+
+          '<div class="section-title">آخر أحداث تسجيل الدخول</div>'+
+          '<div style="max-height:220px;overflow:auto">'+(events.slice(0,20).map(x=>
+            '<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)"><b style="font-size:11px">'+esc(x.event_type)+'</b><div style="font-size:10px;color:#687488">'+fmtDate(x.created_at)+' · '+esc(x.ip_address||'—')+'</div></div>'
+          ).join('')||'<div class="empty-state" style="padding:20px">لا توجد أحداث.</div>')+'</div>'+
+          '<div class="section-title">آخر تغييرات الإدارة</div>'+
+          '<div style="max-height:180px;overflow:auto">'+(audits.slice(0,12).map(x=>
+            '<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)"><b style="font-size:11px">'+esc(x.action)+'</b><div style="font-size:10px;color:#687488">'+fmtDate(x.created_at)+' · '+esc(x.actor_role||'')+'</div></div>'
+          ).join('')||'<div class="empty-state" style="padding:20px">لا توجد تغييرات.</div>')+'</div>'+
+          '<div style="font-size:10px;color:#687488;margin-top:12px">ملاحظة أمان: الإجراءات الإدارية هنا مسجلة في سجل التدقيق ويصل إشعار للحساب المتأثر عند تغيير كلمة المرور أو الجلسات أو حالة الحساب.</div>'+
+          '<div class="modal-actions"><button class="btn btn-ghost btn-block" onclick="closeModal()">إغلاق</button></div>'
+        );
+
+        document.getElementById('ysec-revoke').addEventListener('click',async()=>{
+          const b=document.getElementById('ysec-revoke'); b.disabled=true;
+          try{const r=await api('/auth/owners/youssef/revoke-sessions',{method:'POST'});toast('تم إنهاء '+r.revokedCount+' جلسة','ok');closeModal();await RENDERERS['owner-accounts'](el);}catch(err){toast(err.message,'err');b.disabled=false;}
+        });
+        document.getElementById('ysec-status').addEventListener('click',async()=>{
+          const b=document.getElementById('ysec-status'); b.disabled=true;
+          const next=a.status==='SUSPENDED'?'ACTIVE':'SUSPENDED';
+          try{await api('/auth/owners/youssef/status',{method:'POST',body:{status:next}});toast(next==='SUSPENDED'?'تم إيقاف الحساب':'تم إعادة تفعيل الحساب','ok');closeModal();await RENDERERS['owner-accounts'](el);}catch(err){toast(err.message,'err');b.disabled=false;}
+        });
+        document.getElementById('ysec-reset').addEventListener('click',async()=>{
+          const b=document.getElementById('ysec-reset');
+          const currentPassword=document.getElementById('ysec-omar-pass').value;
+          const newPassword=document.getElementById('ysec-new-pass').value;
+          if(newPassword.length<8){toast('كلمة المرور الجديدة لازم تكون 8 أحرف على الأقل','err');return;}
+          b.disabled=true;
+          try{const r=await api('/auth/owners/youssef/reset-password',{method:'POST',body:{currentPassword,newPassword}});toast('تم تغيير كلمة مرور يوسف وإنهاء '+r.revokedSessions+' جلسة','ok');closeModal();await RENDERERS['owner-accounts'](el);}catch(err){toast(err.message,'err');b.disabled=false;}
+        });
+      }catch(err){toast(err.message,'err');}
+      finally{sec.disabled=false;}
+      return;
+    }
+
+    const b=e.target.closest('[data-acct]');
+    if(!b)return;
+    b.disabled=true;
+    try{
+      await api('/accounts/'+b.dataset.acct+'/status',{method:'POST',body:{status:b.dataset.next}});
+      toast('اتغيرت حالة الحساب','ok');
+      const fresh=await api('/accounts');
+      accounts.splice(0,accounts.length,...fresh.accounts);
+      render();
+    }catch(err){toast(err.message,'err');b.disabled=false;}
+  });
 };
 
 RENDERERS['owner-payments'] = async (el) => {
