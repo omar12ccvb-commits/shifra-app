@@ -4143,19 +4143,75 @@ function choiceButtons(items,selected,name){return (items||[]).map(x=>'<button t
 function onboardingOpen(profile){
   const role=profile.role, d=profile.data||{}, opts=profile.options||{};
   const multi=(label,items,selected,name)=>'<div><div class="field"><label>'+esc(label)+'</label></div><div class="onboard-choice-grid" data-group="'+esc(name)+'">'+choiceButtons(items,selected,name)+'</div></div>';
-  let html='<h3>إعداد حسابك مع مساعد SHIFRA ✦</h3><div class="onboard-grid"><div class="field"><label>السن</label><input id="onboard-age" type="number" min="13" max="100" value="'+esc(profile.age||'')+'" placeholder="مثال: 25"></div><div class="field"><label>ساعات العمل اليومية</label><input id="onboard-hours" type="number" min="1" max="24" value="'+esc(profile.workHoursPerDay||'')+'" placeholder="مثال: 8"></div>';
-  if(role==='EDITOR') html+=multi('أنت خبير في إيه؟',opts.expertise,d.expertise,'expertise')+multi('ستايل شغلك',opts.styles,d.styles,'styles')+multi('البرامج',opts.software,d.software,'software')+multi('التخصصات',opts.specialties,d.specialties,'specialties')+'<div class="field"><label>نبذة عن خبرتك</label><textarea id="onboard-bio" rows="3">'+esc(d.bio||'')+'</textarea></div>';
-  if(role==='MARKETER') html+=multi('خبرتك الأساسية',opts.specialties,d.specialties,'specialties')+multi('أماكن جلب العملاء',opts.channels,d.channels,'channels')+multi('نوع العملاء اللي بتتعامل معاهم',opts.clientTypes,d.clientTypes,'clientTypes')+multi('طريقة التواصل',opts.communication,d.communication,'communication')+'<div class="field"><label>نبذة عن خبرتك</label><textarea id="onboard-bio" rows="3">'+esc(d.bio||'')+'</textarea></div>';
-  if(role==='CUSTOMER') html+='<div class="field"><label>نوع نشاطك</label><select id="onboard-business"><option value="">اختر</option>'+(opts.businessTypes||[]).map(x=>'<option '+(d.businessType===x?'selected':'')+' value="'+esc(x)+'">'+esc(x)+'</option>').join('')+'</select></div>'+multi('هدفك الأساسي',opts.goals,d.goals,'goals')+multi('تحب نتواصل معاك إزاي؟',opts.preferredContact,d.preferredContact,'preferredContact')+'<div class="field"><label>نبذة عن احتياجك</label><textarea id="onboard-bio" rows="3">'+esc(d.bio||'')+'</textarea></div>';
-  html+='</div><div class="modal-actions"><button class="btn btn-ghost" id="onboard-skip">أكمل بعدين</button><button class="btn btn-primary" id="onboard-save">حفظ الملف</button></div>';
+  let html='<h3>إعداد حسابك مع مساعد SHIFRA ✦</h3>'+
+    '<div class="onboard-grid">'+
+    '<div class="field"><label>السن</label><input id="onboard-age" type="number" min="13" max="100" value="'+esc(profile.age||'')+'" placeholder="مثال: 25"></div>'+
+    '<div class="field"><label>ساعات العمل اليومية</label><input id="onboard-hours" type="number" min="1" max="24" value="'+esc(profile.workHoursPerDay||'')+'" placeholder="مثال: 8"></div>';
+  if(role==='EDITOR') html+=
+    '<div class="field"><label>سنوات الخبرة</label><input id="onboard-experience" type="number" min="0" max="50" value="'+esc(d.experienceYears??'')+'" placeholder="مثال: 3"></div>'+
+    multi('أنت خبير في إيه؟',opts.expertise,d.expertise,'expertise')+
+    multi('ستايل شغلك',opts.styles,d.styles,'styles')+
+    multi('البرامج',opts.software,d.software,'software')+
+    multi('التخصصات',opts.specialties,d.specialties,'specialties')+
+    '<div class="field"><label>نبذة عن خبرتك</label><textarea id="onboard-bio" rows="3">'+esc(d.bio||'')+'</textarea></div>';
+  if(role==='MARKETER') html+=
+    '<div class="field"><label>سنوات الخبرة</label><input id="onboard-experience" type="number" min="0" max="50" value="'+esc(d.experienceYears??'')+'" placeholder="مثال: 2"></div>'+
+    '<div class="field"><label>رقم WhatsApp</label><input id="onboard-whatsapp" type="tel" inputmode="tel" autocomplete="tel" value="'+esc(profile.whatsappPhone||profile.phone||d.whatsappPhone||'')+'" placeholder="+20 10xxxxxxxx"></div>'+
+    multi('خبرتك الأساسية',opts.specialties,d.specialties,'specialties')+
+    multi('أماكن جلب العملاء',opts.channels,d.channels,'channels')+
+    multi('نوع العملاء اللي بتتعامل معاهم',opts.clientTypes,d.clientTypes,'clientTypes')+
+    multi('طريقة التواصل',opts.communication,d.communication,'communication')+
+    '<div class="field"><label>نبذة عن خبرتك</label><textarea id="onboard-bio" rows="3">'+esc(d.bio||'')+'</textarea></div>';
+  if(role==='CUSTOMER') html+=
+    '<div class="field"><label>رقم WhatsApp</label><input id="onboard-whatsapp" type="tel" inputmode="tel" autocomplete="tel" value="'+esc(profile.whatsappPhone||profile.phone||d.whatsappPhone||'')+'" placeholder="+20 10xxxxxxxx"></div>'+
+    '<div class="field"><label>نوع نشاطك</label><select id="onboard-business"><option value="">اختر</option>'+(opts.businessTypes||[]).map(x=>'<option '+(d.businessType===x?'selected':'')+' value="'+esc(x)+'">'+esc(x)+'</option>').join('')+'</select></div>'+
+    multi('هدفك الأساسي',opts.goals,d.goals,'goals')+
+    multi('تحب نتواصل معاك إزاي؟',opts.preferredContact,d.preferredContact,'preferredContact')+
+    '<div class="field"><label>نبذة عن احتياجك</label><textarea id="onboard-bio" rows="3">'+esc(d.bio||'')+'</textarea></div>';
+  html+='</div>'+
+    '<div class="modal-actions"><button class="btn btn-ghost" id="onboard-skip">أكمل بعدين</button><button class="btn btn-primary" id="onboard-save">حفظ الملف</button></div>';
   modal(html);
   document.querySelectorAll('[data-onboard-group]').forEach(b=>b.addEventListener('click',()=>b.classList.toggle('selected')));
   document.getElementById('onboard-skip').addEventListener('click',closeModal);
   document.getElementById('onboard-save').addEventListener('click',async()=>{
-    const data={};document.querySelectorAll('[data-group]').forEach(g=>{const n=g.dataset.group;data[n]=Array.from(g.querySelectorAll('.onboard-choice.selected')).map(x=>x.dataset.onboardValue);});
-    if(role==='CUSTOMER'){data.businessType=document.getElementById('onboard-business').value;} const bio=document.getElementById('onboard-bio');if(bio)data.bio=bio.value.trim();
-    const body={age:document.getElementById('onboard-age').value||null,workHoursPerDay:document.getElementById('onboard-hours').value||null,data};
-    try{await api('/me/profile',{method:'PATCH',body});state.accountProfile={...profile,age:body.age,workHoursPerDay:body.workHoursPerDay,data,complete:true};closeModal();toast('اتحفظ ملفك — AI والمطابقة هيستخدموا البيانات دي','ok');}catch(e){toast(e.message,'err');}
+    const data={};
+    document.querySelectorAll('[data-group]').forEach(g=>{
+      const n=g.dataset.group;
+      data[n]=Array.from(g.querySelectorAll('.onboard-choice.selected')).map(x=>x.dataset.onboardValue);
+    });
+    if(role==='CUSTOMER'){
+      data.businessType=document.getElementById('onboard-business').value;
+    }
+    const bio=document.getElementById('onboard-bio');
+    if(bio) data.bio=bio.value.trim();
+    const expEl=document.getElementById('onboard-experience');
+    if(expEl) data.experienceYears=expEl.value===''?null:Number(expEl.value);
+    const waEl=document.getElementById('onboard-whatsapp');
+    const whatsappPhone=waEl ? waEl.value.trim() : null;
+    const body={
+      age:document.getElementById('onboard-age').value||null,
+      workHoursPerDay:document.getElementById('onboard-hours').value||null,
+      experienceYears:data.experienceYears,
+      whatsappPhone,
+      data
+    };
+    try{
+      const r=await api('/me/profile',{method:'PATCH',body});
+      state.accountProfile={
+        ...profile,
+        age:body.age,
+        workHoursPerDay:body.workHoursPerDay,
+        whatsappPhone:r.profile?.whatsappPhone||whatsappPhone||profile.whatsappPhone||profile.phone||null,
+        phone:r.profile?.whatsappPhone||whatsappPhone||profile.phone||null,
+        data,
+        complete:true
+      };
+      if(state.profile) state.profile={...state.profile, phone:r.profile?.whatsappPhone||whatsappPhone||state.profile.phone||null};
+      closeModal();
+      toast('اتحفظ ملفك ورقم WhatsApp — AI والمطابقة هيستخدموا البيانات دي','ok');
+    }catch(e){
+      toast(e.message,'err');
+    }
   });
 }
 async function maybeOpenOnboarding(){
