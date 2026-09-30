@@ -3160,6 +3160,7 @@ RENDERERS['ai-hunter'] = async (el) => {
     }finally{runBox.disabled=false;}
   });
   loadRuns();
+};
 
 async function renderRoutingState(host,requestId){
   const r=await api('/smart-routing/requests/'+requestId);
