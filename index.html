@@ -2768,7 +2768,7 @@ const NAV_BY_ROLE = {
     {id:'owner-editors', label:'المنتجين', icon:'🎬'},
     {id:'owner-marketers', label:'المسوّقين', icon:'📣'},
     {id:'owner-ops', label:'العمليات والاختناقات', icon:'⚙'},
-    {id:'owner-accounts', label:'كل الحسابات', icon:'👥'},
+    {id:'owner-accounts', label:'كل الحسابات', icon:'👥'}, {id:'owner-youssef', label:'حساب يوسف', icon:'👤'},
     {id:'owner-payments', label:'المدفوعات', icon:'▤'},
     {id:'owner-payouts', label:'المستحقات', icon:'⇄'},
     {id:'owner-audit', label:'التتبع والتدقيق', icon:'▧'},
@@ -2824,7 +2824,7 @@ const VIEW_META = {
   'owner-editors':{title:'المنتجين / المحررين', sub:'كل المنتجين والمحررين في مكان مستقل'},
   'owner-marketers':{title:'المسوّقين', sub:'كل المسوقين في مكان مستقل'},
   'owner-ops':{title:'العمليات والاختناقات', sub:'حالات المشاريع، التأخير، الدفع، والشكاوى'},
-  'owner-accounts':{title:'كل الحسابات', sub:'المستخدمون والجلسات والحالة'},
+  'owner-accounts':{title:'كل الحسابات', sub:'المستخدمون والجلسات والحالة'}, 'owner-youssef':{title:'حساب يوسف', sub:'مركز أمان يوسف وإعادة ضبط كلمة المرور'},
   'owner-payments':{title:'المدفوعات', sub:'مراجعة إثباتات الدفع ومتابعة الحالة'},
   'owner-payouts':{title:'المستحقات', sub:'المبالغ الجاهزة والمدفوعة والفاشلة'},
   'owner-audit':{title:'التتبع والتدقيق', sub:'سجل العمليات الحساسة والخطوات الأخيرة'},
@@ -2844,7 +2844,7 @@ const MOBILE_PRIMARY_BY_ROLE = {
   CUSTOMER:['customerHome','projects','direct','customerTools'],
   MARKETER:['marketerHome','smart-routing','projects','people-directory'],
   EDITOR:['editorHome','projects','earnings','people-directory'],
-  OWNER:['owner-home','owner-customers','owner-editors','owner-marketers'],
+  OWNER:['owner-home','owner-customers','owner-editors','owner-marketers','owner-youssef'],
   ADMIN:['owner-home','owner-customers','owner-editors','owner-marketers']
 };
 function renderNav(){
@@ -3300,6 +3300,16 @@ RENDERERS['owner-ops'] = async (el) => {
   el.innerHTML='<div class="owner-kpi-grid"><div class="owner-kpi"><div class="k">مشاريع نشطة</div><div class="v">'+active.length+'</div></div><div class="owner-kpi"><div class="k">متأخرة</div><div class="v">'+overdue.length+'</div></div><div class="owner-kpi"><div class="k">خلال 48 ساعة</div><div class="v">'+due48.length+'</div></div><div class="owner-kpi"><div class="k">شكاوى مفتوحة</div><div class="v">'+complaints.filter(c=>['OPEN','IN_REVIEW'].includes(c.status)).length+'</div></div></div>'+
   '<div class="owner-split"><div class="card"><div class="owner-section-head"><div class="title">الاختناقات حسب الحالة</div></div>'+Object.entries(status).sort((a,b)=>b[1]-a[1]).map(x=>'<div style="padding:8px 0"><div style="display:flex;justify-content:space-between;font-size:11px"><span>'+esc(x[0])+'</span><span>'+x[1]+'</span></div><div class="owner-bar"><i style="width:'+Math.round(x[1]/max*100)+'%"></i></div></div>').join('')+'</div>'+
   '<div class="card"><div class="owner-section-head"><div class="title">رادار المخاطر</div></div><div style="display:grid;gap:8px"><div class="owner-pill">إثباتات دفع معلقة: '+payments.filter(p=>p.status==='PROOF_SUBMITTED').length+'</div><div class="owner-pill">دفع فاشل: '+payments.filter(p=>p.status==='FAILED').length+'</div><div class="owner-pill">شكاوى مفتوحة: '+complaints.filter(c=>c.status==='OPEN').length+'</div><div class="owner-pill">مشاريع متأخرة: '+overdue.length+'</div></div></div></div>';
+};
+
+RENDERERS['owner-youssef'] = async (el) => {
+  await RENDERERS['owner-accounts'](el);
+  const button = el.querySelector('[data-ysec]');
+  if (button) {
+    button.click();
+  } else {
+    el.innerHTML = '<div class="card"><div style="font-weight:800;font-size:16px">حساب يوسف</div><div style="color:#687488;margin-top:8px">حساب يوسف غير موجود حاليًا أو لا يمكن الوصول إليه.</div></div>';
+  }
 };
 
 RENDERERS['owner-accounts'] = async (el) => {
