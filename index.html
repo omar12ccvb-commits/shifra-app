@@ -2890,12 +2890,23 @@ async function refreshBellBadge(){
 }
 document.getElementById('bell-btn').addEventListener('click', async () => {
   const { notifications } = await api('/notifications');
+  let pushState = null;
+  try{ pushState = await diagnosePushNotifications(); }catch(e){}
+  const pushLabel = pushState?.subscribed ? '✅ مفعلة على الجهاز' :
+    pushState?.permission === 'denied' ? '⛔ مقفولة من إعدادات المتصفح' :
+    pushState?.configured ? '⚠️ جاهزة لكن لم يتم تفعيلها على الجهاز' :
+    '⚪ غير متاحة حاليًا';
   modal(`<h3>الإشعارات</h3>
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:12px;color:var(--text-dim)">حالة إشعارات SHIFRA على جهازك</div>
+      <div id="push-state-label" style="font-size:14px;font-weight:700;margin-top:5px">${esc(pushLabel)}</div>
+      <div id="push-state-detail" style="font-size:11px;color:var(--text-faint);margin-top:5px;line-height:1.7">${esc(pushState?.message||'جاري التحقق...')}</div>
+    </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
       <button class="btn btn-primary btn-sm" type="button" onclick="enablePushNotifications();">🔔 تفعيل إشعارات الجهاز</button>
-      <button class="btn btn-ghost btn-sm" type="button" onclick="testPushNotifications();">إرسال اختبار</button>
+      <button class="btn btn-ghost btn-sm" type="button" onclick="testPushNotifications();">🧪 إرسال اختبار</button>
     </div>
-    <div style="font-size:11.5px;color:var(--text-faint);margin-bottom:12px;line-height:1.7">بعد التفعيل، إشعارات SHIFRA تقدر توصلك حتى لو الموقع مقفول.</div>
+    <div style="font-size:11.5px;color:var(--text-faint);margin-bottom:12px;line-height:1.7">بعد التفعيل، إشعارات SHIFRA يمكن أن تظهر حتى لو الموقع مش مفتوح.</div>
     <div style="max-height:60vh; overflow-y:auto">
       ${notifications.length ? notifications.map(n => `
         <div class="card list-card" data-notif="${n.id}" data-entity="${n.related_entity_id||''}" style="margin-bottom:8px; ${n.is_read?'opacity:.55':''}">
