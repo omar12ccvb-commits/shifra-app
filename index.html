@@ -2590,17 +2590,146 @@ function doLogout(){
   document.getElementById('auth-screen').style.display = 'flex';
   document.getElementById('login-password').value = '';
 }
+
+async function openAccountSettings(){
+  try{
+    const [{account},{sessions}] = await Promise.all([
+      api('/account'),
+      api('/account/sessions')
+    ]);
+
+    const isCustomer=account.role==='CUSTOMER';
+    const activeSessions=(sessions||[]).filter(s=>!s.revokedAt);
+    const currentSessions=activeSessions.filter(s=>s.isCurrent);
+    const roleLabel=({OWNER:'مالك',ADMIN:'إدارة',MARKETER:'مسوّق',EDITOR:'مونتير',CUSTOMER:'عميل'}[account.role]||account.role);
+
+    modal(
+      '<h3>إدارة الحساب والأمان</h3>'+
+      '<div class="card" style="margin-bottom:12px">'+
+        '<div style="display:flex;justify-content:space-between;gap:10px;align-items:center">'+
+          '<div><b>'+esc(account.fullName)+'</b><div style="font-size:11px;color:var(--text-faint);margin-top:3px">'+esc(roleLabel)+' · ID #'+esc(account.id)+'</div></div>'+
+          '<span class="badge '+(account.status==='ACTIVE'?'badge-green':'badge-red')+'">'+esc(account.status==='ACTIVE'?'نشط':'موقوف')+'</span>'+
+        '</div>'+
+        '<div class="kv"><span class="k">جلسات نشطة</span><span class="v">'+Number(account.activeSessions||0)+'</span></div>'+
+        '<div class="kv"><span class="k">رمز دخول بديل</span><span class="v">'+(account.hasLoginCode?'مفعّل':'غير مفعّل')+'</span></div>'+
+      '</div>'+
+
+      '<div class="card" style="margin-bottom:12px">'+
+        '<div class="section-title" style="margin-top:0">بيانات الحساب</div>'+
+        '<div class="field"><label>الاسم بالكامل</label><input id="acc-name" value="'+esc(account.fullName||'')+'"></div>'+
+        (isCustomer?'':'<div class="field"><label>البريد الإلكتروني</label><input id="acc-email" class="ltr" value="'+esc(account.email||'')+'"></div>')+
+        '<div class="field"><label>رقم الهاتف</label><input id="acc-phone" class="ltr" inputmode="tel" value="'+esc(account.phone||'')+'"></div>'+
+        '<button class="btn btn-primary btn-block" id="acc-save-profile">حفظ بيانات الحساب</button>'+
+      '</div>'+
+
+      (isCustomer ?
+        '<div class="card" style="margin-bottom:12px">'+
+          '<div class="section-title" style="margin-top:0">رمز الدخول</div>'+
+          '<div style="font-size:12px;color:var(--text-dim);line-height:1.7;margin-bottom:10px">'+(account.hasLoginCode?'غيّر الرمز الحالي. بعد تغييره يتم إنهاء الجلسات الأخرى لحماية الحساب.':'أنشئ رمز دخول بديلًا يمكنك استخدامه مع الاسم بدل رقم الهاتف.')+'</div>'+
+          (account.hasLoginCode?'<div class="field"><label>الرمز الحالي</label><input id="acc-code-current" class="ltr" autocomplete="off" maxlength="32"></div>':'')+
+          '<div class="field"><label>الرمز الجديد</label><input id="acc-code-new" class="ltr" autocomplete="off" maxlength="32"></div>'+
+          '<div class="field"><label>تأكيد الرمز الجديد</label><input id="acc-code-confirm" class="ltr" autocomplete="off" maxlength="32"></div>'+
+          '<button class="btn btn-ghost btn-block" id="acc-save-code">حفظ رمز الدخول</button>'+
+          '<div id="acc-code-result" style="display:none;margin-top:10px"></div>'+
+        '</div>'
+      :
+        '<div class="card" style="margin-bottom:12px">'+
+          '<div class="section-title" style="margin-top:0">كلمة المرور</div>'+
+          '<div style="font-size:12px;color:var(--text-dim);margin-bottom:10px">غيّر كلمة المرور من داخل الحساب.</div>'+
+          '<button class="btn btn-ghost btn-block" id="acc-change-password">تغيير كلمة المرور</button>'+
+        '</div>'
+      )+
+
+      '<div class="card">'+
+        '<div class="section-title" style="margin-top:0">أمان الجلسات</div>'+
+        '<div style="font-size:12px;color:var(--text-dim);line-height:1.7;margin-bottom:10px">الحساب مربوط بمعرّف حساب ثابت. تقدر تعرف الأجهزة المفتوحة وتنهي كل الجلسات الأخرى بدون ما تخرج من جهازك الحالي.</div>'+
+        '<div style="font-size:12px;margin-bottom:10px"><b>'+activeSessions.length+'</b> جلسة نشطة · جهازك الحالي '+(currentSessions.length?'مُعتمد':'غير معروف')+'</div>'+
+        '<button class="btn btn-ghost btn-block" id="acc-revoke-others">إنهاء كل الجلسات الأخرى</button>'+
+        '<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button><button class="btn btn-danger" id="acc-logout">تسجيل الخروج من هذا الجهاز</button></div>'+
+      '</div>'
+    );
+
+    document.getElementById('acc-save-profile').onclick=async e=>{
+      const btn=e.currentTarget; btn.disabled=true;
+      try{
+        const body={fullName:document.getElementById('acc-name').value.trim(),phone:document.getElementById('acc-phone').value.trim()};
+        if(!isCustomer) body.email=document.getElementById('acc-email').value.trim();
+        const r=await api('/account',{method:'PATCH',body});
+        state.user=Object.assign({},state.user,{fullName:r.account.fullName,email:r.account.email,phone:r.account.phone,role:r.account.role,ownerKey:r.account.ownerKey});
+        document.getElementById('side-user-name').textContent=state.user.fullName;
+        closeModal();
+        toast('تم حفظ بيانات الحساب بنجاح','ok');
+      }catch(err){toast(err.message,'err');btn.disabled=false;}
+    };
+
+    const codeBtn=document.getElementById('acc-save-code');
+    if(codeBtn) codeBtn.onclick=async e=>{
+      const btn=e.currentTarget;
+      const next=document.getElementById('acc-code-new').value.trim().toUpperCase();
+      const confirm=document.getElementById('acc-code-confirm').value.trim().toUpperCase();
+      if(next.length<6 || next.length>32){toast('الرمز لازم يكون من 6 إلى 32 حرفًا أو رقمًا','err');return;}
+      if(!/^[A-Z0-9]+$/.test(next)){toast('الرمز يستخدم حروف إنجليزية وأرقام فقط','err');return;}
+      if(next!==confirm){toast('تأكيد الرمز غير مطابق','err');return;}
+      btn.disabled=true;
+      try{
+        const body={newLoginCode:next};
+        if(document.getElementById('acc-code-current')) body.currentLoginCode=document.getElementById('acc-code-current').value.trim().toUpperCase();
+        const r=await api('/account/login-code',{method:'POST',body});
+        const out=document.getElementById('acc-code-result');
+        if(out){
+          out.style.display='block';
+          out.innerHTML='<div class="card" style="text-align:center"><div style="font-size:11px;color:var(--text-faint);margin-bottom:7px">رمز الدخول الجديد — احفظه في مكان آمن</div><div class="mono" style="font-size:24px;font-weight:800;letter-spacing:3px">'+esc(r.loginCode)+'</div></div>';
+        }
+        toast('تم تغيير رمز الدخول وإنهاء الجلسات الأخرى','ok');
+        btn.disabled=false;
+      }catch(err){toast(err.message,'err');btn.disabled=false;}
+    };
+
+    const pwBtn=document.getElementById('acc-change-password');
+    if(pwBtn) pwBtn.onclick=()=>{
+      modal('<h3>تغيير كلمة المرور</h3>'+
+        '<div class="field"><label>كلمة المرور الحالية</label><input id="acc-pw-current" type="password" class="ltr"></div>'+
+        '<div class="field"><label>كلمة المرور الجديدة</label><input id="acc-pw-new" type="password" class="ltr"></div>'+
+        '<div class="field"><label>تأكيد الجديدة</label><input id="acc-pw-confirm" type="password" class="ltr"></div>'+
+        '<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" id="acc-pw-save">حفظ</button></div>');
+      document.getElementById('acc-pw-save').onclick=async e=>{
+        const btn=e.currentTarget;
+        const cur=document.getElementById('acc-pw-current').value;
+        const next=document.getElementById('acc-pw-new').value;
+        const confirm=document.getElementById('acc-pw-confirm').value;
+        if(next.length<8){toast('كلمة المرور لازم تكون 8 أحرف على الأقل','err');return;}
+        if(next!==confirm){toast('تأكيد كلمة المرور غير مطابق','err');return;}
+        btn.disabled=true;
+        try{await api('/auth/change-password',{method:'POST',body:{currentPassword:cur,newPassword:next}});closeModal();toast('تم تغيير كلمة المرور','ok');}
+        catch(err){toast(err.message,'err');btn.disabled=false;}
+      };
+    };
+
+    document.getElementById('acc-revoke-others').onclick=async e=>{
+      const btn=e.currentTarget;btn.disabled=true;
+      try{const r=await api('/account/sessions/revoke-others',{method:'POST'});toast('تم إنهاء '+Number(r.revokedCount||0)+' جلسة أخرى','ok');btn.disabled=false;}
+      catch(err){toast(err.message,'err');btn.disabled=false;}
+    };
+
+    document.getElementById('acc-logout').onclick=()=>doLogout();
+  }catch(err){
+    toast(err.message||'تعذر تحميل إعدادات الحساب','err');
+  }
+}
+
 document.getElementById('logout-btn-desktop').addEventListener('click', doLogout);
 document.getElementById('user-menu-btn').addEventListener('click', () => {
-  modal(`<h3>${esc(state.user.fullName)}</h3>
-    <div class="kv"><span class="k">الدور</span><span class="v">${esc(state.user.role)}</span></div>
-    ${state.profile && state.profile.referral_code ? `<div class="kv"><span class="k">كود الدعوة</span><span class="v mono">${esc(state.profile.referral_code)}</span></div>` : ''}
-    <div style="display:grid;gap:8px;margin-top:16px">
-      <button class="btn btn-primary btn-block" type="button" onclick="enablePushNotifications();">🔔 تفعيل إشعارات الجهاز</button>
-      <button class="btn btn-ghost btn-block" type="button" onclick="testPushNotifications();">إرسال إشعار اختبار</button>
-    </div>
-    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button>
-      <button class="btn btn-danger" id="modal-logout">تسجيل الخروج</button></div>`);
+  modal('<h3>'+esc(state.user.fullName)+'</h3>'+
+    '<div class="kv"><span class="k">الدور</span><span class="v">'+esc(state.user.role)+'</span></div>'+
+    (state.profile && state.profile.referral_code ? '<div class="kv"><span class="k">كود الدعوة</span><span class="v mono">'+esc(state.profile.referral_code)+'</span></div>' : '')+
+    '<div style="display:grid;gap:8px;margin-top:16px">'+
+      '<button class="btn btn-primary btn-block" type="button" id="open-account-settings">⚙️ إدارة الحساب والأمان</button>'+
+      '<button class="btn btn-ghost btn-block" type="button" onclick="enablePushNotifications();">🔔 تفعيل إشعارات الجهاز</button>'+
+      '<button class="btn btn-ghost btn-block" type="button" onclick="testPushNotifications();">إرسال إشعار اختبار</button>'+
+    '</div>'+
+    '<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">إغلاق</button>'+
+      '<button class="btn btn-danger" id="modal-logout">تسجيل الخروج</button></div>');
+  document.getElementById('open-account-settings').addEventListener('click', openAccountSettings);
   document.getElementById('modal-logout').addEventListener('click', doLogout);
 });
 
