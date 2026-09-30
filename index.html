@@ -3245,7 +3245,8 @@ RENDERERS['ai-teammate']=async (el)=>{
   input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});
   el.querySelectorAll('[data-ai-team-q]').forEach(b=>b.addEventListener('click',()=>{input.value=b.dataset.aiTeamQ;send();}));
   await Promise.all([loadStatus(),loadHistory()]);
-};\nasync function renderRoutingState(host,requestId){
+};
+async function renderRoutingState(host,requestId){
   const r=await api('/smart-routing/requests/'+requestId);
   const req=r.request; const offers=r.offers||[]; const current=offers.find(x=>x.id===req.current_offer_id);
   const now=Date.now();
