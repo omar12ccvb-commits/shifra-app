@@ -2115,7 +2115,43 @@ body::before{
   .mk-kpi .lab{font-size:12.5px}.mk-kpi .sub{font-size:12px}.mk-tool .tt{font-size:14px}.mk-tool .ss{font-size:12.5px}.mk-tag{font-size:11.5px}
   .editor-hero p{font-size:13px}.editor-kpi .k{font-size:12px}.editor-kpi .s{font-size:11.5px}.editor-feature .title{font-size:13.5px}.editor-feature .desc{font-size:12.5px}
 }
-</style></head>
+</style>
+<style id="shifra-ai-hunter-v1">
+.ai-hunter-shell{display:grid;gap:14px}
+.ai-hunter-hero{padding:20px;border:1px solid rgba(124,92,255,.18);border-radius:22px;background:radial-gradient(520px 240px at 100% 0%,rgba(56,189,248,.11),transparent 70%),linear-gradient(145deg,rgba(18,21,31,.96),rgba(9,12,18,.94))}
+.ai-hunter-hero h2{font:900 28px/1.3 Cairo,var(--font);color:#fff}
+.ai-hunter-hero p{font:500 11.5px/1.8 Cairo,var(--font);color:#a5b2c4;margin-top:6px}
+.ai-hunter-grid{display:grid;grid-template-columns:320px minmax(0,1fr);gap:14px}
+.ai-hunter-panel{padding:14px;border:1px solid rgba(255,255,255,.06);border-radius:18px;background:rgba(10,13,19,.78)}
+.ai-hunter-panel label{display:block;font:800 10px Cairo,var(--font);color:#b7c0cf;margin:0 0 6px}
+.ai-hunter-panel input,.ai-hunter-panel textarea,.ai-hunter-panel select{width:100%;background:#111722;border:1px solid rgba(124,92,255,.2);border-radius:11px;color:#eef4ff;padding:10px 11px;font:600 12px/1.7 Cairo,var(--font);outline:none}
+.ai-hunter-panel textarea{min-height:100px;resize:vertical}
+.ai-hunter-fields{display:grid;gap:10px}
+.ai-hunter-actions{display:flex;gap:8px;margin-top:12px}
+.ai-hunter-actions .btn{flex:1}
+.ai-hunter-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.ai-hunter-kpi{padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.055);background:rgba(255,255,255,.025)}
+.ai-hunter-kpi .l{font:700 9.5px Cairo,var(--font);color:#7e8ca0}
+.ai-hunter-kpi .v{margin-top:4px;font:900 22px/1 Cairo,var(--font);color:#f4f7fb}
+.ai-hunter-leads{display:grid;gap:9px;margin-top:12px}
+.ai-hunter-lead{padding:13px;border-radius:16px;border:1px solid rgba(255,255,255,.055);background:rgba(255,255,255,.022)}
+.ai-hunter-lead-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.ai-hunter-lead h3{font:900 15px/1.5 Cairo,var(--font);color:#eef4ff}
+.ai-hunter-score{min-width:58px;text-align:center;padding:7px 8px;border-radius:12px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.16);font:900 15px Cairo,var(--font);color:#79e5b6}
+.ai-hunter-meta{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.ai-hunter-chip{padding:4px 7px;border-radius:999px;background:rgba(255,255,255,.045);color:#9eacbe;font:700 9px Cairo,var(--font)}
+.ai-hunter-lead p{margin-top:8px;font:500 10.5px/1.8 Cairo,var(--font);color:#b8c3d2}
+.ai-hunter-lead-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ai-hunter-lead-actions .btn{font-size:10px;padding:7px 9px}
+.ai-hunter-runs{display:grid;gap:7px;margin-top:8px}
+.ai-hunter-run{padding:9px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.05);background:rgba(255,255,255,.02);cursor:pointer}
+.ai-hunter-run:hover{border-color:rgba(124,92,255,.24)}
+.ai-hunter-run .r1{display:flex;justify-content:space-between;gap:8px;font:800 10px Cairo,var(--font);color:#e5ebf4}
+.ai-hunter-run .r2{margin-top:3px;color:#7f8da1;font:500 9px/1.6 Cairo,var(--font)}
+.ai-hunter-empty{padding:28px 14px;text-align:center;color:#78869a;font:700 11px/1.8 Cairo,var(--font)}
+@media(max-width:900px){.ai-hunter-grid{grid-template-columns:1fr}.ai-hunter-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+</head>
 <body>
 
 <div id="auth-screen">
@@ -2769,7 +2805,7 @@ const NAV_BY_ROLE = {
     {id:'direct', label:'رسائل', icon:'💬'}
   ],
   OWNER: [
-    {id:'owner-home', label:'مركز القيادة', icon:'◆'}, {id:'owner-ai', label:'Omar AI', icon:'✦'}, {id:'people-directory', label:'الخبراء', icon:'👥'},
+    {id:'owner-home', label:'مركز القيادة', icon:'◆'}, {id:'owner-ai', label:'Omar AI', icon:'✦'}, {id:'ai-hunter', label:'AI Hunter', icon:'🎯'}, {id:'people-directory', label:'الخبراء', icon:'👥'},
     {id:'owner-tools', label:'أدوات المالك', icon:'✦'},
     {id:'owner-direct', label:'مراسلات مباشرة', icon:'💬'},
     {id:'owner-project-chat', label:'محادثات المشاريع', icon:'☷'},
@@ -2825,7 +2861,7 @@ const VIEW_META = {
   ratings:{title:'تقييماتي', sub:'متوسط التقييم وآخر ملاحظات العملاء'},
   'marketer-profile':{title:'حسابي', sub:'بياناتك وكود الدعوة والأمان'},
   'owner-home':{title:'مركز قيادة المالك', sub:'الأرقام الحية، الأشخاص، المال، والاختناقات في مكان واحد'},
-  'owner-ai':{title:'Omar AI', sub:'مساعد عمر فقط لفحص الحسابات والأمان وتنفيذ الإجراءات بعد التأكيد'},
+  'owner-ai':{title:'Omar AI', sub:'مساعد عمر فقط لفحص الحسابات والأمان وتنفيذ الإجراءات بعد التأكيد'}, 'ai-hunter':{title:'AI Hunter', sub:'محرك اكتشاف العملاء المحتملين والبحث الذكي على الويب'},
   'owner-tools':{title:'أدوات المالك', sub:'20 أداة تشغيلية للتحليل والمراقبة واتخاذ الخطوة التالية'},
   'owner-direct':{title:'المراسلات المباشرة', sub:'عمر ويوسف يقدروا يفتحوا محادثة مع أي حساب نشط'},
   'owner-project-chat':{title:'محادثات المشاريع', sub:'كل محادثات العملاء والمسوقين والمحررين'},
@@ -3021,6 +3057,109 @@ RENDERERS['owner-ai'] = async (el) => {
   el.querySelector('#owner-ai-input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});
   el.querySelectorAll('[data-owner-ai-quick]').forEach(b=>b.addEventListener('click',()=>{el.querySelector('#owner-ai-input').value=b.dataset.ownerAiQuick;send();}));
 };
+
+
+function aiHunterScoreClass(score){
+  const n=Number(score||0);
+  return n>=80?'مرتفع':n>=60?'متوسط':'منخفض';
+}
+async function aiHunterLoad(host, runId){
+  const r=await api(runId?('/ai-hunter/runs/'+runId):'/ai-hunter/runs/1').catch(()=>null);
+  if(!r || !r.leads) return;
+  aiHunterRenderLeads(host,r.leads,r.run);
+}
+function aiHunterRenderLeads(host,leads,run){
+  const box=host.querySelector('#ai-hunter-leads');
+  const k=host.querySelector('#ai-hunter-kpis');
+  const arr=Array.isArray(leads)?leads:[];
+  const avg=arr.length?Math.round(arr.reduce((s,x)=>s+Number(x.fit_score||0),0)/arr.length):0;
+  const high=arr.filter(x=>Number(x.fit_score||0)>=80).length;
+  const interested=arr.filter(x=>['INTERESTED','CONVERTED'].includes(x.status)).length;
+  k.innerHTML='<div class="ai-hunter-kpi"><div class="l">تم اكتشافه</div><div class="v">'+arr.length+'</div></div>'+
+    '<div class="ai-hunter-kpi"><div class="l">فرص قوية</div><div class="v">'+high+'</div></div>'+
+    '<div class="ai-hunter-kpi"><div class="l">متوسط الملاءمة</div><div class="v">'+avg+'</div></div>'+
+    '<div class="ai-hunter-kpi"><div class="l">مهتم/محوّل</div><div class="v">'+interested+'</div></div>';
+  box.innerHTML=arr.length?arr.map(lead=>{
+    const signals=Array.isArray(lead.need_signals)?lead.need_signals:[];
+    const src=Array.isArray(lead.source_urls)?lead.source_urls:[];
+    const score=Number(lead.fit_score||0);
+    return '<div class="ai-hunter-lead">'+
+      '<div class="ai-hunter-lead-top"><div><h3>'+esc(lead.company_name||'شركة غير مسماة')+'</h3><div class="ai-hunter-meta">'+
+      (lead.location?'<span class="ai-hunter-chip">'+esc(lead.location)+'</span>':'')+
+      (lead.niche?'<span class="ai-hunter-chip">'+esc(lead.niche)+'</span>':'')+
+      '<span class="ai-hunter-chip">'+esc(lead.status||'DISCOVERED')+'</span></div></div>'+
+      '<div class="ai-hunter-score">'+score+'<div style="font-size:8px;opacity:.7">/100</div></div></div>'+
+      (lead.why_fit?'<p><b>ليه مناسب:</b> '+esc(lead.why_fit)+'</p>':'')+
+      (lead.service_opportunity?'<p><b>الفرصة:</b> '+esc(lead.service_opportunity)+'</p>':'')+
+      (signals.length?'<div class="ai-hunter-meta">'+signals.slice(0,5).map(s=>'<span class="ai-hunter-chip">'+esc(s)+'</span>').join('')+'</div>':'')+
+      (lead.outreach_message?'<p><b>الرسالة المقترحة:</b> '+esc(lead.outreach_message)+'</p>':'')+
+      '<div class="ai-hunter-lead-actions">'+
+      (lead.website?'<a class="btn btn-secondary btn-sm" target="_blank" rel="noopener" href="'+esc(lead.website)+'">الموقع</a>':'')+
+      (lead.contact_url?'<a class="btn btn-secondary btn-sm" target="_blank" rel="noopener" href="'+esc(lead.contact_url)+'">التواصل</a>':'')+
+      (src[0]?'<a class="btn btn-secondary btn-sm" target="_blank" rel="noopener" href="'+esc(src[0])+'">المصدر</a>':'')+
+      '<button class="btn btn-secondary btn-sm" data-hunter-status="REVIEWED" data-id="'+lead.id+'">مراجعة</button>'+
+      '<button class="btn btn-secondary btn-sm" data-hunter-status="CONTACTED" data-id="'+lead.id+'">تم التواصل</button>'+
+      '<button class="btn btn-primary btn-sm" data-hunter-status="INTERESTED" data-id="'+lead.id+'">مهتم</button>'+
+      '</div></div>';
+  }).join(''):'<div class="ai-hunter-empty">لسه مفيش Leads في النتيجة دي. شغّل بحث جديد.</div>';
+  host.querySelectorAll('[data-hunter-status]').forEach(b=>b.addEventListener('click',async()=>{
+    b.disabled=true;
+    try{
+      await api('/ai-hunter/leads/'+b.dataset.id,{method:'PATCH',body:{status:b.dataset.hunterStatus}});
+      const current=run?.id?await api('/ai-hunter/runs/'+run.id):null;
+      if(current) aiHunterRenderLeads(host,current.leads,current.run);
+    }catch(e){toast('فشل تحديث حالة العميل: '+e.message,'err');b.disabled=false;}
+  }));
+}
+RENDERERS['ai-hunter'] = async (el) => {
+  el.innerHTML='<div class="ai-hunter-shell">'+
+    '<div class="ai-hunter-hero"><h2>AI Hunter 🎯</h2><p>يبحث على الويب عن شركات حقيقية، يقيّم مدى ملاءمتها لخدمات SHIFRA، يشرح سبب الترشيح، ويجهّز رسالة مخصصة. لا يتم إرسال رسائل تلقائيًا.</p></div>'+
+    '<div class="ai-hunter-grid">'+
+      '<div class="ai-hunter-panel"><div class="ai-hunter-fields">'+
+        '<div><label>هدف البحث</label><textarea id="hunter-query" placeholder="مثال: دور على 15 براند في القاهرة محتاجين فيديوهات إعلانية ومحتوى قصير"></textarea></div>'+
+        '<div><label>المجال</label><input id="hunter-niche" placeholder="مطاعم، عقارات، متاجر، عيادات..."></div>'+
+        '<div><label>الموقع</label><input id="hunter-location" value="مصر"></div>'+
+        '<div><label>الخدمة</label><input id="hunter-service" value="مونتاج فيديو + فيديوهات إعلانية + محتوى قصير"></div>'+
+        '<div><label>عدد الشركات</label><select id="hunter-count"><option>5</option><option selected>10</option><option>15</option><option>20</option><option>25</option></select></div>'+
+        '<div><label>تعليمات إضافية</label><textarea id="hunter-extra" placeholder="ركز على الشركات النشطة على السوشيال والتي تنشر باستمرار..."></textarea></div>'+
+      '</div><div class="ai-hunter-actions"><button class="btn btn-primary" id="hunter-run">ابدأ البحث</button></div>'+
+      '<div id="hunter-status" style="margin-top:9px;font:700 10px/1.7 Cairo,var(--font);color:#8c99aa"></div></div>'+
+      '<div><div class="ai-hunter-panel"><div id="ai-hunter-kpis" class="ai-hunter-kpis"></div><div id="ai-hunter-leads" class="ai-hunter-leads"><div class="ai-hunter-empty">ابدأ بحثًا عشان نجيب أول دفعة Leads.</div></div></div></div>'+
+    '</div>'+
+    '<div class="ai-hunter-panel"><b style="font:900 13px Cairo,var(--font)">آخر عمليات البحث</b><div id="ai-hunter-runs" class="ai-hunter-runs"></div></div>'+
+  '</div>';
+
+  const runBox=el.querySelector('#hunter-run'), status=el.querySelector('#hunter-status');
+  const loadRuns=async()=>{
+    const r=await api('/ai-hunter/runs?limit=12').catch(()=>({runs:[]}));
+    const runs=r.runs||[];
+    el.querySelector('#ai-hunter-runs').innerHTML=runs.length?runs.map(x=>'<div class="ai-hunter-run" data-run-id="'+x.id+'"><div class="r1"><span>'+esc((x.query||'').slice(0,80))+'</span><span>'+esc(x.status||'')+'</span></div><div class="r2">'+Number(x.result_count||0)+' Lead · '+esc(x.location||'')+' · '+esc(x.created_at||'')+'</div></div>').join(''):'<div class="ai-hunter-empty">مفيش عمليات سابقة.</div>';
+    el.querySelectorAll('[data-run-id]').forEach(node=>node.addEventListener('click',async()=>{
+      const id=node.dataset.runId; const r=await api('/ai-hunter/runs/'+id); aiHunterRenderLeads(el,r.leads,r.run);
+    }));
+  };
+
+  runBox.addEventListener('click',async()=>{
+    const query=el.querySelector('#hunter-query').value.trim();
+    if(!query){toast('اكتب هدف البحث الأول','err');return;}
+    runBox.disabled=true; status.textContent='⏳ AI Hunter بيبحث على الويب ويحلل الشركات...';
+    try{
+      const r=await api('/ai-hunter/run',{method:'POST',body:{
+        query,
+        niche:el.querySelector('#hunter-niche').value.trim(),
+        location:el.querySelector('#hunter-location').value.trim(),
+        service:el.querySelector('#hunter-service').value.trim(),
+        count:Number(el.querySelector('#hunter-count').value),
+        extraInstructions:el.querySelector('#hunter-extra').value.trim()
+      }});
+      aiHunterRenderLeads(el,r.leads,r.run); status.textContent='✓ اكتمل البحث: '+Number(r.run?.resultCount||0)+' Lead جديد.';
+      loadRuns();
+    }catch(e){
+      status.textContent='✕ '+e.message;
+      toast('AI Hunter: '+e.message,'err');
+    }finally{runBox.disabled=false;}
+  });
+  loadRuns();
 
 async function renderRoutingState(host,requestId){
   const r=await api('/smart-routing/requests/'+requestId);
