@@ -2919,11 +2919,11 @@ function enterApp(){
   goView(firstView);
 }
 const MOBILE_PRIMARY_BY_ROLE = {
-  CUSTOMER:['customerHome','projects','direct','customerTools'],
-  MARKETER:['marketerHome','smart-routing','projects','people-directory'],
-  EDITOR:['editorHome','projects','earnings','people-directory'],
-  OWNER:['owner-home','owner-customers','owner-editors','owner-marketers','owner-youssef'],
-  ADMIN:['owner-home','owner-customers','owner-editors','owner-marketers']
+  CUSTOMER:['customerHome','ai-teammate','projects','direct'],
+  MARKETER:['marketerHome','ai-teammate','smart-routing','projects'],
+  EDITOR:['editorHome','ai-teammate','projects','earnings'],
+  OWNER:['owner-home','ai-teammate','owner-customers','owner-ops'],
+  ADMIN:['owner-home','ai-teammate','owner-customers','owner-ops']
 };
 function renderNav(){
   let items = NAV_BY_ROLE[state.user.role] || [];
