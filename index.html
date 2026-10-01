@@ -3246,12 +3246,13 @@ function aiTeamRenderLeads(host,leads){
 }
 RENDERERS['ai-teammate']=async (el)=>{
   el.innerHTML='<div class="ai-team-shell">'+
-    '<div class="ai-team-chat"><div class="ai-team-head"><div><h2>زميل SHIFRA AI ✦</h2><p>محادثة طبيعية + بحث ويب + اكتشاف عملاء + تتبع نشاط</p></div><span id="ai-team-status" class="ai-team-status"><i class="ai-team-dot"></i>جاري الفحص...</span></div>'+
+    '<div class="ai-team-chat"><div class="ai-team-head"><div><h2>زميل SHIFRA AI ✦</h2><p>محادثة طبيعية + بحث ويب + اكتشاف عملاء + تتبع نشاط · <b id="ai-team-cap-count" style="color:#8be0bb">1,024+ قدرة AI</b></p></div><span id="ai-team-status" class="ai-team-status"><i class="ai-team-dot"></i>جاري الفحص...</span></div>'+
     '<div id="ai-team-log" class="ai-team-log"><div class="ai-team-empty">أنا زميلك داخل SHIFRA. اكتب طلبك، وأنا أوضح لك ماذا أبحث وماذا نفذت.</div></div>'+
     '<div class="ai-team-quick"><button data-ai-team-q="ابحث لي عن شركات حقيقية تحتاج خدمات SHIFRA">🔎 ابحث عن عملاء</button><button data-ai-team-q="اعمل لي قائمة بعملاء محتملين في مصر مع سبب الترشيح">🎯 قائمة Leads</button><button data-ai-team-q="حلل لي أفضل نوع شركات نركز عليه">📊 حلّل السوق</button></div>'+
     '<div class="ai-team-compose"><textarea id="ai-team-input" placeholder="اتكلم معاه عادي... مثال: دورلي على شركات عقارات في القاهرة محتاجة فيديوهات إعلانية"></textarea><button id="ai-team-send" class="btn btn-primary">إرسال</button></div></div>'+
     '<div class="ai-team-side">'+
       '<div class="ai-team-card"><div style="font:900 12px Cairo,var(--font);color:#edf2f8">ماذا يفعل الآن؟</div><div id="ai-team-activity" class="ai-team-activity" style="margin-top:9px"></div><div style="font:900 11px Cairo,var(--font);color:#edf2f8;margin-top:12px">Leads المكتشفة</div><div id="ai-team-leads"></div></div>'+
+      '<div class="ai-team-card"><div style="font:900 12px Cairo,var(--font);color:#edf2f8">قدرات زميل AI · 1,024+</div><div style="font:500 9px/1.7 Cairo,var(--font);color:#7f8da1;margin-top:3px">ابحث عن أي قدرة أو مجال لتشغيل إطار المساعدة المناسب.</div><input id="ai-team-cap-search" placeholder="مثال: مبيعات، Reels، عقارات..." style="width:100%;margin-top:8px;background:#111722;border:1px solid rgba(124,92,255,.2);border-radius:10px;color:#eef4ff;padding:8px 9px;font:600 10px Cairo,var(--font)"><div id="ai-team-cap-list" style="display:grid;gap:5px;margin-top:8px;max-height:220px;overflow:auto"></div></div>'+
       '<div class="ai-team-card"><div style="font:900 12px Cairo,var(--font);color:#edf2f8">المحادثات السابقة</div><div id="ai-team-history" class="ai-team-history"></div></div>'+
     '</div></div>';
 
@@ -3272,6 +3273,20 @@ RENDERERS['ai-teammate']=async (el)=>{
     }catch(_){
       statusEl.innerHTML='<i class="ai-team-dot" style="background:#fbbf24"></i>تعذر التحقق';
     }
+  }
+
+  async function loadCapabilities(query=''){
+    try{
+      const qs=query ? ('?q='+encodeURIComponent(query)+'&limit=18') : '?limit=18';
+      const r=await api('/ai-teammate/capabilities'+qs);
+      const list=el.querySelector('#ai-team-cap-list');
+      const count=el.querySelector('#ai-team-cap-count');
+      if(count) count.textContent=(Number(r.total||1024)).toLocaleString('en-US')+'+ قدرة AI';
+      const caps=r.capabilities||[];
+      list.innerHTML=caps.length
+        ? caps.map(x=>'<div style="padding:7px 8px;border-radius:10px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05);font:700 9px/1.6 Cairo,var(--font);color:#cdd7e4"><b style="color:#8be0bb">'+esc(x.action)+'</b> · '+esc(x.domain)+'</div>').join('')
+        : '<div style="color:#7f8da1;font:600 9px Cairo,var(--font)">مفيش قدرة مطابقة للبحث.</div>';
+    }catch(_){}
   }
 
   async function loadHistory(){
@@ -3360,7 +3375,15 @@ RENDERERS['ai-teammate']=async (el)=>{
   sendBtn.addEventListener('click',send);
   input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});
   el.querySelectorAll('[data-ai-team-q]').forEach(b=>b.addEventListener('click',()=>{input.value=b.dataset.aiTeamQ;send();}));
-  await Promise.all([loadStatus(),loadHistory()]);
+  const capSearch=el.querySelector('#ai-team-cap-search');
+  if(capSearch){
+    let capTimer=null;
+    capSearch.addEventListener('input',()=>{
+      clearTimeout(capTimer);
+      capTimer=setTimeout(()=>loadCapabilities(capSearch.value.trim()),250);
+    });
+  }
+  await Promise.all([loadStatus(),loadHistory(),loadCapabilities()]);
 };
 async function renderRoutingState(host,requestId){
   const r=await api('/smart-routing/requests/'+requestId);
