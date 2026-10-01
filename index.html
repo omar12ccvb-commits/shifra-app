@@ -3242,7 +3242,7 @@ function aiTeamRenderActivity(host,events){
 function aiTeamRenderLeads(host,leads){
   const box=host.querySelector('#ai-team-leads');
   const arr=Array.isArray(leads)?leads:[];
-  box.innerHTML=arr.length?arr.slice(0,8).map(l=>'<div class="ai-team-lead"><b>'+esc(l.company_name||'شركة')+' · '+Number(l.fit_score||0)+'/100</b><span>'+esc(l.service_opportunity||l.why_fit||'Lead مكتشف')+'</span></div>').join(''):'';
+  box.innerHTML=arr.length?arr.slice(0,10).map(l=>'<div class="ai-team-lead"><b>'+esc(l.company_name||'شركة')+' · '+Number(l.fit_score||0)+'/100</b><span>'+esc(l.service_opportunity||l.why_fit||'Lead مكتشف')+'</span></div>').join(''):'';
 }
 RENDERERS['ai-teammate']=async (el)=>{
   el.innerHTML='<div class="ai-team-shell">'+
