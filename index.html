@@ -3254,29 +3254,109 @@ RENDERERS['ai-teammate']=async (el)=>{
       '<div class="ai-team-card"><div style="font:900 12px Cairo,var(--font);color:#edf2f8">ماذا يفعل الآن؟</div><div id="ai-team-activity" class="ai-team-activity" style="margin-top:9px"></div><div style="font:900 11px Cairo,var(--font);color:#edf2f8;margin-top:12px">Leads المكتشفة</div><div id="ai-team-leads"></div></div>'+
       '<div class="ai-team-card"><div style="font:900 12px Cairo,var(--font);color:#edf2f8">المحادثات السابقة</div><div id="ai-team-history" class="ai-team-history"></div></div>'+
     '</div></div>';
+
   let threadId=null;
+  let activeJobTimer=null;
   const statusEl=el.querySelector('#ai-team-status');
   const input=el.querySelector('#ai-team-input');
   const sendBtn=el.querySelector('#ai-team-send');
 
-  async function loadStatus(){try{const s=await api('/ai-teammate/status'); statusEl.innerHTML='<i class="ai-team-dot"></i>'+(s.enabled?'متصل · '+esc(s.model):'غير مهيأ بعد');}catch(_){statusEl.innerHTML='<i class="ai-team-dot" style="background:#fbbf24"></i>تعذر التحقق';}}
-  async function loadHistory(){const r=await api('/ai-teammate/threads').catch(()=>({threads:[]}));const rows=r.threads||[];el.querySelector('#ai-team-history').innerHTML=rows.length?rows.map(t=>'<button data-ai-thread="'+t.id+'">'+esc(t.title||'محادثة')+'</button>').join(''):'<div class="ai-team-empty">مفيش محادثات سابقة.</div>';el.querySelectorAll('[data-ai-thread]').forEach(b=>b.addEventListener('click',()=>openThread(Number(b.dataset.aiThread))));}
-  async function openThread(id){const r=await api('/ai-teammate/threads/'+id);threadId=r.thread.id;el.querySelector('#ai-team-log').innerHTML='';(r.messages||[]).forEach(m=>aiTeamAddMessage(el,m.role,m.content,m.sources));aiTeamRenderActivity(el,r.activity||[]);const last=(r.messages||[]).at(-1);if(last){}aiTeamRenderLeads(el,[]);}
+  function stopJobPolling(){
+    if(activeJobTimer){clearTimeout(activeJobTimer);activeJobTimer=null;}
+  }
+
+  async function loadStatus(){
+    try{
+      const s=await api('/ai-teammate/status');
+      statusEl.innerHTML='<i class="ai-team-dot"></i>'+(s.enabled?'متصل · '+esc(s.model):'غير مهيأ بعد');
+    }catch(_){
+      statusEl.innerHTML='<i class="ai-team-dot" style="background:#fbbf24"></i>تعذر التحقق';
+    }
+  }
+
+  async function loadHistory(){
+    const r=await api('/ai-teammate/threads').catch(()=>({threads:[]}));
+    const rows=r.threads||[];
+    el.querySelector('#ai-team-history').innerHTML=rows.length
+      ? rows.map(t=>'<button data-ai-thread="'+t.id+'">'+esc(t.title||'محادثة')+'</button>').join('')
+      : '<div class="ai-team-empty">مفيش محادثات سابقة.</div>';
+    el.querySelectorAll('[data-ai-thread]').forEach(b=>b.addEventListener('click',()=>openThread(Number(b.dataset.aiThread))));
+  }
+
+  async function openThread(id){
+    stopJobPolling();
+    const r=await api('/ai-teammate/threads/'+id);
+    threadId=r.thread.id;
+    el.querySelector('#ai-team-log').innerHTML='';
+    (r.messages||[]).forEach(m=>aiTeamAddMessage(el,m.role,m.content,m.sources));
+    aiTeamRenderActivity(el,r.activity||[]);
+    aiTeamRenderLeads(el,[]);
+  }
+
+  async function pollJob(jobId){
+    try{
+      const r=await api('/ai-teammate/jobs/'+jobId);
+      aiTeamRenderActivity(el,r.activity||[]);
+      if(r.job?.status==='QUEUED'||r.job?.status==='RUNNING'){
+        statusEl.innerHTML='<i class="ai-team-dot"></i>البحث يعمل الآن…';
+        activeJobTimer=setTimeout(()=>pollJob(jobId),1600);
+        return;
+      }
+
+      stopJobPolling();
+      if(r.job?.status==='COMPLETED'){
+        statusEl.innerHTML='<i class="ai-team-dot"></i>متصل · البحث اكتمل';
+        if(r.message) aiTeamAddMessage(el,'ASSISTANT',r.message.content||'اكتملت عملية البحث.',r.sources||r.message.sources||[]);
+        aiTeamRenderLeads(el,r.leads||[]);
+        aiTeamRenderActivity(el,r.activity||[]);
+        loadHistory();
+      }else{
+        statusEl.innerHTML='<i class="ai-team-dot" style="background:#fbbf24"></i>توقف البحث';
+        aiTeamRenderActivity(el,(r.activity||[]).concat([{status:'FAILED',title:'فشل البحث',detail:r.job?.error||'حدث خطأ غير معروف.'}]));
+        toast('زميل AI: '+(r.job?.error||'فشل البحث'),'err');
+      }
+    }catch(e){
+      activeJobTimer=setTimeout(()=>pollJob(jobId),2200);
+    }finally{
+      sendBtn.disabled=false;
+    }
+  }
+
   async function send(){
-    const content=input.value.trim(); if(!content || sendBtn.disabled)return;
-    sendBtn.disabled=true;aiTeamAddMessage(el,'USER',content,[]);input.value='';
+    const content=input.value.trim();
+    if(!content || sendBtn.disabled)return;
+
+    stopJobPolling();
+    sendBtn.disabled=true;
+    aiTeamAddMessage(el,'USER',content,[]);
+    input.value='';
     aiTeamRenderActivity(el,[{status:'RUNNING',title:'بدأ التنفيذ',detail:'أفهم الطلب وأحدد هل يحتاج بحث ويب أم إجابة مباشرة.'}]);
+
     try{
       const r=await api('/ai-teammate/chat',{method:'POST',body:{threadId,content}});
-      threadId=r.threadId;aiTeamAddMessage(el,'ASSISTANT',r.message?.content||'وصلت النتيجة.',r.sources||[]);
-      aiTeamRenderActivity(el,r.activity||[]);
-      aiTeamRenderLeads(el,r.leads||[]);
-      loadHistory();
+      threadId=r.threadId;
+
+      if(r.async && r.jobId){
+        statusEl.innerHTML='<i class="ai-team-dot"></i>البحث يعمل في الخلفية…';
+        aiTeamAddMessage(el,'ASSISTANT',r.message?.content||'بدأت البحث عن عملاء حقيقيين. سأعرض النتيجة عند اكتماله.',[]);
+        aiTeamRenderActivity(el,r.activity||[]);
+        activeJobTimer=setTimeout(()=>pollJob(r.jobId),700);
+      }else{
+        aiTeamAddMessage(el,'ASSISTANT',r.message?.content||'وصلت النتيجة.',r.sources||[]);
+        aiTeamRenderActivity(el,r.activity||[]);
+        aiTeamRenderLeads(el,r.leads||[]);
+        loadHistory();
+        sendBtn.disabled=false;
+      }
     }catch(e){
       aiTeamRenderActivity(el,[{status:'FAILED',title:'توقف التنفيذ',detail:e.message}]);
       toast('زميل AI: '+e.message,'err');
-    }finally{sendBtn.disabled=false;input.focus();}
+      sendBtn.disabled=false;
+    }finally{
+      input.focus();
+    }
   }
+
   sendBtn.addEventListener('click',send);
   input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});
   el.querySelectorAll('[data-ai-team-q]').forEach(b=>b.addEventListener('click',()=>{input.value=b.dataset.aiTeamQ;send();}));
