@@ -3252,7 +3252,7 @@ RENDERERS['ai-teammate']=async (el)=>{
     '<div class="ai-team-compose"><textarea id="ai-team-input" placeholder="اتكلم معاه عادي... مثال: دورلي على شركات عقارات في القاهرة محتاجة فيديوهات إعلانية"></textarea><button id="ai-team-send" class="btn btn-primary">إرسال</button></div></div>'+
     '<div class="ai-team-side">'+
       '<div class="ai-team-card"><div style="font:900 12px Cairo,var(--font);color:#edf2f8">ماذا يفعل الآن؟</div><div id="ai-team-activity" class="ai-team-activity" style="margin-top:9px"></div><div style="font:900 11px Cairo,var(--font);color:#edf2f8;margin-top:12px">Leads المكتشفة</div><div id="ai-team-leads"></div></div>'+
-      '<div class="ai-team-card"><div style="font:900 12px Cairo,var(--font);color:#edf2f8">قدرات زميل AI · 1,024+</div><div style="font:500 9px/1.7 Cairo,var(--font);color:#7f8da1;margin-top:3px">ابحث عن أي قدرة أو مجال لتشغيل إطار المساعدة المناسب.</div><input id="ai-team-cap-search" placeholder="مثال: مبيعات، Reels، عقارات..." style="width:100%;margin-top:8px;background:#111722;border:1px solid rgba(124,92,255,.2);border-radius:10px;color:#eef4ff;padding:8px 9px;font:600 10px Cairo,var(--font)"><div id="ai-team-cap-list" style="display:grid;gap:5px;margin-top:8px;max-height:220px;overflow:auto"></div></div>'+
+      '<div class="ai-team-card"><div style="font:900 12px Cairo,var(--font);color:#edf2f8">التواصل مع العملاء</div><div style="font:500 9px/1.7 Cairo,var(--font);color:#7f8da1;margin-top:3px">مسودات مخصصة من البحث، اعتماد قبل الإرسال، وسجل حالة كل رسالة.</div><div id="ai-team-outreach" style="display:grid;gap:7px;margin-top:8px"></div></div><div class="ai-team-card"><div style="font:900 12px Cairo,var(--font);color:#edf2f8">قدرات زميل AI · 1,024+</div><div style="font:500 9px/1.7 Cairo,var(--font);color:#7f8da1;margin-top:3px">ابحث عن أي قدرة أو مجال لتشغيل إطار المساعدة المناسب.</div><input id="ai-team-cap-search" placeholder="مثال: مبيعات، Reels، عقارات..." style="width:100%;margin-top:8px;background:#111722;border:1px solid rgba(124,92,255,.2);border-radius:10px;color:#eef4ff;padding:8px 9px;font:600 10px Cairo,var(--font)"><div id="ai-team-cap-list" style="display:grid;gap:5px;margin-top:8px;max-height:220px;overflow:auto"></div></div>'+
       '<div class="ai-team-card"><div style="font:900 12px Cairo,var(--font);color:#edf2f8">المحادثات السابقة</div><div id="ai-team-history" class="ai-team-history"></div></div>'+
     '</div></div>';
 
@@ -3289,6 +3289,37 @@ RENDERERS['ai-teammate']=async (el)=>{
     }catch(_){}
   }
 
+  async function loadOutreachQueue(){
+    try{
+      const r=await api('/ai-teammate/outreach-queue?limit=20');
+      const host=el.querySelector('#ai-team-outreach');
+      if(!host)return;
+      const rows=r.messages||[];
+      host.innerHTML=rows.length ? rows.slice(0,12).map(m=>
+        '<div style="padding:8px;border:1px solid rgba(255,255,255,.06);border-radius:10px;background:rgba(255,255,255,.02)">'+
+        '<div style="font:900 10px Cairo,var(--font);color:#edf2f8">'+esc(m.company_name||'Lead')+'</div>'+
+        '<div style="font:600 9px/1.6 Cairo,var(--font);color:#8e9caf">'+esc(m.channel||'')+' · '+esc(m.status||'')+'</div>'+
+        '<div style="font:500 9px/1.6 Cairo,var(--font);color:#aeb9c9;margin-top:4px">'+esc((m.body||'').slice(0,180))+'</div>'+
+        '<div style="display:flex;gap:6px;margin-top:6px">'+
+          (m.status==='DRAFT' ? '<button class="btn btn-primary btn-sm" data-outreach-approve="'+m.id+'">اعتماد</button>' : '')+
+          (m.status==='APPROVED' ? '<button class="btn btn-primary btn-sm" data-outreach-send="'+m.id+'">إرسال</button>' : '')+
+        '</div></div>'
+      ).join('') : '<div style="color:#7f8da1;font:600 9px Cairo,var(--font)">مفيش مسودات تواصل لسه.</div>';
+      host.querySelectorAll('[data-outreach-approve]').forEach(b=>b.addEventListener('click',async()=>{
+        b.disabled=true;
+        try{await api('/ai-teammate/outreach/'+b.dataset.outreachApprove+'/approve',{method:'POST',body:{}});toast('تم اعتماد رسالة التواصل','ok');await loadOutreachQueue();}
+        catch(e){toast(e.message||'تعذر اعتماد الرسالة','err');b.disabled=false;}
+      }));
+      host.querySelectorAll('[data-outreach-send]').forEach(b=>b.addEventListener('click',async()=>{
+        b.disabled=true;
+        try{await api('/ai-teammate/outreach/'+b.dataset.outreachSend+'/send',{method:'POST',body:{}});toast('تم إرسال الرسالة عبر القناة المتصلة','ok');await loadOutreachQueue();}
+        catch(e){toast(e.message||'قناة الإرسال غير متصلة','err');b.disabled=false;}
+      }));
+    }catch(_){
+      const host=el.querySelector('#ai-team-outreach');
+      if(host)host.innerHTML='<div style="color:#fbbf24;font:600 9px Cairo,var(--font)">تعذر تحميل طابور التواصل.</div>';
+    }
+  }
   async function loadHistory(){
     const r=await api('/ai-teammate/threads').catch(()=>({threads:[]}));
     const rows=r.threads||[];
@@ -3325,6 +3356,7 @@ RENDERERS['ai-teammate']=async (el)=>{
         aiTeamRenderLeads(el,r.leads||[]);
         aiTeamRenderActivity(el,r.activity||[]);
         loadHistory();
+        loadOutreachQueue();
       }else{
         statusEl.innerHTML='<i class="ai-team-dot" style="background:#fbbf24"></i>توقف البحث';
         aiTeamRenderActivity(el,(r.activity||[]).concat([{status:'FAILED',title:'فشل البحث',detail:r.job?.error||'حدث خطأ غير معروف.'}]));
@@ -3383,7 +3415,7 @@ RENDERERS['ai-teammate']=async (el)=>{
       capTimer=setTimeout(()=>loadCapabilities(capSearch.value.trim()),250);
     });
   }
-  await Promise.all([loadStatus(),loadHistory(),loadCapabilities()]);
+  await Promise.all([loadStatus(),loadHistory(),loadCapabilities(),loadOutreachQueue()]);
 };
 async function renderRoutingState(host,requestId){
   const r=await api('/smart-routing/requests/'+requestId);
