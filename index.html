@@ -2178,7 +2178,7 @@ body::before{
 .ai-team-event .t{font:900 10px Cairo,var(--font);color:#e5ebf4}.ai-team-event .d{margin-top:3px;font:500 9px/1.65 Cairo,var(--font);color:#8190a4}
 .ai-team-event.running{border-color:rgba(124,92,255,.2);}.ai-team-event.failed{border-color:rgba(248,113,113,.2)}
 .ai-team-lead{margin-top:8px;padding:9px;border-radius:11px;background:rgba(52,211,153,.045);border:1px solid rgba(52,211,153,.09)}
-.ai-team-lead b{font:900 10px Cairo,var(--font);color:#e7f6ee}.ai-team-lead span{display:block;margin-top:3px;font:500 9px/1.55 Cairo,var(--font);color:#92a2b5}
+.ai-team-lead b{font:900 10px Cairo,var(--font);color:#e7f6ee}.ai-team-lead span{display:block;margin-top:3px;font:500 9px/1.55 Cairo,var(--font);color:#92a2b5}.ai-team-lead .meta{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.ai-team-lead .meta span{display:inline-block;margin:0;padding:3px 6px;border-radius:999px;background:rgba(255,255,255,.04);font:800 8px Cairo,var(--font);color:#aebdce}.ai-team-lead details{margin-top:7px}.ai-team-lead summary{cursor:pointer;color:#9ecaff;font:800 8.5px Cairo,var(--font)}.ai-team-lead .checks{margin-top:6px;padding:7px;border-radius:9px;background:rgba(255,255,255,.025);font:500 8.5px/1.7 Cairo,var(--font);color:#8796a9}.ai-team-lead .links{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.ai-team-lead .links a{padding:4px 6px;border-radius:8px;background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.11);color:#9cc9ff;text-decoration:none;font:800 8px Cairo,var(--font)}
 .ai-team-history{display:grid;gap:6px;margin-top:8px}
 .ai-team-history button{text-align:start;padding:8px 9px;border-radius:10px;border:1px solid rgba(255,255,255,.05);background:rgba(255,255,255,.02);color:#bcc8d6;font:700 9px Cairo,var(--font)}
 .ai-team-empty{padding:22px;text-align:center;color:#77869a;font:700 10px/1.8 Cairo,var(--font)}
@@ -3144,6 +3144,7 @@ function aiHunterRenderLeads(host,leads,run){
       '<div class="ai-hunter-score">'+score+'<div style="font-size:8px;opacity:.7">/100</div></div></div>'+
       (lead.why_fit?'<p><b>ليه مناسب:</b> '+esc(lead.why_fit)+'</p>':'')+
       (lead.service_opportunity?'<p><b>الفرصة:</b> '+esc(lead.service_opportunity)+'</p>':'')+
+      (()=>{const ri=lead.research_intelligence||{};const lv=ri.liveVerification||{};return '<p><b>تحقق AI:</b> '+Number(ri.qualityScore ?? ri.score ?? 0)+'/100 · 100 فحص '+Number(ri.score||0)+'/100 · '+esc(lv.status||'SEARCH_ONLY')+' ('+Number(lv.verificationScore||0)+'/100)</p>';})()+
       (signals.length?'<div class="ai-hunter-meta">'+signals.slice(0,5).map(s=>'<span class="ai-hunter-chip">'+esc(s)+'</span>').join('')+'</div>':'')+
       (lead.outreach_message?'<p><b>الرسالة المقترحة:</b> '+esc(lead.outreach_message)+'</p>':'')+
       '<div class="ai-hunter-lead-actions">'+
@@ -3242,7 +3243,40 @@ function aiTeamRenderActivity(host,events){
 function aiTeamRenderLeads(host,leads){
   const box=host.querySelector('#ai-team-leads');
   const arr=Array.isArray(leads)?leads:[];
-  box.innerHTML=arr.length?arr.slice(0,10).map(l=>'<div class="ai-team-lead"><b>'+esc(l.company_name||'شركة')+' · '+Number(l.fit_score||0)+'/100</b><span>'+esc(l.service_opportunity||l.why_fit||'Lead مكتشف')+'</span></div>').join(''):'';
+  box.innerHTML=arr.length?arr.slice(0,10).map(l=>{
+    const ri=l.research_intelligence||{};
+    const lv=ri.liveVerification||{};
+    const score=Number(ri.score||0);
+    const quality=Number(ri.qualityScore ?? score);
+    const liveScore=Number(lv.verificationScore||0);
+    const liveLabel=lv.status==='VERIFIED'?'مصدر مباشر مؤكد':lv.status==='PARTIAL'?'تحقق جزئي':'بحث فقط';
+    const pass=Number(ri.passCount||0);
+    const review=Number(ri.reviewCount||0);
+    const signals=Array.isArray(l.need_signals)?l.need_signals.slice(0,4):[];
+    const sources=Array.isArray(l.source_urls)?l.source_urls:[];
+    const safe=(url)=>{try{const u=new URL(String(url||''));return /^https?:$/i.test(u.protocol)?u.toString():'#';}catch(_){return '#';}};
+    return '<div class="ai-team-lead">'+
+      '<b>'+esc(l.company_name||'شركة')+' · '+quality+'/100</b>'+
+      '<span>'+esc(l.service_opportunity||l.why_fit||'Lead مكتشف')+'</span>'+
+      '<div class="meta">'+
+        (l.niche?'<span>'+esc(l.niche)+'</span>':'')+
+        '<span>'+esc(liveLabel)+' · '+liveScore+'/100</span>'+
+        '<span>100 فحص: '+score+'/100</span>'+
+      '</div>'+
+      (signals.length?'<div class="meta">'+signals.map(s=>'<span>'+esc(s)+'</span>').join('')+'</div>':'')+
+      '<details><summary>عرض فحوص AI والأدلة</summary><div class="checks">'+
+        'PASS: '+pass+' · REVIEW: '+review+'<br>'+
+        'التحقق المباشر: '+esc(lv.summary||'غير متاح')+
+        ((ri.topSignals||[]).length?'<br>إشارات ناجحة: '+esc((ri.topSignals||[]).slice(0,5).map(x=>x.name||x.id).join(' · ')):'')+
+        ((ri.topReviews||[]).length?'<br>نقاط تحتاج مراجعة: '+esc((ri.topReviews||[]).slice(0,4).map(x=>x.name||x.id).join(' · ')):'')+
+      '</div></details>'+
+      '<div class="links">'+
+        (l.website?'<a target="_blank" rel="noopener" href="'+esc(safe(l.website))+'">الموقع</a>':'')+
+        (l.contact_url?'<a target="_blank" rel="noopener" href="'+esc(safe(l.contact_url))+'">التواصل</a>':'')+
+        (sources[0]?'<a target="_blank" rel="noopener" href="'+esc(safe(sources[0]))+'">المصدر</a>':'')+
+      '</div>'+
+    '</div>';
+  }).join(''):'<div class="ai-team-empty">مفيش Leads في النتيجة دي.</div>';
 }
 RENDERERS['ai-teammate']=async (el)=>{
   el.innerHTML='<div class="ai-team-shell">'+
