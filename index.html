@@ -3516,32 +3516,49 @@ function aiHunterRenderLeads(host,leads,run){
   const box=host.querySelector('#ai-hunter-leads');
   const k=host.querySelector('#ai-hunter-kpis');
   const arr=Array.isArray(leads)?leads:[];
-  const avg=arr.length?Math.round(arr.reduce((s,x)=>s+Number(x.fit_score||0),0)/arr.length):0;
+  const avg=arr.length?Math.round(arr.reduce((sum,x)=>sum+Number(x.fit_score||0),0)/arr.length):0;
   const high=arr.filter(x=>Number(x.fit_score||0)>=80).length;
   const interested=arr.filter(x=>['INTERESTED','CONVERTED'].includes(x.status)).length;
-  k.innerHTML='<div class="ai-hunter-kpi"><div class="l">تم اكتشافه</div><div class="v">'+arr.length+'</div></div>'+
+  k.innerHTML='<div class="ai-hunter-kpi"><div class="l">فرص حديثة</div><div class="v">'+arr.length+'</div></div>'+
     '<div class="ai-hunter-kpi"><div class="l">فرص قوية</div><div class="v">'+high+'</div></div>'+
     '<div class="ai-hunter-kpi"><div class="l">متوسط الملاءمة</div><div class="v">'+avg+'</div></div>'+
     '<div class="ai-hunter-kpi"><div class="l">مهتم/محوّل</div><div class="v">'+interested+'</div></div>';
-  box.innerHTML=arr.length?arr.map(lead=>{
+
+  const summaryHtml=run?.summary
+    ? '<div style="margin-top:10px;padding:11px 12px;border-radius:13px;border:1px solid rgba(56,189,248,.14);background:linear-gradient(145deg,rgba(56,189,248,.055),rgba(124,92,255,.045));color:#dbeafe;font:600 11px/1.8 Cairo,var(--font)"><b style="display:block;color:#fff;margin-bottom:3px">ملخص البحث</b>'+esc(run.summary)+'</div>'
+    : '';
+
+  box.innerHTML=summaryHtml+(arr.length?arr.map(lead=>{
     const signals=Array.isArray(lead.need_signals)?lead.need_signals:[];
     const src=Array.isArray(lead.source_urls)?lead.source_urls:[];
     const score=Number(lead.fit_score||0);
+    const ri=lead.research_intelligence||{};
+    const freshness=Number(lead.freshness_score ?? ri.freshnessScore ?? 0);
+    const evidenceDate=lead.last_evidence_date||ri.lastEvidenceDate||'';
+    const age=lead.evidence_age_days ?? ri.evidenceAgeDays;
+    const recentActivity=ri.recentActivity||'';
+    const qualification=lead.qualification_label||ri.qualificationLabel||'POTENTIAL';
+    const qualificationText=qualification==='HIGH_POTENTIAL'?'فرصة قوية الآن':qualification==='REVIEW'?'تحتاج مراجعة':'فرصة محتملة';
     return '<div class="ai-hunter-lead">'+
       '<div class="ai-hunter-lead-top"><div><h3>'+esc(lead.company_name||'شركة غير مسماة')+'</h3><div class="ai-hunter-meta">'+
       (lead.location?'<span class="ai-hunter-chip">'+esc(lead.location)+'</span>':'')+
       (lead.niche?'<span class="ai-hunter-chip">'+esc(lead.niche)+'</span>':'')+
-      '<span class="ai-hunter-chip">'+esc(lead.status||'DISCOVERED')+'</span></div></div>'+
+      '<span class="ai-hunter-chip">'+esc(qualificationText)+'</span></div></div>'+
       '<div class="ai-hunter-score">'+score+'<div style="font-size:8px;opacity:.7">/100</div></div></div>'+
-      (lead.why_fit?'<p><b>ليه مناسب:</b> '+esc(lead.why_fit)+'</p>':'')+
-      (lead.service_opportunity?'<p><b>الفرصة:</b> '+esc(lead.service_opportunity)+'</p>':'')+ (()=>{const q=lead.qualification_label||lead.research_intelligence?.qualificationLabel||'POTENTIAL';const t=q==='HIGH_POTENTIAL'?'احتمال كبير كـLead':q==='REVIEW'?'يحتاج مراجعة':'Lead محتمل';return '<p><b>تقييم AI:</b> '+esc(t)+'</p>';})()+ (lead.business_summary?'<p><b>تفاصيل النشاط:</b> '+esc(lead.business_summary)+'</p>':'')+ (lead.whatsapp_number?'<p><b>WhatsApp:</b> '+esc(lead.whatsapp_number)+'</p>':(lead.contact_phone?'<p><b>رقم التواصل:</b> '+esc(lead.contact_phone)+'</p>':''))+
-      (()=>{const ri=lead.research_intelligence||{};const lv=ri.liveVerification||{};return '<p><b>تحقق AI:</b> '+Number(ri.qualityScore ?? ri.score ?? 0)+'/100 · 100 فحص '+Number(ri.score||0)+'/100 · '+esc(lv.status||'SEARCH_ONLY')+' ('+Number(lv.verificationScore||0)+'/100)</p>';})()+
-      (signals.length?'<div class="ai-hunter-meta">'+signals.slice(0,5).map(s=>'<span class="ai-hunter-chip">'+esc(s)+'</span>').join('')+'</div>':'')+
-      (lead.outreach_message?'<p><b>الرسالة المقترحة:</b> '+esc(lead.outreach_message)+'</p>':'')+
+
+      (lead.business_summary?'<div style="margin-top:9px;padding:10px 11px;border-radius:12px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.05)"><div style="font:800 10px Cairo;color:#8fdcff">ملخص العميل</div><div style="margin-top:3px;font:600 11.5px/1.8 Cairo;color:#e6edf7">'+esc(lead.business_summary)+'</div></div>':'')+
+      (lead.sales_reason?'<p><b>ليه يحتاج المونتاج دلوقتي:</b> '+esc(lead.sales_reason)+'</p>':'')+
+      (recentActivity?'<p><b>آخر نشاط مؤكد:</b> '+esc(recentActivity)+'</p>':'')+
+      (lead.last_evidence_date?'<p><b>حداثة الدليل:</b> '+esc(evidenceDate)+(age!=null?' · من '+Number(age)+' يوم':'')+(freshness?' · '+freshness+'/100':'')+'</p>':'')+
+      (lead.why_fit?'<p><b>ليه مناسب لـSHIFRA:</b> '+esc(lead.why_fit)+'</p>':'')+
+      (lead.service_opportunity?'<p><b>الخدمة الأنسب:</b> '+esc(lead.service_opportunity)+'</p>':'')+
+      (lead.whatsapp_number?'<p><b>WhatsApp تجاري:</b> '+esc(lead.whatsapp_number)+'</p>':(lead.contact_phone?'<p><b>رقم تجاري:</b> '+esc(lead.contact_phone)+'</p>':''))+
+      (signals.length?'<div class="ai-hunter-meta">'+signals.slice(0,5).map(signal=>'<span class="ai-hunter-chip">'+esc(signal)+'</span>').join('')+'</div>':'')+
+      (lead.outreach_message?'<p><b>رسالة مختصرة جاهزة:</b> '+esc(lead.outreach_message)+'</p>':'')+
       '<div class="ai-hunter-lead-actions">'+
       (lead.website?'<a class="btn btn-secondary btn-sm" target="_blank" rel="noopener" href="'+esc(aiHunterSafeUrl(lead.website))+'">الموقع</a>':'')+
       (lead.contact_url?'<a class="btn btn-secondary btn-sm" target="_blank" rel="noopener" href="'+esc(aiHunterSafeUrl(lead.contact_url))+'">التواصل</a>':'')+
-      (src[0]?'<a class="btn btn-secondary btn-sm" target="_blank" rel="noopener" href="'+esc(aiHunterSafeUrl(src[0]))+'">المصدر</a>':'')+
+      (src[0]?'<a class="btn btn-secondary btn-sm" target="_blank" rel="noopener" href="'+esc(aiHunterSafeUrl(src[0]))+'">الدليل</a>':'')+
       (lead.outreach_message?'<button class="btn btn-secondary btn-sm" data-copy-outreach="'+esc(lead.outreach_message)+'">نسخ الرسالة</button>':'')+
       '<button class="btn btn-secondary btn-sm" data-hunter-status="REVIEWED" data-id="'+lead.id+'">مراجعة</button>'+
       '<button class="btn btn-secondary btn-sm" data-hunter-status="CONTACTED" data-id="'+lead.id+'">تم التواصل</button>'+
@@ -3549,7 +3566,8 @@ function aiHunterRenderLeads(host,leads,run){
       '<button class="btn btn-primary btn-sm" data-hunter-status="CONVERTED" data-id="'+lead.id+'">تحويل لعميل</button>'+
       '<button class="btn btn-secondary btn-sm" data-hunter-status="NOT_INTERESTED" data-id="'+lead.id+'">غير مهتم</button>'+
       '</div></div>';
-  }).join(''):'<div class="ai-hunter-empty">لسه مفيش Leads في النتيجة دي. شغّل بحث جديد.</div>';
+  }).join(''):'<div class="ai-hunter-empty">لم نجد فرصًا حديثة مؤكدة في هذا البحث. شغّل بحثًا آخر بمجال أو موقع مختلف.</div>');
+
   host.querySelectorAll('[data-copy-outreach]').forEach(b=>b.addEventListener('click',()=>aiHunterCopy(b.dataset.copyOutreach||'')));
   host.querySelectorAll('[data-hunter-status]').forEach(b=>b.addEventListener('click',async()=>{
     b.disabled=true;
@@ -3560,9 +3578,10 @@ function aiHunterRenderLeads(host,leads,run){
     }catch(e){toast('فشل تحديث حالة العميل: '+e.message,'err');b.disabled=false;}
   }));
 }
+
 RENDERERS['ai-hunter'] = async (el) => {
   el.innerHTML='<div class="ai-hunter-shell">'+
-    '<div class="ai-hunter-hero"><h2>AI Hunter 🎯</h2><p>محرك مبيعات يبحث على الويب عن شركات وبراندات ومحلات ومشاريع وقنوات وصنّاع محتوى لديهم نشاط تجاري عام وإشارات حقيقية تدل على حاجتهم للمونتاج أو الفيديو، ثم يحلل الفرصة ويجهّز رسالة شخصية تقنع العميل بالتعرّف على SHIFRA. الإرسال الخارجي يظل يدويًا بعد مراجعتك.</p><div class="ai-hunter-engine-status" id="hunter-engine-status">جاري التحقق من محرك البحث...</div></div>'+
+    '<div class="ai-hunter-hero"><h2>AI Hunter 🎯</h2><p>محرك مبيعات يبحث على الويب عن فرص حقيقية وحديثة فقط، ويرفض العملاء الذين لا يوجد على احتياجهم دليل حديث. كل Lead لازم يوضح نشاط العميل، آخر نشاط مؤكد، لماذا يحتاج المونتاج الآن، الخدمة الأنسب، ومصدر الدليل.</p><div class="ai-hunter-engine-status" id="hunter-engine-status">جاري التحقق من محرك البحث...</div></div>'+
     '<div class="ai-hunter-grid">'+
       '<div class="ai-hunter-panel"><div class="ai-hunter-fields">'+
         '<div><label>هدف البحث</label><textarea id="hunter-query" placeholder="مثال: دور على 15 براند في القاهرة محتاجين فيديوهات إعلانية ومحتوى قصير"></textarea></div>'+
@@ -3570,7 +3589,7 @@ RENDERERS['ai-hunter'] = async (el) => {
         '<div><label>الموقع</label><input id="hunter-location" value="مصر"></div>'+
         '<div><label>الخدمة</label><input id="hunter-service" value="مونتاج فيديو + فيديوهات إعلانية + محتوى قصير"></div>'+
         '<div><label>عدد الشركات</label><select id="hunter-count"><option>5</option><option selected>10</option><option>15</option><option>20</option><option>25</option></select></div>'+
-        '<div><label>تعليمات إضافية</label><textarea id="hunter-extra" placeholder="ركز على الشركات النشطة على السوشيال والتي تنشر باستمرار..."></textarea></div>'+
+        '<div><label>تعليمات إضافية</label><textarea id="hunter-extra" placeholder="ركز على فرص لها دليل حديث خلال آخر 30-60 يوم، واشرح لماذا يحتاج العميل المونتاج الآن. لو الدليل قديم تجاهله..."></textarea></div>'+
       '</div><div class="ai-hunter-actions"><button class="btn btn-primary" id="hunter-run">ابدأ البحث</button></div>'+
       '<div id="hunter-status" style="margin-top:9px;font:700 10px/1.7 Cairo,var(--font);color:#8c99aa"></div></div>'+
       '<div><div class="ai-hunter-panel"><div id="ai-hunter-kpis" class="ai-hunter-kpis"></div><div id="ai-hunter-leads" class="ai-hunter-leads"><div class="ai-hunter-empty">ابدأ بحثًا عشان نجيب أول دفعة Leads.</div></div></div></div>'+
