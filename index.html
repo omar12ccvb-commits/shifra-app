@@ -2684,6 +2684,22 @@ input,textarea,select,button{max-width:100%;box-sizing:border-box}
   .ai-intent{align-self:flex-start}
   .ai-outcome-row button{flex:1;min-width:54px}
 }
+</style><style id="shifra-social-hunter">
+.hunter-social-box{margin-top:8px;padding:10px;border:1px solid rgba(96,165,250,.14);border-radius:13px;background:linear-gradient(145deg,rgba(96,165,250,.055),rgba(139,92,246,.035))}
+.hunter-social-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.hunter-social-head b{display:block;color:#edf4ff;font:900 11px Cairo,var(--font)}
+.hunter-social-head span{display:block;margin-top:2px;color:#7f8da1;font:600 9px/1.6 Cairo,var(--font)}
+.hunter-social-platforms{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.hunter-platform{border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.025);color:#9eabbd;border-radius:999px;padding:6px 9px;font:700 9px Cairo,var(--font)}
+.hunter-platform.active{color:#eef2ff;background:rgba(139,92,246,.14);border-color:rgba(167,139,250,.28)}
+.hunter-switch{position:relative;width:38px;height:22px;flex:0 0 auto}
+.hunter-switch input{opacity:0;width:0;height:0}
+.hunter-switch span{position:absolute;inset:0;background:#242936;border:1px solid rgba(255,255,255,.08);border-radius:999px;transition:.18s}
+.hunter-switch span:before{content:"";position:absolute;width:16px;height:16px;right:2px;top:2px;border-radius:50%;background:#aab4c3;transition:.18s}
+.hunter-switch input:checked+span{background:rgba(139,92,246,.28);border-color:rgba(167,139,250,.38)}
+.hunter-switch input:checked+span:before{transform:translateX(-16px);background:#fff}
+#hunter-social-run{min-width:145px}
+@media(max-width:650px){#hunter-social-run{width:100%}.ai-hunter-actions{flex-direction:column}}
 </style></head>
 <body>
 
@@ -3689,29 +3705,43 @@ function aiHunterRenderLeads(host,leads,run){
 
 RENDERERS['ai-hunter'] = async (el) => {
   el.innerHTML='<div class="ai-hunter-shell">'+
-    '<div class="ai-hunter-hero"><h2>AI Hunter 🎯</h2><p>محرك مبيعات عميق على مرحلتين: يكتشف مرشحين ثم يعيد البحث عن كل مرشح للتحقق المستقل. لا يقبل إلا فرصة عليها دليل حديث جدًا خلال آخر يومين، مع ملخص النشاط وسبب الاحتياج الحالي ومصادر واضحة.</p><div class="ai-hunter-engine-status" id="hunter-engine-status">جاري التحقق من محرك البحث...</div></div>'+
+    '<div class="ai-hunter-hero"><h2>AI Hunter 🎯</h2><p>محرك مبيعات عميق على مرحلتين: يكتشف مرشحين ثم يعيد البحث عن كل مرشح للتحقق المستقل. يمكنه البحث العادي أو تشغيل وضع اصطياد السوشيال الذي يستهدف المنشورات العامة المفهرسة على المنصات الاجتماعية، ويركز على طلبات المونتاج الحديثة مع مصادر واضحة.</p><div class="ai-hunter-engine-status" id="hunter-engine-status">جاري التحقق من محرك البحث...</div></div>'+
     '<div class="ai-hunter-grid">'+
       '<div class="ai-hunter-panel"><div class="ai-hunter-fields">'+
         '<div><label>هدف البحث</label><textarea id="hunter-query" placeholder="مثال: دور على 15 براند في القاهرة محتاجين فيديوهات إعلانية ومحتوى قصير"></textarea></div>'+
         '<div><label>المجال</label><input id="hunter-niche" placeholder="مطاعم، عقارات، متاجر، عيادات..."></div>'+
         '<div><label>الموقع</label><input id="hunter-location" value="مصر"></div>'+
         '<div><label>الخدمة</label><input id="hunter-service" value="مونتاج فيديو + فيديوهات إعلانية + محتوى قصير"></div>'+
+        '<div class="hunter-social-box"><div class="hunter-social-head"><div><b>🎯 وضع اصطياد السوشيال</b><span>أشخاص أو شركات نشروا أنهم محتاجين مونتير — مش وظائف قديمة</span></div><label class="hunter-switch"><input id="hunter-social-mode" type="checkbox" checked><span></span></label></div>'+
+        '<div class="hunter-social-platforms">'+
+          '<button type="button" class="hunter-platform active" data-social-platform="facebook">Facebook</button>'+
+          '<button type="button" class="hunter-platform active" data-social-platform="instagram">Instagram</button>'+
+          '<button type="button" class="hunter-platform active" data-social-platform="tiktok">TikTok</button>'+
+          '<button type="button" class="hunter-platform active" data-social-platform="x">X</button>'+
+          '<button type="button" class="hunter-platform active" data-social-platform="linkedin">LinkedIn</button>'+
+          '<button type="button" class="hunter-platform active" data-social-platform="reddit">Reddit</button>'+
+          '<button type="button" class="hunter-platform active" data-social-platform="youtube">YouTube</button>'+
+          '<button type="button" class="hunter-platform active" data-social-platform="threads">Threads</button>'+
+        '</div></div>''+
         '<div><label>عدد الشركات</label><select id="hunter-count"><option>5</option><option selected>10</option><option>15</option><option>20</option><option>25</option></select></div>'+
         '<div><label>تعليمات إضافية</label><textarea id="hunter-extra" placeholder="ركز فقط على أدلة اليوم أو أمس أو أول أمس، واشرح لماذا يحتاج العميل المونتاج الآن. افحص المصادر بدقة وارفض أي فرصة قديمة..."></textarea></div>'+
-      '</div><div class="ai-hunter-actions"><button class="btn btn-primary" id="hunter-run">ابدأ البحث</button></div>'+
+      '</div><div class="ai-hunter-actions"><button class="btn btn-primary" id="hunter-run">ابدأ البحث</button><button class="btn btn-ghost" id="hunter-social-run">🚀 اصطياد السوشيال</button></div>'+
       '<div id="hunter-status" style="margin-top:9px;font:700 10px/1.7 Cairo,var(--font);color:#8c99aa"></div></div>'+
       '<div><div class="ai-hunter-panel"><div id="ai-hunter-kpis" class="ai-hunter-kpis"></div><div id="ai-hunter-leads" class="ai-hunter-leads"><div class="ai-hunter-empty">ابدأ بحثًا عشان نجيب أول دفعة Leads.</div></div></div></div>'+
     '</div>'+
     '<div class="ai-hunter-panel"><b style="font:900 13px Cairo,var(--font)">آخر عمليات البحث</b><div id="ai-hunter-runs" class="ai-hunter-runs"></div></div>'+
   '</div>';
 
-  const runBox=el.querySelector('#hunter-run'), status=el.querySelector('#hunter-status');
+  const runBox=el.querySelector('#hunter-run'), status=el.querySelector('#hunter-status'), socialRun=el.querySelector('#hunter-social-run');
+  const socialMode=el.querySelector('#hunter-social-mode');
+  const selectedSocial=()=>Array.from(el.querySelectorAll('[data-social-platform].active')).map(b=>b.dataset.socialPlatform);
+  el.querySelectorAll('[data-social-platform]').forEach(b=>b.addEventListener('click',()=>b.classList.toggle('active')));
   const loadStatus=async()=>{
     const box=el.querySelector('#hunter-engine-status');
     const r=await api('/ai-hunter/status').catch(()=>null);
     if(!box) return;
     if(!r){box.textContent='⚠ تعذر التحقق من حالة محرك البحث الآن.';box.className='ai-hunter-engine-status error';return;}
-    if(r.enabled){box.textContent='✓ محرك بحث عميق جاهز — Gemini 3.8 + بحث Google حي + تفكير مرتفع + تحقق على مرحلتين. الحدث المقبول يجب أن يكون خلال آخر يومين.';box.className='ai-hunter-engine-status ready';}
+    if(r.enabled){box.textContent='✓ محرك بحث عميق جاهز — بحث حي + تحقق على مرحلتين. وضع السوشيال يفلتر النتائج نحو منشورات عامة حديثة تحتاج مونتير مع رابط المصدر.';box.className='ai-hunter-engine-status ready';}
     else{box.textContent='⚠ AI Hunter محتاج GEMINI_API_KEY من Google AI Studio على السيرفر قبل البحث الحي.';box.className='ai-hunter-engine-status error';}
   };
   const loadRuns=async()=>{
@@ -3723,26 +3753,48 @@ RENDERERS['ai-hunter'] = async (el) => {
     }));
   };
 
-  runBox.addEventListener('click',async()=>{
+  async function runHunter(forceSocial=false){
     const query=el.querySelector('#hunter-query').value.trim();
     if(!query){toast('اكتب هدف البحث الأول','err');return;}
-    runBox.disabled=true; status.textContent='⏳ بحث عميق جاري: اكتشاف مرشحين → إعادة بحث مستقلة → التحقق من الحداثة والاحتياج → ترتيب أفضل الفرص. البحث قد يستغرق وقتًا أطول عمدًا للحصول على نتائج أدق...';
+    const socialEnabled=forceSocial || !!socialMode?.checked;
+    const platforms=selectedSocial();
+    if(socialEnabled && !platforms.length){toast('اختار منصة اجتماعية واحدة على الأقل','err');return;}
+    const siteMap={
+      facebook:'site:facebook.com', instagram:'site:instagram.com', tiktok:'site:tiktok.com',
+      x:'(site:x.com OR site:twitter.com)', linkedin:'site:linkedin.com', reddit:'site:reddit.com',
+      youtube:'site:youtube.com', threads:'site:threads.net'
+    };
+    const platformLabels={facebook:'Facebook',instagram:'Instagram',tiktok:'TikTok',x:'X',linkedin:'LinkedIn',reddit:'Reddit',youtube:'YouTube',threads:'Threads'};
+    const siteClause=socialEnabled ? platforms.map(p=>siteMap[p]).join(' OR ') : '';
+    const effectiveQuery=socialEnabled ? '('+query+') ('+siteClause+')' : query;
+    const socialExtra=socialEnabled
+      ? 'وضع اصطياد السوشيال: ابحث في المنشورات والصفحات الاجتماعية العامة المفهرسة فقط. لا أريد مواقع وظائف أو منصات فريلانس. أريد أشخاصًا أو شركات قالوا بوضوح إنهم محتاجين مونتير/مونتاج فيديو الآن. استخدم العربية والإنجليزية: مطلوب مونتير، محتاج مونتير، بدور على مونتير، عايز مونتير، مطلوب مونتاج، مونتير فيديو، video editor needed، need a video editor، looking for a video editor، editor needed، hiring video editor. أعطِ الأولوية لآخر 15 دقيقة إن أمكن، ثم آخر ساعة، ثم آخر 6 ساعات، ثم آخر 24 ساعة، وبحد أقصى 48 ساعة. لا تخترع وقت النشر، واذكر عندما لا يكون وقت النشر مؤكدًا. استبعد الطلبات القديمة والمنافسة العالية عندما توجد بدائل. لكل Lead اعرض الرابط الأصلي والمنصة واسم الحساب أو الشركة وسبب الاحتياج والمصدر الذي يثبت الطلب. المنصات: '+platforms.map(p=>platformLabels[p]).join(', ')+'.'
+      : el.querySelector('#hunter-extra').value.trim();
+    runBox.disabled=true;
+    if(socialRun) socialRun.disabled=true;
+    status.textContent='⏳ '+(socialEnabled?'اصطياد السوشيال':'AI Hunter')+' جاري: بحث → تحقق → فلترة الحداثة → ترتيب أفضل الفرص...';
     try{
       const r=await api('/ai-hunter/run',{method:'POST',body:{
-        query,
+        query:effectiveQuery,
         niche:el.querySelector('#hunter-niche').value.trim(),
         location:el.querySelector('#hunter-location').value.trim(),
         service:el.querySelector('#hunter-service').value.trim(),
         count:Number(el.querySelector('#hunter-count').value),
-        extraInstructions:el.querySelector('#hunter-extra').value.trim()
+        extraInstructions:socialExtra
       }});
-      aiHunterRenderLeads(el,r.leads,r.run); status.textContent='✓ اكتمل البحث العميق: '+Number(r.run?.resultCount||0)+' Lead مقبول بعد التحقق.';
+      aiHunterRenderLeads(el,r.leads,r.run);
+      status.textContent='✓ اكتمل البحث: '+Number(r.run?.resultCount||0)+' Lead مقبول بعد التحقق.';
       loadRuns();
     }catch(e){
       status.textContent='✕ '+e.message;
       toast('AI Hunter: '+e.message,'err');
-    }finally{runBox.disabled=false;}
-  });
+    }finally{
+      runBox.disabled=false;
+      if(socialRun) socialRun.disabled=false;
+    }
+  }
+  runBox.addEventListener('click',()=>runHunter(false));
+  if(socialRun) socialRun.addEventListener('click',()=>runHunter(true));
   loadRuns();
   loadStatus();
 };
