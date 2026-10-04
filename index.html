@@ -2576,6 +2576,59 @@ body::after{display:none!important}
 }
 </style>
 
+<style id="shifra-layout-stability-v1">
+/* Final layout guard: prevent responsive overflow and oversized action controls. */
+html,body{width:100%;max-width:100%;overflow-x:hidden}
+#app-shell,.main,.content,.page-head,.ai-hunter-shell,.ai-team-shell,.owner-ai-shell{min-width:0;max-width:100%}
+.main{width:100%}
+.content{width:100%;box-sizing:border-box}
+img,video,canvas,iframe{max-width:100%}
+input,textarea,select,button{max-width:100%;box-sizing:border-box}
+.btn-primary{width:auto!important}
+.auth-card form > .btn-primary,
+.auth-card form > .btn-block,
+.btn-block{width:100%!important}
+.btn-row .btn,.ai-hunter-actions .btn,.owner-ai-command .btn{width:auto!important}
+.ai-hunter-lead-actions .btn{width:auto!important;max-width:100%}
+.ai-hunter-grid{min-width:0}
+.ai-team-shell{min-width:0}
+.ai-team-chat,.ai-team-side,.ai-hunter-panel,.owner-ai-chat,.owner-ai-side{min-width:0}
+.ai-hunter-kpis{min-width:0}
+.ai-hunter-kpi{min-width:0}
+.ai-hunter-kpi .l,.ai-hunter-kpi .v{white-space:normal;overflow-wrap:anywhere}
+.ai-hunter-lead{min-width:0;overflow:hidden}
+.ai-hunter-lead-actions{min-width:0}
+.chat-enterprise-shell{max-width:100%;min-width:0}
+.chat-window,.chat-people{min-width:0}
+@media(max-width:819px){
+  .content{padding-inline:12px!important}
+  .page-head{padding-inline:14px!important}
+  .ai-hunter-grid{grid-template-columns:1fr!important}
+  .ai-team-shell{grid-template-columns:1fr!important}
+  .owner-ai-shell{grid-template-columns:1fr!important}
+  .ai-team-chat,.ai-team-side{width:100%;max-width:100%}
+  .ai-hunter-panel{width:100%;max-width:100%}
+  .ai-hunter-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .ai-hunter-lead-top{gap:7px}
+  .ai-hunter-score{min-width:52px}
+  .chat-enterprise-shell{
+    width:100%!important;
+    max-width:100%!important;
+    height:auto!important;
+    min-height:calc(100vh - 190px)!important;
+  }
+  .chat-window{min-height:0!important}
+}
+@media(max-width:560px){
+  .content{padding-inline:10px!important}
+  .ai-hunter-kpis{grid-template-columns:1fr 1fr!important}
+  .ai-hunter-lead-actions .btn{flex:1 1 auto;min-width:0}
+  .ai-team-shell{gap:10px!important}
+  .ai-team-chat{min-height:calc(100vh - 190px)!important}
+  .owner-ai-input{flex-direction:column}
+  .owner-ai-input .btn{width:100%!important;min-height:48px}
+}
+</style>
 </head>
 <body>
 
