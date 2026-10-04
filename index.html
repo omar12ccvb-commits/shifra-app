@@ -3332,13 +3332,13 @@ document.getElementById('user-menu-btn').addEventListener('click', () => {
 /* ---------------- Role-adaptive nav + router ---------------- */
 const NAV_BY_ROLE = {
   CUSTOMER: [
-    {id:'customerHome', label:'مركز العميل', icon:'◆'}, {id:'ai-teammate', label:'زميل AI', icon:'✦'}, {id:'ai-service', label:'خدمات AI', icon:'✦'},
+    {id:'customerHome', label:'مركز العميل', icon:'◆'}, {id:'ai-service', label:'خدمات AI', icon:'✦'},
     {id:'customerTools', label:'الأدوات', icon:'✦'},
     {id:'projects', label:'مشاريعي', icon:'▦'},
     {id:'direct', label:'رسائل', icon:'💬'}
   ],
   MARKETER: [
-    {id:'marketerHome', label:'مركز المسوّق', icon:'◆'}, {id:'ai-teammate', label:'زميل AI', icon:'✦'}, {id:'smart-routing', label:'اختيار AI', icon:'🧠'}, {id:'people-directory', label:'الخبراء', icon:'👥'}, {id:'workflow-guide', label:'دليل المسار', icon:'📘'},
+    {id:'marketerHome', label:'مركز المسوّق', icon:'◆'}, {id:'smart-routing', label:'اختيار AI', icon:'🧠'}, {id:'people-directory', label:'الخبراء', icon:'👥'}, {id:'workflow-guide', label:'دليل المسار', icon:'📘'},
     {id:'marketer-tools', label:'أدوات المسوّق', icon:'✦'},
     {id:'opportunities', label:'الفرص', icon:'◆'}, {id:'customers', label:'عملائي', icon:'☺'},
     {id:'projects', label:'مشاريعي', icon:'▦'}, {id:'conversations', label:'المحادثات', icon:'☷'},
@@ -3347,14 +3347,14 @@ const NAV_BY_ROLE = {
     {id:'marketer-profile', label:'حسابي', icon:'⚿'}
   ],
   EDITOR: [
-    {id:'editorHome', label:'مركز المونتير', icon:'◆'}, {id:'ai-teammate', label:'زميل AI', icon:'✦'}, {id:'people-directory', label:'الخبراء', icon:'👥'}, {id:'workflow-guide', label:'دليل المسار', icon:'📘'},
+    {id:'editorHome', label:'مركز المونتير', icon:'◆'}, {id:'people-directory', label:'الخبراء', icon:'👥'}, {id:'workflow-guide', label:'دليل المسار', icon:'📘'},
     {id:'editorTools', label:'أدوات المونتير', icon:'✦'},
     {id:'projects', label:'مهامي', icon:'▦'},
     {id:'earnings', label:'أرباحي', icon:'%'},
     {id:'direct', label:'رسائل', icon:'💬'}
   ],
   OWNER: [
-    {id:'owner-home', label:'مركز القيادة', icon:'◆'}, {id:'owner-ai', label:'Omar AI', icon:'✦'}, {id:'ai-teammate', label:'زميل AI', icon:'✦'}, {id:'ai-hunter', label:'AI Hunter', icon:'🎯'}, {id:'people-directory', label:'الخبراء', icon:'👥'},
+    {id:'owner-home', label:'مركز القيادة', icon:'◆'}, {id:'owner-ai', label:'Omar AI', icon:'✦'}, {id:'ai-hunter', label:'SHIFRA Lead AI', icon:'✦'}, {id:'people-directory', label:'الخبراء', icon:'👥'},
     {id:'owner-tools', label:'أدوات المالك', icon:'✦'},
     {id:'owner-direct', label:'مراسلات مباشرة', icon:'💬'},
     {id:'owner-project-chat', label:'محادثات المشاريع', icon:'☷'},
@@ -3410,7 +3410,7 @@ const VIEW_META = {
   ratings:{title:'تقييماتي', sub:'متوسط التقييم وآخر ملاحظات العملاء'},
   'marketer-profile':{title:'حسابي', sub:'بياناتك وكود الدعوة والأمان'},
   'owner-home':{title:'مركز قيادة المالك', sub:'الأرقام الحية، الأشخاص، المال، والاختناقات في مكان واحد'},
-  'owner-ai':{title:'Omar AI', sub:'مساعد عمر فقط لفحص الحسابات والأمان وتنفيذ الإجراءات بعد التأكيد'}, 'ai-teammate':{title:'زميل AI', sub:'محادثة ذكية مع بحث ويب واكتساب عملاء وصندوق نشاط شفاف'}, 'ai-hunter':{title:'AI Hunter', sub:'محرك اكتشاف العملاء المحتملين والبحث الذكي على الويب'},
+  'owner-ai':{title:'Omar AI', sub:'مساعد عمر فقط لفحص الحسابات والأمان وتنفيذ الإجراءات بعد التأكيد'}, 'ai-teammate':{title:'زميل AI', sub:'محادثة ذكية مع بحث ويب واكتساب عملاء وصندوق نشاط شفاف'}, 'ai-hunter':{title:'SHIFRA Lead AI ✦', sub:'صائد العملاء الذكي: سوشيال + ويب + تحقق مزدوج + فلترة حداثة'},
   'owner-tools':{title:'أدوات المالك', sub:'20 أداة تشغيلية للتحليل والمراقبة واتخاذ الخطوة التالية'},
   'owner-direct':{title:'المراسلات المباشرة', sub:'عمر ويوسف يقدروا يفتحوا محادثة مع أي حساب نشط'},
   'owner-project-chat':{title:'محادثات المشاريع', sub:'كل محادثات العملاء والمسوقين والمحررين'},
@@ -3437,11 +3437,11 @@ function enterApp(){
   goView(firstView);
 }
 const MOBILE_PRIMARY_BY_ROLE = {
-  CUSTOMER:['customerHome','ai-teammate','projects','direct'],
-  MARKETER:['marketerHome','ai-teammate','smart-routing','projects'],
-  EDITOR:['editorHome','ai-teammate','projects','earnings'],
-  OWNER:['owner-home','ai-teammate','owner-customers','owner-ops'],
-  ADMIN:['owner-home','ai-teammate','owner-customers','owner-ops']
+  CUSTOMER:['customerHome','ai-hunter','projects','direct'],
+  MARKETER:['marketerHome','ai-hunter','smart-routing','projects'],
+  EDITOR:['editorHome','ai-hunter','projects','earnings'],
+  OWNER:['owner-home','ai-hunter','owner-customers','owner-ops'],
+  ADMIN:['owner-home','ai-hunter','owner-customers','owner-ops']
 };
 function renderNav(){
   let items = NAV_BY_ROLE[state.user.role] || [];
@@ -3705,14 +3705,14 @@ function aiHunterRenderLeads(host,leads,run){
 
 RENDERERS['ai-hunter'] = async (el) => {
   el.innerHTML='<div class="ai-hunter-shell">'+
-    '<div class="ai-hunter-hero"><h2>AI Hunter 🎯</h2><p>محرك مبيعات عميق على مرحلتين: يكتشف مرشحين ثم يعيد البحث عن كل مرشح للتحقق المستقل. يمكنه البحث العادي أو تشغيل وضع اصطياد السوشيال الذي يستهدف المنشورات العامة المفهرسة على المنصات الاجتماعية، ويركز على طلبات المونتاج الحديثة مع مصادر واضحة.</p><div class="ai-hunter-engine-status" id="hunter-engine-status">جاري التحقق من محرك البحث...</div></div>'+
+    '<div class="ai-hunter-hero"><h2>SHIFRA Lead AI ✦</h2><p>صائد عملاء SHIFRA: يبحث في السوشيال والويب، يكتشف طلبات المونتاج الحديثة، يعيد فحص كل نتيجة بشكل مستقل، ويمنع النتائج القديمة أو غير المؤكدة قبل عرضها لك.</p><div class="ai-hunter-engine-status" id="hunter-engine-status">جاري التحقق من محرك البحث...</div></div>'+
     '<div class="ai-hunter-grid">'+
       '<div class="ai-hunter-panel"><div class="ai-hunter-fields">'+
-        '<div><label>هدف البحث</label><textarea id="hunter-query" placeholder="مثال: دور على 15 براند في القاهرة محتاجين فيديوهات إعلانية ومحتوى قصير"></textarea></div>'+
+        '<div><label>ماذا تريد أن يصطاد AI؟</label><textarea id="hunter-query">ابحث عن أشخاص وشركات في كل الدول العربية نشروا مؤخرًا أنهم يحتاجون مونتير فيديو أو مونتاج Reels وإعلانات.</textarea></div>'+
         '<div><label>المجال</label><input id="hunter-niche" placeholder="مطاعم، عقارات، متاجر، عيادات..."></div>'+
-        '<div><label>الموقع</label><input id="hunter-location" value="مصر"></div>'+
+        '<div><label>النطاق</label><input id="hunter-location" value="مصر + جميع الدول العربية"></div>'+
         '<div><label>الخدمة</label><input id="hunter-service" value="مونتاج فيديو + فيديوهات إعلانية + محتوى قصير"></div>'+
-        '<div class="hunter-social-box"><div class="hunter-social-head"><div><b>🎯 وضع اصطياد السوشيال</b><span>أشخاص أو شركات نشروا أنهم محتاجين مونتير — مش وظائف قديمة</span></div><label class="hunter-switch"><input id="hunter-social-mode" type="checkbox" checked><span></span></label></div>'+
+        '<div class="hunter-social-box"><div class="hunter-social-head"><div><b>🎯 وضع اصطياد السوشيال</b><span>أحدث طلبات المونتاج من السوشيال — مش وظائف قديمة ولا قوائم عامة</span></div><label class="hunter-switch"><input id="hunter-social-mode" type="checkbox" checked><span></span></label></div>'+
         '<div class="hunter-social-platforms">'+
           '<button type="button" class="hunter-platform active" data-social-platform="facebook">Facebook</button>'+
           '<button type="button" class="hunter-platform active" data-social-platform="instagram">Instagram</button>'+
@@ -3724,8 +3724,8 @@ RENDERERS['ai-hunter'] = async (el) => {
           '<button type="button" class="hunter-platform active" data-social-platform="threads">Threads</button>'+
         '</div></div>'+
         '<div><label>عدد الشركات</label><select id="hunter-count"><option>5</option><option selected>10</option><option>15</option><option>20</option><option>25</option></select></div>'+
-        '<div><label>تعليمات إضافية</label><textarea id="hunter-extra" placeholder="ركز فقط على أدلة اليوم أو أمس أو أول أمس، واشرح لماذا يحتاج العميل المونتاج الآن. افحص المصادر بدقة وارفض أي فرصة قديمة..."></textarea></div>'+
-      '</div><div class="ai-hunter-actions"><button class="btn btn-primary" id="hunter-run">ابدأ البحث</button><button class="btn btn-ghost" id="hunter-social-run">🚀 اصطياد السوشيال</button></div>'+
+        '<div><label>تعليمات الذكاء</label><textarea id="hunter-extra">ركز على آخر 15 دقيقة أولًا، ثم آخر ساعة، ثم آخر 6 ساعات، ثم آخر 24 ساعة، وبحد أقصى 48 ساعة. ارفض أي منشور قديم أو غير مؤكد. لا أريد مواقع وظائف أو منصات فريلانس؛ أريد منشورات السوشيال نفسها، مع الرابط الأصلي، وقت النشر إن أمكن، التفاعلات/التعليقات إن ظهرت، وسبب واضح لاحتياج المونتاج الآن.</textarea></div>'+
+      '</div><div class="ai-hunter-actions"><button class="btn btn-primary" id="hunter-run">ابدأ البحث الذكي</button><button class="btn btn-ghost" id="hunter-social-run">🚀 اصطاد طلبات المونتاج</button></div>'+
       '<div id="hunter-status" style="margin-top:9px;font:700 10px/1.7 Cairo,var(--font);color:#8c99aa"></div></div>'+
       '<div><div class="ai-hunter-panel"><div id="ai-hunter-kpis" class="ai-hunter-kpis"></div><div id="ai-hunter-leads" class="ai-hunter-leads"><div class="ai-hunter-empty">ابدأ بحثًا عشان نجيب أول دفعة Leads.</div></div></div></div>'+
     '</div>'+
@@ -3741,8 +3741,8 @@ RENDERERS['ai-hunter'] = async (el) => {
     const r=await api('/ai-hunter/status').catch(()=>null);
     if(!box) return;
     if(!r){box.textContent='⚠ تعذر التحقق من حالة محرك البحث الآن.';box.className='ai-hunter-engine-status error';return;}
-    if(r.enabled){box.textContent='✓ محرك بحث عميق جاهز — بحث حي + تحقق على مرحلتين. وضع السوشيال يفلتر النتائج نحو منشورات عامة حديثة تحتاج مونتير مع رابط المصدر.';box.className='ai-hunter-engine-status ready';}
-    else{box.textContent='⚠ AI Hunter محتاج GEMINI_API_KEY من Google AI Studio على السيرفر قبل البحث الحي.';box.className='ai-hunter-engine-status error';}
+    if(r.enabled){box.textContent='✓ SHIFRA Lead AI جاهز — بحث حي + مرحلتان مستقلتان للتحقق + فلترة حداثة خلال 48 ساعة + منع النتائج القديمة.';box.className='ai-hunter-engine-status ready';}
+    else{box.textContent='⚠ محرك البحث الحي غير مهيأ على السيرفر حاليًا.';box.className='ai-hunter-engine-status error';}
   };
   const loadRuns=async()=>{
     const r=await api('/ai-hunter/runs?limit=12').catch(()=>({runs:[]}));
