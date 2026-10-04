@@ -3549,7 +3549,7 @@ function aiHunterRenderLeads(host,leads,run){
       (lead.business_summary?'<div style="margin-top:9px;padding:10px 11px;border-radius:12px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.05)"><div style="font:800 10px Cairo;color:#8fdcff">ملخص العميل</div><div style="margin-top:3px;font:600 11.5px/1.8 Cairo;color:#e6edf7">'+esc(lead.business_summary)+'</div></div>':'')+
       (lead.sales_reason?'<p><b>ليه يحتاج المونتاج دلوقتي:</b> '+esc(lead.sales_reason)+'</p>':'')+
       (recentActivity?'<p><b>آخر نشاط مؤكد:</b> '+esc(recentActivity)+'</p>':'')+
-      (lead.last_evidence_date?'<p><b>حداثة الدليل:</b> '+esc(evidenceDate)+(age!=null?' · من '+Number(age)+' يوم':'')+(freshness?' · '+freshness+'/100':'')+'</p>':'')+
+      (lead.last_evidence_date?'<p><b>حداثة الدليل:</b> '+esc(evidenceDate)+(age!=null?' · من '+Number(age)+' يوم':'')+(freshness?' · '+freshness+'/100':'')+'</p>':'')+(()=>{const v=Number(lead.verification_score ?? ri.verificationScore ?? 0);const sc=Number(lead.source_count ?? ri.sourceCount ?? src.length);return '<p><b>دقة التحقق:</b> '+v+'/100 · '+sc+' مصدر'+(lead.source_agreement||ri.sourceAgreement? ' · '+esc(lead.source_agreement||ri.sourceAgreement):'')+'</p>';})()+
       (lead.why_fit?'<p><b>ليه مناسب لـSHIFRA:</b> '+esc(lead.why_fit)+'</p>':'')+
       (lead.service_opportunity?'<p><b>الخدمة الأنسب:</b> '+esc(lead.service_opportunity)+'</p>':'')+
       (lead.whatsapp_number?'<p><b>WhatsApp تجاري:</b> '+esc(lead.whatsapp_number)+'</p>':(lead.contact_phone?'<p><b>رقم تجاري:</b> '+esc(lead.contact_phone)+'</p>':''))+
@@ -3581,7 +3581,7 @@ function aiHunterRenderLeads(host,leads,run){
 
 RENDERERS['ai-hunter'] = async (el) => {
   el.innerHTML='<div class="ai-hunter-shell">'+
-    '<div class="ai-hunter-hero"><h2>AI Hunter 🎯</h2><p>محرك مبيعات يبحث على الويب عن فرص حقيقية وحديثة فقط، ويرفض العملاء الذين لا يوجد على احتياجهم دليل حديث. كل Lead لازم يوضح نشاط العميل، آخر نشاط مؤكد، لماذا يحتاج المونتاج الآن، الخدمة الأنسب، ومصدر الدليل.</p><div class="ai-hunter-engine-status" id="hunter-engine-status">جاري التحقق من محرك البحث...</div></div>'+
+    '<div class="ai-hunter-hero"><h2>AI Hunter 🎯</h2><p>محرك مبيعات عميق على مرحلتين: يكتشف مرشحين ثم يعيد البحث عن كل مرشح للتحقق المستقل. لا يقبل إلا فرصة عليها دليل حديث جدًا خلال آخر يومين، مع ملخص النشاط وسبب الاحتياج الحالي ومصادر واضحة.</p><div class="ai-hunter-engine-status" id="hunter-engine-status">جاري التحقق من محرك البحث...</div></div>'+
     '<div class="ai-hunter-grid">'+
       '<div class="ai-hunter-panel"><div class="ai-hunter-fields">'+
         '<div><label>هدف البحث</label><textarea id="hunter-query" placeholder="مثال: دور على 15 براند في القاهرة محتاجين فيديوهات إعلانية ومحتوى قصير"></textarea></div>'+
@@ -3589,7 +3589,7 @@ RENDERERS['ai-hunter'] = async (el) => {
         '<div><label>الموقع</label><input id="hunter-location" value="مصر"></div>'+
         '<div><label>الخدمة</label><input id="hunter-service" value="مونتاج فيديو + فيديوهات إعلانية + محتوى قصير"></div>'+
         '<div><label>عدد الشركات</label><select id="hunter-count"><option>5</option><option selected>10</option><option>15</option><option>20</option><option>25</option></select></div>'+
-        '<div><label>تعليمات إضافية</label><textarea id="hunter-extra" placeholder="ركز على فرص لها دليل حديث خلال آخر 30-60 يوم، واشرح لماذا يحتاج العميل المونتاج الآن. لو الدليل قديم تجاهله..."></textarea></div>'+
+        '<div><label>تعليمات إضافية</label><textarea id="hunter-extra" placeholder="ركز فقط على أدلة اليوم أو أمس أو أول أمس، واشرح لماذا يحتاج العميل المونتاج الآن. افحص المصادر بدقة وارفض أي فرصة قديمة..."></textarea></div>'+
       '</div><div class="ai-hunter-actions"><button class="btn btn-primary" id="hunter-run">ابدأ البحث</button></div>'+
       '<div id="hunter-status" style="margin-top:9px;font:700 10px/1.7 Cairo,var(--font);color:#8c99aa"></div></div>'+
       '<div><div class="ai-hunter-panel"><div id="ai-hunter-kpis" class="ai-hunter-kpis"></div><div id="ai-hunter-leads" class="ai-hunter-leads"><div class="ai-hunter-empty">ابدأ بحثًا عشان نجيب أول دفعة Leads.</div></div></div></div>'+
@@ -3603,7 +3603,7 @@ RENDERERS['ai-hunter'] = async (el) => {
     const r=await api('/ai-hunter/status').catch(()=>null);
     if(!box) return;
     if(!r){box.textContent='⚠ تعذر التحقق من حالة محرك البحث الآن.';box.className='ai-hunter-engine-status error';return;}
-    if(r.enabled){box.textContent='✓ محرك البحث الحي جاهز عبر Gemini — يقدر يبحث ويحلل المصادر العامة ويجهز رسائل مخصصة.';box.className='ai-hunter-engine-status ready';}
+    if(r.enabled){box.textContent='✓ محرك بحث عميق جاهز — Gemini 3.8 + بحث Google حي + تفكير مرتفع + تحقق على مرحلتين. الحدث المقبول يجب أن يكون خلال آخر يومين.';box.className='ai-hunter-engine-status ready';}
     else{box.textContent='⚠ AI Hunter محتاج GEMINI_API_KEY من Google AI Studio على السيرفر قبل البحث الحي.';box.className='ai-hunter-engine-status error';}
   };
   const loadRuns=async()=>{
@@ -3618,7 +3618,7 @@ RENDERERS['ai-hunter'] = async (el) => {
   runBox.addEventListener('click',async()=>{
     const query=el.querySelector('#hunter-query').value.trim();
     if(!query){toast('اكتب هدف البحث الأول','err');return;}
-    runBox.disabled=true; status.textContent='⏳ AI Hunter بيبحث على الويب ويحلل الشركات...';
+    runBox.disabled=true; status.textContent='⏳ بحث عميق جاري: اكتشاف مرشحين → إعادة بحث مستقلة → التحقق من الحداثة والاحتياج → ترتيب أفضل الفرص. البحث قد يستغرق وقتًا أطول عمدًا للحصول على نتائج أدق...';
     try{
       const r=await api('/ai-hunter/run',{method:'POST',body:{
         query,
@@ -3628,7 +3628,7 @@ RENDERERS['ai-hunter'] = async (el) => {
         count:Number(el.querySelector('#hunter-count').value),
         extraInstructions:el.querySelector('#hunter-extra').value.trim()
       }});
-      aiHunterRenderLeads(el,r.leads,r.run); status.textContent='✓ اكتمل البحث: '+Number(r.run?.resultCount||0)+' Lead جديد.';
+      aiHunterRenderLeads(el,r.leads,r.run); status.textContent='✓ اكتمل البحث العميق: '+Number(r.run?.resultCount||0)+' Lead مقبول بعد التحقق.';
       loadRuns();
     }catch(e){
       status.textContent='✕ '+e.message;
