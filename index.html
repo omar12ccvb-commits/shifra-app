@@ -2629,7 +2629,62 @@ input,textarea,select,button{max-width:100%;box-sizing:border-box}
   .owner-ai-input .btn{width:100%!important;min-height:48px}
 }
 </style>
-</head>
+<style id="shifra-ai-intelligence-v2">
+.ai-team-radar-card{overflow:hidden}
+.ai-radar-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ai-radar-head b{display:block;font-size:12px;color:#f1f5f9}
+.ai-radar-head span{display:block;font-size:9px;color:#7f8da1;margin-top:2px}
+.ai-radar-head button{border:1px solid rgba(139,92,246,.26);background:rgba(139,92,246,.10);color:#d7c8ff;border-radius:8px;padding:6px 9px;font:700 9px var(--font)}
+.ai-radar-stats{display:flex;gap:6px;flex-wrap:wrap;margin:9px 0}
+.ai-radar-stats span{font:800 9px var(--mono);padding:5px 7px;border-radius:8px;background:rgba(255,255,255,.035);color:#aab7c8}
+.ai-radar-item{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.055)}
+.ai-radar-item:last-child{border-bottom:0}
+.ai-radar-item b{display:block;font-size:10px;color:#edf3f8}
+.ai-radar-item span{display:block;font-size:9px;color:#8be0bb;margin-top:2px}
+.ai-radar-item small{display:block;font-size:9px;line-height:1.55;color:#78879a;margin-top:2px}
+.ai-market-title{font-size:9px;font-weight:800;color:#dbe4ef;margin:9px 0 5px}
+.ai-market-row{display:grid;grid-template-columns:1fr 32px 54px;align-items:center;gap:5px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:9px}
+.ai-market-row span{color:#aebccc;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ai-market-row b{color:#f5f7fa;text-align:center}
+.ai-market-row em{font-style:normal;color:#8be0bb;text-align:left}
+.ai-team-lead-v2{padding:11px!important;border-radius:14px!important}
+.ai-lead-topline{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.ai-lead-topline b{display:block;font-size:12px;color:#f5f8fb}
+.ai-lead-niche{display:block;font-size:9px;color:#7d8b9d;margin-top:2px}
+.ai-intent{display:inline-flex;align-items:center;white-space:nowrap;border-radius:999px;padding:5px 8px;font:800 8.5px var(--mono)}
+.ai-intent.hot{background:rgba(248,113,113,.12);color:#fda4af;border:1px solid rgba(248,113,113,.22)}
+.ai-intent.warm{background:rgba(251,191,36,.11);color:#fcd34d;border:1px solid rgba(251,191,36,.20)}
+.ai-intent.cold{background:rgba(96,165,250,.10);color:#93c5fd;border:1px solid rgba(96,165,250,.18)}
+.ai-lead-summary{font-size:10px;line-height:1.65;color:#b6c2d1;margin-top:7px}
+.ai-lead-score-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:8px}
+.ai-lead-score-grid>div{padding:7px 6px;border:1px solid rgba(255,255,255,.05);background:rgba(255,255,255,.025);border-radius:9px}
+.ai-lead-score-grid span{display:block;font-size:7.5px;color:#748195}
+.ai-lead-score-grid b{display:block;margin-top:2px;font:800 10px var(--mono);color:#eef4fa}
+.ai-lead-meta{margin-top:7px!important}
+.ai-lead-why{display:grid;grid-template-columns:auto 1fr;gap:6px;margin-top:8px;padding:7px 8px;border-radius:9px;background:rgba(139,92,246,.07);border:1px solid rgba(139,92,246,.12);font-size:9px}
+.ai-lead-why b{color:#d9cbff}.ai-lead-why span{color:#aebbd0}
+.ai-lead-reason{font-size:9px;line-height:1.65;color:#8f9caf;margin-top:6px}
+.ai-lead-details{margin-top:8px}
+.ai-lead-details summary{cursor:pointer;color:#a7b4c6;font-size:9px;font-weight:800}
+.ai-lead-details .checks{margin-top:7px;font-size:9px;line-height:1.7;color:#8898aa}
+.ai-agent-trace{display:grid;gap:4px;margin-top:5px}
+.ai-agent-trace span{padding:4px 6px;border-radius:7px;background:rgba(255,255,255,.025);color:#b4c0cf}
+.ai-contact-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.ai-contact-primary,.ai-contact-link,.ai-contact-muted{display:inline-flex;align-items:center;justify-content:center;padding:7px 9px;border-radius:8px;font-size:9px;font-weight:800;text-decoration:none}
+.ai-contact-primary{background:rgba(52,211,153,.12);color:#8be0bb;border:1px solid rgba(52,211,153,.22)}
+.ai-contact-link{background:rgba(255,255,255,.035);color:#aebccc;border:1px solid rgba(255,255,255,.055)}
+.ai-contact-muted{color:#66758a;border:1px dashed rgba(255,255,255,.06)}
+.ai-outcome-row{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.055)}
+.ai-outcome-current{font-size:8.5px;color:#8290a2;margin-inline-end:auto}
+.ai-outcome-row button{border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.03);color:#aebccc;border-radius:7px;padding:5px 6px;font:700 8px var(--font)}
+.ai-outcome-row button:hover{border-color:rgba(139,92,246,.28);color:#e2d7ff}
+@media(max-width:600px){
+  .ai-lead-score-grid{grid-template-columns:repeat(2,1fr)}
+  .ai-lead-topline{align-items:stretch;flex-direction:column}
+  .ai-intent{align-self:flex-start}
+  .ai-outcome-row button{flex:1;min-width:54px}
+}
+</style></head>
 <body>
 
 <div id="auth-screen">
@@ -3706,52 +3761,99 @@ function aiTeamRenderActivity(host,events){
 function aiTeamRenderLeads(host,leads){
   const box=host.querySelector('#ai-team-leads');
   const arr=Array.isArray(leads)?leads:[];
-  box.innerHTML=arr.length?arr.slice(0,10).map(l=>{
+  const safe=(url)=>{try{const u=new URL(String(url||''));return /^https?:$/i.test(u.protocol)?u.toString():'#';}catch(_){return '#';}};
+  const digits=(value)=>String(value||'').replace(/\\D/g,'');
+  const escList=(items,limit=5)=>Array.isArray(items)?items.filter(Boolean).slice(0,limit).map(x=>esc(String(x))).join(' · '):'';
+  const intentMeta=(ri)=>{
+    const li=ri.leadIntelligence||{};
+    const score=Number(li.intentScore ?? ri.intentScore ?? 0);
+    const label=String(li.intentLabel||ri.intentLabel||'COLD');
+    const text=label==='HOT'?'HOT · محتاجك دلوقتي':label==='WARM'?'WARM · فرصة دافئة':'COLD · إشارة ضعيفة';
+    const cls=label==='HOT'?'hot':label==='WARM'?'warm':'cold';
+    return {score,label,text,cls};
+  };
+  box.innerHTML=arr.length?arr.slice(0,10).map((l,idx)=>{
     const ri=l.research_intelligence||{};
+    const li=ri.leadIntelligence||{};
     const lv=ri.liveVerification||{};
-    const score=Number(ri.score||0);
-    const quality=Number(ri.qualityScore ?? score);
+    const quality=Number(ri.qualityScore ?? ri.score ?? 0);
     const liveScore=Number(lv.verificationScore||0);
+    const score100=Number(ri.score||0);
+    const dealScore=Number(li.dealScore ?? ri.dealScore ?? l.deal_score ?? 0);
+    const freshness=Number(li.freshnessScore ?? ri.freshnessScore ?? l.freshness_score ?? 0);
+    const intent=intentMeta(ri);
+    const valueBand=String(li.estimatedValueBand||ri.estimatedValueBand||l.estimated_value_band||'MEDIUM');
+    const valueText=valueBand==='HIGH'?'قيمة محتملة مرتفعة':valueBand==='LOW'?'قيمة محتملة منخفضة':'قيمة محتملة متوسطة';
     const qualification=String(l.qualification_label||ri.qualificationLabel||'POTENTIAL');
-    const qualificationText=qualification==='HIGH_POTENTIAL'?'احتمال كبير كـLead':qualification==='POTENTIAL'?'Lead محتمل':'يحتاج مراجعة';
+    const qualificationText=qualification==='HIGH_POTENTIAL'?'احتمال كبير':qualification==='POTENTIAL'?'Lead محتمل':'يحتاج مراجعة';
     const qualificationClass=qualification==='HIGH_POTENTIAL'?'green':qualification==='REVIEW'?'amber':'blue';
-    const pass=Number(ri.passCount||0);
-    const review=Number(ri.reviewCount||0);
+    const pass=Number(ri.passCount||0), review=Number(ri.reviewCount||0);
     const signals=Array.isArray(l.need_signals)?l.need_signals.slice(0,4):[];
     const sources=Array.isArray(l.source_urls)?l.source_urls:[];
-    const digits=(value)=>String(value||'').replace(/\\D/g,'');
-    const safe=(url)=>{try{const u=new URL(String(url||''));return /^https?:$/i.test(u.protocol)?u.toString():'#';}catch(_){return '#';}};
-    const phone=l.contact_phone||'';
-    const wa=l.whatsapp_number||'';
-    const waHref=wa?'https://wa.me/'+digits(wa):'';
-    return '<div class="ai-team-lead">'+
-      '<b>'+esc(l.company_name||'شركة')+' · '+quality+'/100</b>'+
-      '<span>'+esc(l.business_summary||l.service_opportunity||l.why_fit||'Lead مكتشف')+'</span>'+
-      '<div class="meta">'+
-        (l.location?'<span>'+esc(l.location)+'</span>':'')+
-        (l.niche?'<span>'+esc(l.niche)+'</span>':'')+
-        '<span class="'+qualificationClass+'">'+esc(qualificationText)+'</span>'+
-        '<span>100 فحص: '+score+'/100</span>'+
-        '<span>تحقق مباشر: '+liveScore+'/100</span>'+
+    const phone=l.contact_phone||'', wa=l.whatsapp_number||'';
+    const waVerified=Boolean(wa && lv.publicWhatsAppVerified);
+    const waHref=waVerified?'https://wa.me/'+digits(wa):'';
+    const reverse=li.reverseResearch||{};
+    const whyNow=li.whyNow||'لا توجد إشارة زمنية قوية.';
+    const wrong=li.whyCouldBeWrong||'راجع المصدر قبل التواصل.';
+    const outcome=String(l.outcome_status||'');
+    const outcomeLabel=outcome==='CONTACTED'?'تم التواصل':outcome==='REPLIED'?'رد':outcome==='QUALIFIED'?'Qualified':outcome==='WON'?'كسبنا':outcome==='LOST'?'خسرنا':outcome==='NO_RESPONSE'?'بدون رد':outcome==='INVALID'?'غير صالح':'لم يتم التواصل';
+    const agents=Array.isArray(li.agentTrace)?li.agentTrace:[];
+    return '<div class="ai-team-lead ai-team-lead-v2">'+
+      '<div class="ai-lead-topline"><div><b>'+esc((idx+1)+'. '+(l.company_name||'شركة'))+'</b><span class="ai-lead-niche">'+esc(l.niche||'')+'</span></div><span class="ai-intent '+intent.cls+'">'+esc(intent.text)+' · '+intent.score+'/100</span></div>'+
+      '<div class="ai-lead-summary">'+esc(l.business_summary||l.service_opportunity||l.why_fit||'Lead مكتشف من مصادر عامة.')+'</div>'+
+      '<div class="ai-lead-score-grid">'+
+        '<div><span>Deal Score</span><b>'+dealScore+'/100</b></div>'+
+        '<div><span>100 فحص</span><b>'+score100+'/100</b></div>'+
+        '<div><span>Freshness</span><b>'+freshness+'/100</b></div>'+
+        '<div><span>'+esc(valueText)+'</span><b>'+esc(valueBand)+'</b></div>'+
       '</div>'+
-      (signals.length?'<div class="meta">'+signals.map(s=>'<span>'+esc(s)+'</span>').join('')+'</div>':'')+
-      (l.sales_reason?'<p style="margin-top:6px">'+esc(l.sales_reason)+'</p>':'')+
-      (phone||wa?'<div class="meta">'+(wa?'<span>WhatsApp: '+esc(wa)+'</span>':'')+(phone&&phone!==wa?'<span>تواصل: '+esc(phone)+'</span>':'')+'</div>':'')+
-      '<details><summary>عرض فحوص AI والأدلة</summary><div class="checks">'+
-        'PASS: '+pass+' · REVIEW: '+review+'<br>'+
-        esc(ri.qualificationReason||lv.summary||'')+
-        ((ri.topSignals||[]).length?'<br>إشارات ناجحة: '+esc((ri.topSignals||[]).slice(0,5).map(x=>x.name||x.id).join(' · ')):'')+
-        ((ri.topReviews||[]).length?'<br>نقاط تحتاج مراجعة: '+esc((ri.topReviews||[]).slice(0,4).map(x=>x.name||x.id).join(' · ')):'')+
+      '<div class="meta ai-lead-meta">'+
+        (l.location?'<span>'+esc(l.location)+'</span>':'')+
+        '<span class="'+qualificationClass+'">'+esc(qualificationText)+'</span>'+
+        '<span>تحقق مباشر '+liveScore+'/100</span>'+
+        '<span>'+esc(li.signalAgeLabel||'التوقيت غير محدد')+'</span>'+
+      '</div>'+
+      '<div class="ai-lead-why"><b>ليه الاختيار؟</b><span>'+esc(whyNow)+'</span></div>'+
+      (signals.length?'<div class="meta">'+signals.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div>':'')+
+      (l.sales_reason?'<p class="ai-lead-reason">'+esc(l.sales_reason)+'</p>':'')+
+      '<details class="ai-lead-details"><summary>التحليل الكامل · السبب · مصادر الـAI</summary><div class="checks">'+
+        '<div><b>Reverse Research:</b> '+Number(reverse.searches||0)+' بحث · '+Number(reverse.independentSources||0)+' مصدر مستقل · '+Number(reverse.freshDemandSources||0)+' إشارة حديثة.</div>'+
+        '<div><b>WhatsApp:</b> '+(waVerified?'✓ منشور ومتحقق: '+esc(wa):'غير متحقق كمصدر WhatsApp تجاري')+'</div>'+
+        '<div><b>ليه ممكن تكون النتيجة غلط؟</b> '+esc(wrong)+'</div>'+
+        '<div><b>PASS:</b> '+pass+' · <b>REVIEW:</b> '+review+'</div>'+
+        (li.duplicateRisk?'<div><b>Duplicate Risk:</b> '+esc(li.duplicateRisk)+'</div>':'')+
+        (li.outcomeLearning?'<div><b>تعلم من النتائج:</b> '+Number(li.outcomeLearning.sample||0)+' نتيجة · Win Rate '+Number(li.outcomeLearning.winRate||0)+'%.</div>':'')+
+        (agents.length?'<div class="ai-agent-trace"><b>مسار الوكلاء:</b>'+agents.map(a=>'<span>'+esc(a.id)+' · '+esc(a.status)+' · '+Number(a.score||0)+'/100</span>').join('')+'</div>':'')+
+        ((ri.topSignals||[]).length?'<div><b>أقوى الإشارات:</b> '+escList(ri.topSignals.map(x=>x.name||x.id),5)+'</div>':'')+
+        ((ri.topReviews||[]).length?'<div><b>نقاط المراجعة:</b> '+escList(ri.topReviews.map(x=>x.name||x.id),5)+'</div>':'')+
       '</div></details>'+
-      '<div class="links">'+
-        (waHref?'<a target="_blank" rel="noopener" href="'+esc(waHref)+'">فتح WhatsApp</a>':'')+
-        (phone?'<a href="tel:'+esc(phone)+'">اتصال</a>':'')+
-        (l.website?'<a target="_blank" rel="noopener" href="'+esc(safe(l.website))+'">الموقع</a>':'')+
-        (l.contact_url?'<a target="_blank" rel="noopener" href="'+esc(safe(l.contact_url))+'">التواصل</a>':'')+
-        (sources[0]?'<a target="_blank" rel="noopener" href="'+esc(safe(sources[0]))+'">المصدر</a>':'')+
+      '<div class="ai-contact-row">'+
+        (waHref?'<a class="ai-contact-primary" target="_blank" rel="noopener" href="'+esc(waHref)+'">فتح WhatsApp</a>':'<span class="ai-contact-muted">لا يوجد WhatsApp متحقق</span>')+
+        (phone?'<a class="ai-contact-link" href="tel:'+esc(phone)+'">اتصال</a>':'')+
+        (l.website?'<a class="ai-contact-link" target="_blank" rel="noopener" href="'+esc(safe(l.website))+'">الموقع</a>':'')+
+        (sources[0]?'<a class="ai-contact-link" target="_blank" rel="noopener" href="'+esc(safe(sources[0]))+'">المصدر</a>':'')+
+      '</div>'+
+      '<div class="ai-outcome-row" data-lead-id="'+esc(l.id)+'">'+
+        '<span class="ai-outcome-current">'+esc(outcomeLabel)+'</span>'+
+        '<button data-outcome="CONTACTED">تواصلت</button><button data-outcome="REPLIED">رد</button><button data-outcome="QUALIFIED">Qualified</button><button data-outcome="WON">Won</button><button data-outcome="LOST">Lost</button>'+
       '</div>'+
     '</div>';
   }).join(''):'<div class="ai-team-empty">مفيش Leads في النتيجة دي.</div>';
+
+  box.querySelectorAll('.ai-outcome-row button').forEach(btn=>{
+    btn.addEventListener('click',async()=>{
+      const row=btn.closest('.ai-outcome-row'), leadId=row?.dataset?.leadId, outcome=btn.dataset.outcome;
+      if(!leadId||!outcome)return;
+      btn.disabled=true;
+      try{
+        await api('/ai-teammate/leads/'+encodeURIComponent(leadId)+'/outcome',{method:'POST',body:{outcome}});
+        row.querySelector('.ai-outcome-current').textContent=outcome==='CONTACTED'?'تم التواصل':outcome==='REPLIED'?'رد':outcome==='QUALIFIED'?'Qualified':outcome==='WON'?'كسبنا':'خسرنا';
+        toast('اتحفظت النتيجة والـAI هيتعلم منها','ok');
+      }catch(e){toast(e.message,'err');}
+      finally{btn.disabled=false;}
+    });
+  });
 }
 RENDERERS['ai-teammate']=async (el)=>{
   el.innerHTML='<div class="ai-team-shell">'+
@@ -3761,7 +3863,7 @@ RENDERERS['ai-teammate']=async (el)=>{
     '<div class="ai-team-compose"><textarea id="ai-team-input" placeholder="اتكلم معاه عادي... مثال: دورلي على شركات عقارات في القاهرة محتاجة فيديوهات إعلانية"></textarea><button id="ai-team-send" class="btn btn-primary">إرسال</button></div></div>'+
     '<div class="ai-team-side">'+
       '<div class="ai-team-card"><div style="font:900 12px Cairo,var(--font);color:#edf2f8">ماذا يفعل الآن؟</div><div id="ai-team-activity" class="ai-team-activity" style="margin-top:9px"></div><div style="font:900 11px Cairo,var(--font);color:#edf2f8;margin-top:12px">Leads المكتشفة</div><div id="ai-team-leads"></div></div>'+
-      '<div class="ai-team-card"><div style="font:900 12px Cairo,var(--font);color:#edf2f8">بيانات التواصل</div><div style="font:500 9px/1.7 Cairo,var(--font);color:#7f8da1;margin-top:3px">زميل AI لا يرسل ولا يعتمد رسائل. في طلبات المونتاج يعرض لك فقط WhatsApp التجاري المنشور والمتحقق منه لتتواصل بنفسك.</div><div id="ai-team-outreach" style="display:grid;gap:7px;margin-top:8px"><div style="color:#7f8da1;font:600 9px Cairo,var(--font)">رقم WhatsApp سيظهر داخل الـLead عند توفره.</div></div></div><div class="ai-team-card"><div style="font:900 12px Cairo,var(--font);color:#edf2f8">قدرات زميل AI · 1,024+</div><div style="font:500 9px/1.7 Cairo,var(--font);color:#7f8da1;margin-top:3px">ابحث عن أي قدرة أو مجال لتشغيل إطار المساعدة المناسب.</div><input id="ai-team-cap-search" placeholder="مثال: مبيعات، Reels، عقارات..." style="width:100%;margin-top:8px;background:#111722;border:1px solid rgba(124,92,255,.2);border-radius:10px;color:#eef4ff;padding:8px 9px;font:600 10px Cairo,var(--font)"><div id="ai-team-cap-list" style="display:grid;gap:5px;margin-top:8px;max-height:220px;overflow:auto"></div></div>'+
+      '<div class="ai-team-card"><div style="font:900 12px Cairo,var(--font);color:#edf2f8">بيانات التواصل</div><div style="font:500 9px/1.7 Cairo,var(--font);color:#7f8da1;margin-top:3px">زميل AI لا يرسل ولا يعتمد رسائل. في طلبات المونتاج يعرض لك فقط WhatsApp التجاري المنشور والمتحقق منه لتتواصل بنفسك.</div><div id="ai-team-outreach" style="display:grid;gap:7px;margin-top:8px"><div style="color:#7f8da1;font:600 9px Cairo,var(--font)">رقم WhatsApp سيظهر داخل الـLead عند توفره.</div></div></div><div class="ai-team-card ai-team-radar-card"><div class="ai-radar-head"><div><b>رادار العملاء</b><span>HOT / آخر 48 ساعة / أفضل الفرص</span></div><button id="ai-team-radar-refresh">تحديث</button></div><div id="ai-team-radar"><div class="ai-team-empty" style="padding:20px 8px">لسه ما حللتش الرادار.</div></div></div><div class="ai-team-card"><div class="ai-radar-head"><div><b>ذكاء السوق</b><span>أين توجد أقوى الفرص؟</span></div></div><div id="ai-team-market"><div class="ai-team-empty" style="padding:20px 8px">جاري تجهيز خريطة السوق...</div></div></div><div class="ai-team-card"><div style="font:900 12px Cairo,var(--font);color:#edf2f8">قدرات زميل AI · 1,024+</div><div style="font:500 9px/1.7 Cairo,var(--font);color:#7f8da1;margin-top:3px">ابحث عن أي قدرة أو مجال لتشغيل إطار المساعدة المناسب.</div><input id="ai-team-cap-search" placeholder="مثال: مبيعات، Reels، عقارات..." style="width:100%;margin-top:8px;background:#111722;border:1px solid rgba(124,92,255,.2);border-radius:10px;color:#eef4ff;padding:8px 9px;font:600 10px Cairo,var(--font)"><div id="ai-team-cap-list" style="display:grid;gap:5px;margin-top:8px;max-height:220px;overflow:auto"></div></div>'+
       ''+
     '</div></div>';
 
@@ -3796,6 +3898,28 @@ RENDERERS['ai-teammate']=async (el)=>{
         ? caps.map(x=>'<div style="padding:7px 8px;border-radius:10px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05);font:700 9px/1.6 Cairo,var(--font);color:#cdd7e4"><b style="color:#8be0bb">'+esc(x.action)+'</b> · '+esc(x.domain)+'</div>').join('')
         : '<div style="color:#7f8da1;font:600 9px Cairo,var(--font)">مفيش قدرة مطابقة للبحث.</div>';
     }catch(_){}
+  }
+
+  async function loadRadar(){
+    const host=el.querySelector('#ai-team-radar'); if(!host)return;
+    try{
+      const r=await api('/ai-teammate/radar?hours=48&limit=12');
+      const a=r.snapshot?.alerts||[];
+      host.innerHTML='<div class="ai-radar-stats"><span>HOT '+Number(r.snapshot?.hotCount||0)+'</span><span>WARM '+Number(r.snapshot?.warmCount||0)+'</span><span>حديث '+Number(r.snapshot?.recentDemandCount||0)+'</span></div>'+
+        (a.length?a.slice(0,6).map(x=>'<div class="ai-radar-item"><b>'+esc(x.companyName||'شركة')+'</b><span>'+esc(x.intentLabel||'COLD')+' · '+Number(x.intentScore||0)+'/100 · Deal '+Number(x.dealScore||0)+'/100</span><small>'+esc(x.whyNow||'')+'</small></div>').join(''):'<div class="ai-team-empty" style="padding:18px 8px">مفيش Alerts قوية في آخر 48 ساعة.</div>');
+    }catch(e){host.innerHTML='<div class="ai-team-empty" style="padding:18px 8px">تعذر تحديث الرادار.</div>';}
+  }
+
+  async function loadMarketInsights(){
+    const host=el.querySelector('#ai-team-market'); if(!host)return;
+    try{
+      const r=await api('/ai-teammate/market-insights?hours=168');
+      const countries=(r.countries||[]).slice(0,5), niches=(r.niches||[]).slice(0,5);
+      host.innerHTML='<div class="ai-market-title">الأسواق</div>'+
+        (countries.length?countries.map(x=>'<div class="ai-market-row"><span>'+esc(x.name)+'</span><b>'+x.count+'</b><em>'+x.avgIntent+'/100</em></div>').join(''):'<div class="ai-team-empty" style="padding:12px 8px">مفيش بيانات كفاية.</div>')+
+        '<div class="ai-market-title" style="margin-top:10px">القطاعات</div>'+
+        (niches.length?niches.map(x=>'<div class="ai-market-row"><span>'+esc(x.name)+'</span><b>'+x.count+'</b><em>'+x.avgIntent+'/100</em></div>').join(''):'<div class="ai-team-empty" style="padding:12px 8px">مفيش بيانات كفاية.</div>');
+    }catch(e){host.innerHTML='<div class="ai-team-empty" style="padding:12px 8px">تعذر تحميل ذكاء السوق.</div>';}
   }
 
   async function loadOutreachQueue(){
@@ -3878,7 +4002,10 @@ RENDERERS['ai-teammate']=async (el)=>{
       capTimer=setTimeout(()=>loadCapabilities(capSearch.value.trim()),250);
     });
   }
-  await Promise.all([loadStatus(),loadCapabilities(),loadOutreachQueue()]);
+  const radarBtn=el.querySelector('#ai-team-radar-refresh');
+  if(radarBtn)radarBtn.addEventListener('click',()=>loadRadar());
+  await Promise.all([loadStatus(),loadCapabilities(),loadOutreachQueue(),loadRadar(),loadMarketInsights()]);
+  setInterval(()=>loadRadar().catch(()=>{}),300000);
 };
 async function renderRoutingState(host,requestId){
   const r=await api('/smart-routing/requests/'+requestId);
