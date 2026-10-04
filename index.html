@@ -3757,12 +3757,12 @@ RENDERERS['ai-teammate']=async (el)=>{
   el.innerHTML='<div class="ai-team-shell">'+
     '<div class="ai-team-chat"><div class="ai-team-head"><div><h2>زميل SHIFRA AI ✦</h2><p>محادثة طبيعية + بحث ويب + اكتشاف عملاء + تتبع نشاط · <b id="ai-team-cap-count" style="color:#8be0bb">1,024+ قدرة AI</b></p></div><span id="ai-team-status" class="ai-team-status"><i class="ai-team-dot"></i>جاري الفحص...</span></div>'+
     '<div id="ai-team-log" class="ai-team-log"><div class="ai-team-empty">أنا زميلك داخل SHIFRA. اكتب طلبك، وأنا أوضح لك ماذا أبحث وماذا نفذت.</div></div>'+
-    '<div class="ai-team-quick"><button data-ai-team-q="ابحث لي عن شركات حقيقية تحتاج خدمات SHIFRA">🔎 ابحث عن عملاء</button><button data-ai-team-q="اعمل لي قائمة بعملاء محتملين في مصر مع سبب الترشيح">🎯 قائمة Leads</button><button data-ai-team-q="حلل لي أفضل نوع شركات نركز عليه">📊 حلّل السوق</button></div>'+
+    '<div class="ai-team-quick"><button data-ai-team-q="ابحث لي عن شركات حقيقية تحتاج خدمات SHIFRA">🔎 ابحث عن عملاء</button><button data-ai-team-q="اعمل لي قائمة بعملاء محتملين في مصر مع سبب الترشيح">🎯 قائمة Leads</button><button data-ai-team-q="حلل لي أفضل نوع شركات نركز عليه">📊 حلّل السوق</button><span class="ai-team-live-note">الجلسة الحالية فقط · لا يتم عرض المحادثات أو الـLeads القديمة هنا</span></div>'+
     '<div class="ai-team-compose"><textarea id="ai-team-input" placeholder="اتكلم معاه عادي... مثال: دورلي على شركات عقارات في القاهرة محتاجة فيديوهات إعلانية"></textarea><button id="ai-team-send" class="btn btn-primary">إرسال</button></div></div>'+
     '<div class="ai-team-side">'+
       '<div class="ai-team-card"><div style="font:900 12px Cairo,var(--font);color:#edf2f8">ماذا يفعل الآن؟</div><div id="ai-team-activity" class="ai-team-activity" style="margin-top:9px"></div><div style="font:900 11px Cairo,var(--font);color:#edf2f8;margin-top:12px">Leads المكتشفة</div><div id="ai-team-leads"></div></div>'+
       '<div class="ai-team-card"><div style="font:900 12px Cairo,var(--font);color:#edf2f8">بيانات التواصل</div><div style="font:500 9px/1.7 Cairo,var(--font);color:#7f8da1;margin-top:3px">زميل AI لا يرسل ولا يعتمد رسائل. في طلبات المونتاج يعرض لك فقط WhatsApp التجاري المنشور والمتحقق منه لتتواصل بنفسك.</div><div id="ai-team-outreach" style="display:grid;gap:7px;margin-top:8px"><div style="color:#7f8da1;font:600 9px Cairo,var(--font)">رقم WhatsApp سيظهر داخل الـLead عند توفره.</div></div></div><div class="ai-team-card"><div style="font:900 12px Cairo,var(--font);color:#edf2f8">قدرات زميل AI · 1,024+</div><div style="font:500 9px/1.7 Cairo,var(--font);color:#7f8da1;margin-top:3px">ابحث عن أي قدرة أو مجال لتشغيل إطار المساعدة المناسب.</div><input id="ai-team-cap-search" placeholder="مثال: مبيعات، Reels، عقارات..." style="width:100%;margin-top:8px;background:#111722;border:1px solid rgba(124,92,255,.2);border-radius:10px;color:#eef4ff;padding:8px 9px;font:600 10px Cairo,var(--font)"><div id="ai-team-cap-list" style="display:grid;gap:5px;margin-top:8px;max-height:220px;overflow:auto"></div></div>'+
-      '<div class="ai-team-card"><div style="font:900 12px Cairo,var(--font);color:#edf2f8">المحادثات السابقة</div><div id="ai-team-history" class="ai-team-history"></div></div>'+
+      ''+
     '</div></div>';
 
   let threadId=null;
@@ -3804,25 +3804,6 @@ RENDERERS['ai-teammate']=async (el)=>{
     host.innerHTML='<div style="color:#7f8da1;font:600 9px/1.7 Cairo,var(--font)">زميل AI لن يرسل أو يعتمد أي رسالة. استخدم رقم WhatsApp الظاهر في الـLead وتواصل بنفسك.</div>';
   }
 
-  async function loadHistory(){
-    const r=await api('/ai-teammate/threads').catch(()=>({threads:[]}));
-    const rows=r.threads||[];
-    el.querySelector('#ai-team-history').innerHTML=rows.length
-      ? rows.map(t=>'<button data-ai-thread="'+t.id+'">'+esc(t.title||'محادثة')+'</button>').join('')
-      : '<div class="ai-team-empty">مفيش محادثات سابقة.</div>';
-    el.querySelectorAll('[data-ai-thread]').forEach(b=>b.addEventListener('click',()=>openThread(Number(b.dataset.aiThread))));
-  }
-
-  async function openThread(id){
-    stopJobPolling();
-    const r=await api('/ai-teammate/threads/'+id);
-    threadId=r.thread.id;
-    el.querySelector('#ai-team-log').innerHTML='';
-    (r.messages||[]).forEach(m=>aiTeamAddMessage(el,m.role,m.content,m.sources));
-    aiTeamRenderActivity(el,r.activity||[]);
-    aiTeamRenderLeads(el,[]);
-  }
-
   async function pollJob(jobId){
     try{
       const r=await api('/ai-teammate/jobs/'+jobId);
@@ -3839,7 +3820,6 @@ RENDERERS['ai-teammate']=async (el)=>{
         if(r.message) aiTeamAddMessage(el,'ASSISTANT',r.message.content||'اكتملت عملية البحث.',r.sources||r.message.sources||[]);
         aiTeamRenderLeads(el,r.leads||[]);
         aiTeamRenderActivity(el,r.activity||[]);
-        loadHistory();
         loadOutreachQueue();
       }else{
         statusEl.innerHTML='<i class="ai-team-dot" style="background:#fbbf24"></i>توقف البحث';
@@ -3876,7 +3856,6 @@ RENDERERS['ai-teammate']=async (el)=>{
         aiTeamAddMessage(el,'ASSISTANT',r.message?.content||'وصلت النتيجة.',r.sources||[]);
         aiTeamRenderActivity(el,r.activity||[]);
         aiTeamRenderLeads(el,r.leads||[]);
-        loadHistory();
         sendBtn.disabled=false;
       }
     }catch(e){
@@ -3899,7 +3878,7 @@ RENDERERS['ai-teammate']=async (el)=>{
       capTimer=setTimeout(()=>loadCapabilities(capSearch.value.trim()),250);
     });
   }
-  await Promise.all([loadStatus(),loadHistory(),loadCapabilities(),loadOutreachQueue()]);
+  await Promise.all([loadStatus(),loadCapabilities(),loadOutreachQueue()]);
 };
 async function renderRoutingState(host,requestId){
   const r=await api('/smart-routing/requests/'+requestId);
