@@ -2117,6 +2117,16 @@ body::before{
 }
 </style>
 <style id="shifra-ai-hunter-v1">
+.lead-swarm-board{margin-top:14px;padding:12px;border:1px solid rgba(120,105,255,.22);border-radius:16px;background:linear-gradient(135deg,rgba(82,68,180,.10),rgba(15,20,29,.92));box-shadow:inset 0 1px 0 rgba(255,255,255,.03)}
+.lead-swarm-title{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.lead-swarm-title b{font:900 12px Cairo,var(--font);color:#edf2ff}.lead-swarm-title span{font:600 9px Cairo,var(--font);color:#8d9aae}
+.lead-swarm-agents{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.lead-agent{padding:10px 8px;border-radius:12px;border:1px solid rgba(255,255,255,.07);background:#0e141d;display:grid;gap:3px;transition:.2s}
+.lead-agent span{font:900 11px var(--font);color:#8d8cff}.lead-agent b{font:800 10px Cairo,var(--font);color:#eaf0fa}.lead-agent small{font:600 8px Cairo,var(--font);color:#738198}
+.lead-agent.active{border-color:rgba(125,112,255,.65);box-shadow:0 0 0 1px rgba(125,112,255,.13),0 0 20px rgba(94,72,255,.10)}
+.lead-agent.done{border-color:rgba(91,224,175,.38);background:rgba(35,85,70,.12)}.lead-agent.done span{color:#72e5b4}
+.lead-swarm-note{margin-top:9px;font:700 9px/1.7 Cairo,var(--font);color:#91a1b7}
+@media(max-width:760px){.lead-swarm-agents{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .ai-hunter-shell{display:grid;gap:14px}
 .ai-hunter-hero{padding:20px;border:1px solid rgba(124,92,255,.18);border-radius:22px;background:radial-gradient(520px 240px at 100% 0%,rgba(56,189,248,.11),transparent 70%),linear-gradient(145deg,rgba(18,21,31,.96),rgba(9,12,18,.94))}
 .ai-hunter-hero h2{font:900 28px/1.3 Cairo,var(--font);color:#fff}
@@ -3705,7 +3715,7 @@ function aiHunterRenderLeads(host,leads,run){
 
 RENDERERS['ai-hunter'] = async (el) => {
   el.innerHTML='<div class="ai-hunter-shell">'+
-    '<div class="ai-hunter-hero"><h2>SHIFRA Lead AI ✦</h2><p>صائد عملاء SHIFRA: يبحث في السوشيال والويب، يكتشف طلبات المونتاج الحديثة، يعيد فحص كل نتيجة بشكل مستقل، ويمنع النتائج القديمة أو غير المؤكدة قبل عرضها لك.</p><div class="ai-hunter-engine-status" id="hunter-engine-status">جاري التحقق من محرك البحث...</div></div>'+
+    '<div class="ai-hunter-hero"><h2>SHIFRA Lead AI ✦</h2><p>صائد عملاء SHIFRA: فريق من 4 وكلاء يعملون كمنظومة واحدة — تخطيط، صيد، تحقق، ثم تحكيم واختيار أفضل Lead.</p><div class="ai-hunter-engine-status" id="hunter-engine-status">جاري التحقق من محرك البحث...</div><div class="lead-swarm-board" id="lead-swarm-board"><div class="lead-swarm-title"><b>🧠 SHIFRA Lead AI Swarm</b><span>4 وكلاء مستقلين · Zero‑Config · لا يتوقف عند غياب مزود مدفوع</span></div><div class="lead-swarm-agents"><div class="lead-agent" data-agent-card="director"><span>①</span><b>مدير البحث</b><small>يفكك طلبك</small></div><div class="lead-agent" data-agent-card="hunter"><span>②</span><b>صياد السوشيال</b><small>يجمع الأدلة</small></div><div class="lead-agent" data-agent-card="verifier"><span>③</span><b>مدقق الأدلة</b><small>يفحص الحداثة</small></div><div class="lead-agent" data-agent-card="judge"><span>④</span><b>قاضي الجودة</b><small>يختار الأقوى</small></div></div><div class="lead-swarm-note" id="lead-swarm-note">جاهز — البحث القادم سيمر على الأربعة بالترتيب.</div></div></div>'+
     '<div class="ai-hunter-grid">'+
       '<div class="ai-hunter-panel"><div class="ai-hunter-fields">'+
         '<div><label>ماذا تريد أن يصطاد AI؟</label><textarea id="hunter-query">ابحث عن أشخاص وشركات في كل الدول العربية نشروا مؤخرًا أنهم يحتاجون مونتير فيديو أو مونتاج Reels وإعلانات.</textarea></div>'+
@@ -3741,7 +3751,7 @@ RENDERERS['ai-hunter'] = async (el) => {
     const r=await api('/ai-hunter/status').catch(()=>null);
     if(!box) return;
     if(!r){box.textContent='⚠ تعذر التحقق من حالة محرك البحث الآن.';box.className='ai-hunter-engine-status error';return;}
-    if(r.enabled){box.textContent='✓ SHIFRA Lead AI جاهز — بحث حي + تحقق مزدوج + فلترة 48 ساعة، مع مزود احتياطي تلقائي عند تعذر Gemini.';box.className='ai-hunter-engine-status ready';}
+    if(r.enabled){box.textContent='✓ SHIFRA Lead AI جاهز — 4 وكلاء + بحث سوشيال + تحقق + تحكيم، مع وضع Zero‑Config احتياطي تلقائي.';box.className='ai-hunter-engine-status ready';}
     else{box.textContent='⚠ محرك البحث الحي غير مهيأ على السيرفر حاليًا.';box.className='ai-hunter-engine-status error';}
   };
   const loadRuns=async()=>{
@@ -3772,7 +3782,12 @@ RENDERERS['ai-hunter'] = async (el) => {
       : el.querySelector('#hunter-extra').value.trim();
     runBox.disabled=true;
     if(socialRun) socialRun.disabled=true;
-    status.textContent='⏳ '+(socialEnabled?'اصطياد السوشيال':'AI Hunter')+' جاري: بحث → تحقق → فلترة الحداثة → ترتيب أفضل الفرص...';
+    status.textContent='⏳ فريق SHIFRA AI يعمل: مدير البحث → صياد السوشيال → مدقق الأدلة → قاضي الجودة...';
+    const swarmNote=el.querySelector('#lead-swarm-note');
+    const agentOrder=['director','hunter','verifier','judge'];
+    const agentLabels=['مدير البحث: يبني الخطة','صياد السوشيال: يجمع النتائج','مدقق الأدلة: يفحص المصدر والحداثة','قاضي الجودة: يرتب الأقوى'];
+    agentOrder.forEach((id,i)=>{const card=el.querySelector('[data-agent-card="'+id+'"]'); if(card){card.classList.remove('done','active'); if(i===0)card.classList.add('active');}});
+    if(swarmNote) swarmNote.textContent='⏳ '+agentLabels[0]+'...';
     try{
       const r=await api('/ai-hunter/run',{method:'POST',body:{
         query:effectiveQuery,
@@ -3781,10 +3796,21 @@ RENDERERS['ai-hunter'] = async (el) => {
         location:el.querySelector('#hunter-location').value.trim(),
         service:el.querySelector('#hunter-service').value.trim(),
         count:Number(el.querySelector('#hunter-count').value),
-        extraInstructions:socialExtra
+        extraInstructions:socialExtra,
+        swarmMode:true
       }});
       aiHunterRenderLeads(el,r.leads,r.run);
-      status.textContent='✓ اكتمل البحث: '+Number(r.run?.resultCount||0)+' Lead مقبول بعد التحقق.';
+      const swarm=r.research?.swarm;
+      const board=el.querySelector('#lead-swarm-board');
+      const note=el.querySelector('#lead-swarm-note');
+      if(swarm?.agents){
+        swarm.agents.forEach(a=>{
+          const card=board?.querySelector('[data-agent-card="'+a.id+'"]');
+          if(card){card.classList.add('done');const small=card.querySelector('small');if(small)small.textContent='✓ '+(a.selected??a.verified??a.found??'تم');}
+        });
+        if(note) note.textContent='✓ اكتمل مسار الأربعة: تخطيط → صيد → تحقق → تحكيم. النتائج المعروضة هي الخلاصة النهائية.';
+      }
+      status.textContent='✓ اكتمل البحث عبر 4 وكلاء: '+Number(r.run?.resultCount||0)+' Lead مقبول بعد التحقق.';
       loadRuns();
     }catch(e){
       status.textContent='✕ '+e.message;
